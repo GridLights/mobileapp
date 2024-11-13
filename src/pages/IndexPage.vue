@@ -110,10 +110,22 @@ export default defineComponent({
     },
 
     onTimerInput() {
+      if (this.timerValue > 50) {
+        this.timerValue = 50;
+      }
+      if (this.timerValue < 0) {
+        this.timerValue = 0;
+      }
       console.log("Timer Value: " + this.timerValue);
     },
 
     onFreqInput() {
+      if (this.freqValue > 50) {
+        this.freqValue = 50;
+      }
+      if (this.freqValue < 0) {
+        this.freqValue = 0;
+      }
       console.log("Frequency Value: " + this.freqValue);
     },
 
