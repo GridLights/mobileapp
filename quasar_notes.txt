@@ -1,0 +1,16 @@
+quasar notes:
+
+create new app
+npm init quasar
+
+
+//run in browser
+quasar dev 
+
+//run as mac app
+quasar dev -m electron
+
+///open project in vs code. drop remote-director folder onto vs code icon 
+
+
+
