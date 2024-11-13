@@ -1,11 +1,11 @@
 <template>
-  <q-page class="flex flex-col items-center q-pa-md">
+  <q-page class="flex flex-col items-center">
     <div class="grid-container">
       <!-- Row 1 -->
       <div class="grid-item col-3">
         <q-img
-          src="https://placehold.co/200x200"
-          style="width: 100%; height: auto; max-width: 200px"
+          src="~/assets/ledGrid.svg"
+          style="width: 100%; height: auto; max-width: 265px"
         />
       </div>
 
@@ -15,7 +15,7 @@
           vertical
           :min="0"
           :max="100"
-          style="height: 150px"
+          style="height: 170px"
           @update:model-value="logSliderValue"
         />
       </div>
@@ -39,7 +39,7 @@
             min="0"
             max="50"
             filled
-            style="width: 171px"
+            style="width: 221px"
             @update:model-value="onTimerInput"
           >
             <template v-slot:prepend>
@@ -53,7 +53,7 @@
             filled
             min="0"
             max="50"
-            style="width: 171px"
+            style="width: 221px"
             @update:model-value="onFreqInput"
           >
             <template v-slot:prepend>
@@ -143,7 +143,7 @@ export default defineComponent({
   grid-template-rows: auto auto;
   gap: 10px;
   width: 100%;
-  max-width: 350px;
+  max-width: 450px;
   margin: 0 auto;
 }
 
