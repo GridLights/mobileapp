@@ -16,6 +16,7 @@
           :min="0"
           :max="100"
           style="height: 150px"
+          @update:model-value="logSliderValue"
         />
       </div>
 
@@ -32,10 +33,14 @@
       <div class="grid-item col-span-3 input-container">
         <div class="flex justify-between">
           <q-input
-            v-model="timerValue1"
+            class="q-mr-sm"
+            v-model="timerValue"
             type="number"
+            min="0"
+            max="50"
             filled
-            style="width: calc(50% - 5px)"
+            style="width: 171px"
+            @update:model-value="onTimerInput"
           >
             <template v-slot:prepend>
               <q-icon name="timer" />
@@ -43,10 +48,13 @@
           </q-input>
 
           <q-input
-            v-model="timerValue2"
+            v-model="freqValue"
             type="number"
             filled
-            style="width: calc(50% - 5px)"
+            min="0"
+            max="50"
+            style="width: 171px"
+            @update:model-value="onFreqInput"
           >
             <template v-slot:prepend>
               <q-icon name="timeline" />
@@ -61,7 +69,13 @@
           class="rounded-borders"
           style="width: 100%; max-height: 200px; overflow-y: auto"
         >
-          <q-item v-for="n in 10" :key="n" clickable v-ripple>
+          <q-item
+            v-for="n in 10"
+            :key="n"
+            clickable
+            @click="onItemClick(n)"
+            v-ripple
+          >
             <q-item-section>Shape {{ n }}</q-item-section>
           </q-item>
         </q-list>
@@ -69,6 +83,46 @@
     </div>
   </q-page>
 </template>
+
+<script>
+import { defineComponent } from "vue";
+
+export default defineComponent({
+  name: "IndexPage",
+
+  data() {
+    return {
+      sliderValue: 50,
+      isOn: false,
+      timerValue: 0,
+      freqValue: 0,
+    };
+  },
+
+  methods: {
+    toggleButton() {
+      this.isOn = !this.isOn;
+      console.log("button: " + this.isOn);
+    },
+
+    logSliderValue() {
+      console.log("slider: " + this.sliderValue);
+    },
+
+    onTimerInput() {
+      console.log("Timer Value: " + this.timerValue);
+    },
+
+    onFreqInput() {
+      console.log("Frequency Value: " + this.freqValue);
+    },
+
+    onItemClick(itemNumber) {
+      console.log("Clicked on item:", itemNumber);
+    },
+  },
+});
+</script>
 
 <style scoped>
 .grid-container {
@@ -99,30 +153,3 @@
   width: 100%;
 }
 </style>
-
-
-<script>
-import { defineComponent } from "vue";
-import { ref } from "vue";
-
-export default defineComponent({
-  name: "IndexPage",
-
-  setup() {
-    const sliderValue = ref(50);
-    const isOn = ref(false);
-    const timerValue = ref(0);
-
-    const toggleButton = () => {
-      isOn.value = !isOn.value;
-    };
-
-    return {
-      sliderValue,
-      isOn,
-      timerValue,
-      toggleButton,
-    };
-  },
-});
-</script>

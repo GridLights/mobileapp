@@ -21,8 +21,8 @@
       <q-list>
         <q-item-label header> Menu </q-item-label>
 
-        <EssentialLink
-          v-for="link in essentialLinks"
+        <LeftSidebar
+          v-for="link in LeftSidebars"
           :key="link.title"
           v-bind="link"
         />
@@ -38,7 +38,7 @@
 <script>
 import { defineComponent, ref, onMounted } from "vue";
 import { useQuasar } from "quasar";
-import EssentialLink from "src/components/LeftSidebar.vue";
+import LeftSidebar from "src/components/LeftSidebar.vue";
 
 const linksList = [
   {
@@ -63,7 +63,7 @@ export default defineComponent({
   name: "MainLayout",
 
   components: {
-    EssentialLink,
+    LeftSidebar,
   },
 
   setup() {
@@ -75,7 +75,7 @@ export default defineComponent({
     });
 
     return {
-      essentialLinks: linksList,
+      LeftSidebars: linksList,
       leftDrawerOpen,
       toggleLeftDrawer() {
         leftDrawerOpen.value = !leftDrawerOpen.value;
