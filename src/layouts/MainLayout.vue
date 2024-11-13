@@ -13,7 +13,11 @@
 
         <q-toolbar-title> Sol Spektrum </q-toolbar-title>
 
-        <q-img src="~/assets/logo.png" width="72px" />
+        <q-img src="~/assets/logo.png" width="72px">
+          <q-tooltip anchor="top left" self="bottom middle" :offset="[50, -10]">
+            v1.0
+          </q-tooltip>
+        </q-img>
       </q-toolbar>
     </q-header>
 

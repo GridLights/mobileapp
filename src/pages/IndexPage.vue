@@ -5,7 +5,7 @@
       <div class="grid-item col-3">
         <q-img
           src="~/assets/ledGrid.svg"
-          style="width: 100%; height: auto; max-width: 265px"
+          style="width: 100%; height: auto; max-width: 365px"
         />
       </div>
 
@@ -15,7 +15,7 @@
           vertical
           :min="0"
           :max="100"
-          style="height: 170px"
+          style="height: 125px"
           @update:model-value="logSliderValue"
         />
       </div>
@@ -39,7 +39,7 @@
             min="0"
             max="50"
             filled
-            style="width: 221px"
+            style="width: 171px"
             @update:model-value="onTimerInput"
           >
             <template v-slot:prepend>
@@ -53,7 +53,7 @@
             filled
             min="0"
             max="50"
-            style="width: 221px"
+            style="width: 171px"
             @update:model-value="onFreqInput"
           >
             <template v-slot:prepend>
@@ -143,7 +143,7 @@ export default defineComponent({
   grid-template-rows: auto auto;
   gap: 10px;
   width: 100%;
-  max-width: 450px;
+  max-width: 350px;
   margin: 0 auto;
 }
 
