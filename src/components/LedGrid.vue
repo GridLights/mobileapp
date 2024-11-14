@@ -1,3 +1,12 @@
+//:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+// LedGrid.vue
+//
+// LED Polygone grind of LEDs Component
+//
+// Author: Tavis Hord - tavis@sideburn.com
+// Created 11/12/24
+//:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
 <template>
   <div class="svg-container">
     <svg width="200" height="200">

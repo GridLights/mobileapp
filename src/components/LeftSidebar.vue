@@ -1,3 +1,12 @@
+//:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+// LeftSidebar.vue
+//
+// Left slide in menu bar with nav buttons
+//
+// Author: Tavis Hord - tavis@sideburn.com
+// Created 11/12/24
+//:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
 <template>
   <q-item clickable tag="a" target="_blank" :href="link">
     <q-item-section v-if="icon" avatar>

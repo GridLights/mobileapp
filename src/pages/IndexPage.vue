@@ -1,3 +1,12 @@
+//:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+// IndexPage.vue
+//
+// Home page with light controls
+//
+// Author: Tavis Hord - tavis@sideburn.com
+// Created 11/12/24
+//:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
 <template>
   <q-page class="flex flex-col items-center">
     <div class="grid-container">
