@@ -34,7 +34,7 @@
             vertical
             :min="0"
             :max="100"
-            style="height: 180px"
+            style="height: 170px"
             @update:model-value="updateLedColors"
             :disable="!isOn"
           />
@@ -283,8 +283,8 @@ export default defineComponent({
   border-radius: 4px;
   padding-left: 15px;
   padding-right: 15px;
-  padding-top: 10px;
-  padding-bottom: 10px;
+  padding-top: 15px;
+  padding-bottom: 15px;
   display: flex;
   justify-content: center;
   align-items: center;
