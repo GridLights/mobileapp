@@ -1,27 +1,12 @@
 <template>
   <q-page class="flex flex-col items-center">
     <div class="grid-container">
-      <!-- Row 1 -->
-      <div class="grid-item col-3">
-        <q-img
-          src="~/assets/ledGrid.svg"
-          style="width: 100%; height: auto; max-width: 365px"
-        />
-      </div>
-
-      <div class="grid-item col-1 flex justify-center items-center">
-        <q-slider
-          v-model="sliderValue"
-          vertical
-          :min="0"
-          :max="100"
-          style="height: 125px"
-          @update:model-value="logSliderValue"
-        />
-      </div>
-
-      <div class="grid-item col-2 flex justify-center items-center">
+      <!-- row 1 -->
+      <div
+        class="grid-item col-2 flex justify-center items-center button-container"
+      >
         <q-btn
+          :ripple="false"
           :icon="isOn ? 'lightbulb' : 'lightbulb_outline'"
           :color="isOn ? 'orange' : 'grey'"
           @click="toggleButton"
@@ -29,7 +14,25 @@
         />
       </div>
 
-      <!-- Row 2 -->
+      <div class="grid-item col-3">
+        <LedGrid :rows="ledRows" />
+      </div>
+
+      <div class="grid-item col-1 flex justify-center items-center">
+        <div class="slider-container">
+          <q-slider
+            v-model="sliderValue"
+            vertical
+            :min="0"
+            :max="100"
+            style="height: 180px"
+            @update:model-value="updateLedColors"
+            :disable="!isOn"
+          />
+        </div>
+      </div>
+
+      <!-- row 2 -->
       <div class="grid-item col-span-3 input-container">
         <div class="flex justify-between">
           <q-input
@@ -73,8 +76,12 @@
             v-for="n in 10"
             :key="n"
             clickable
-            @click="onItemClick(n)"
-            v-ripple
+            @click="isOn ? onItemClick(n) : null"
+            :ripple="false"
+            :class="{
+              'selected-item': selectedItem === n,
+              'disabled-item': !isOn,
+            }"
           >
             <q-item-section>Shape {{ n }}</q-item-section>
           </q-item>
@@ -86,9 +93,14 @@
 
 <script>
 import { defineComponent } from "vue";
+import LedGrid from "src/components/LedGrid.vue";
 
 export default defineComponent({
   name: "IndexPage",
+
+  components: {
+    LedGrid,
+  },
 
   data() {
     return {
@@ -96,17 +108,113 @@ export default defineComponent({
       isOn: false,
       timerValue: 0,
       freqValue: 0,
+      ledRows: [
+        ["#ff0000", "#00ff00", "#0000ff", "#ff00ff"],
+        ["#ff0000", "#00ff00", "#0000ff", "#ff00ff", "#fcfcfc"],
+        ["#ff0000", "#00ff00", "#0000ff", "#ff00ff", "#ff00ff", "#fcfcfc"],
+        [
+          "#ff0000",
+          "#00ff00",
+          "#0000ff",
+          "#ff00ff",
+          "#fcfcfc",
+          "#ff0000",
+          "#ffccff",
+        ],
+        ["#ff0000", "#00ff00", "#0000ff", "#ff00ff", "#ff00ff", "#fcfcfc"],
+        ["#ff0000", "#00ff00", "#0000ff", "#ff00ff", "#fcfcfc"],
+        ["#ff0000", "#00ff00", "#0000ff", "#ff00ff"],
+      ],
+      selectedItem: null,
     };
+  },
+
+  mounted() {
+    // init all LEDs to black
+    this.setAllLeds(0);
   },
 
   methods: {
     toggleButton() {
       this.isOn = !this.isOn;
+
+      //  set all LEDs to black and disable the slider
+      if (!this.isOn) {
+        this.setAllLeds(0);
+      } else {
+        this.setAllLeds(this.sliderValue); // set to current slider value when turned on
+      }
+
       console.log("button: " + this.isOn);
     },
 
     logSliderValue() {
       console.log("slider: " + this.sliderValue);
+    },
+
+    setAllLeds(value) {
+      const clampedValue = Math.max(0, Math.min(value, 100));
+
+      // convert to hex color
+      const colorScale = [
+        "#000000", // 0 (black)
+        "#FF0000", // 20 (red)
+        "#FFFF00", // 40 (yellow)
+        "#00FF00", // 60 (green)
+        "#00FFFF", // 80 (cyan)
+        "#FFFFFF", // 100 (white)
+      ];
+
+      const index = Math.floor((clampedValue / 100) * (colorScale.length - 1));
+
+      this.ledRows = this.ledRows.map((row) =>
+        row.map(() => colorScale[index])
+      );
+    },
+
+    updateLedColors() {
+      const colorScale = [
+        "#FF0000", //red
+        "#FF7F00",
+        "#FFFF00", //yellow
+        "#7FFF00",
+        "#00FF00", //green
+        "#00FF7F",
+        "#00FFFF", //cyan
+        "#007FFF",
+        "#0000FF",
+        "#7F00FF",
+        "#FF00FF",
+      ];
+
+      const index = Math.floor(
+        (this.sliderValue / 100) * (colorScale.length - 1)
+      );
+
+      this.ledRows = this.ledRows.map((row) =>
+        row.map(() => colorScale[index])
+      );
+    },
+
+    generateRandomPattern() {
+      this.ledRows = this.ledRows.map((row) =>
+        row.map(
+          () =>
+            `#${Math.floor(Math.random() * 16777215)
+              .toString(16)
+              .padStart(6, "0")}`
+        )
+      );
+    },
+
+    onItemClick(itemNumber) {
+      console.log("Clicked on item:", itemNumber);
+
+      // generate random colors for each LED when an item is clicked
+      this.generateRandomPattern();
+
+      // set the selected item for highlighting
+      this.selectedItem = itemNumber;
     },
 
     onTimerInput() {
@@ -127,10 +235,6 @@ export default defineComponent({
         this.freqValue = 0;
       }
       console.log("Frequency Value: " + this.freqValue);
-    },
-
-    onItemClick(itemNumber) {
-      console.log("Clicked on item:", itemNumber);
     },
   },
 });
@@ -157,11 +261,39 @@ export default defineComponent({
   grid-column: span 3;
 }
 
+.slider-container {
+  border: 1px solid #888; /* Border color */
+  border-radius: 4px; /* Rounded corners */
+  padding-left: 15px; /* Padding around the slider */
+  padding-right: 15px; /* Padding around the slider */
+  padding-top: 10px; /* Padding around the slider */
+  padding-bottom: 10px; /* Padding around the slider */
+  display: flex; /* Center the slider vertically */
+  justify-content: center; /* Center horizontally */
+  align-items: center; /* Center vertically */
+}
+.button-container {
+  border: 1px solid #888;
+  border-radius: 4px;
+  padding: 10px;
+}
+
 .input-container {
   width: 100%;
 }
 
 .list-container {
   width: 100%;
+}
+
+/* disabled list items */
+.disabled-item {
+  opacity: 0.5; /* disabled */
+  pointer-events: none; /* prevent interaction */
+}
+
+/* hilighted selected item */
+.selected-item {
+  background-color: #555; /* bg color for highlighted item */
 }
 </style>

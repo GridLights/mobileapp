@@ -1,7 +1,7 @@
 <template>
   <q-layout view="lHh Lpr lFf">
     <q-header class="bg-grey-8">
-      <q-toolbar>
+      <q-toolbar class="q-py-sm">
         <q-btn
           flat
           dense
@@ -11,13 +11,16 @@
           @click="toggleLeftDrawer"
         />
 
-        <q-toolbar-title> Sol Spektrum </q-toolbar-title>
+        <q-toolbar-title class="no-text-select"> Sol Spektrum </q-toolbar-title>
 
-        <q-img src="~/assets/logo.png" width="72px">
+        <!-- make the logo a background image to try to prevent ios from zooming it on a tap when getting version -->
+        <!-- so far not helping.... -->
+        <div class="logo-container no-text-select">
+          <img :src="logoUrl" alt="Logo" class="logo-image" />
           <q-tooltip anchor="top left" self="bottom middle" :offset="[50, -10]">
-            v1.0
+            v1.0.7
           </q-tooltip>
-        </q-img>
+        </div>
       </q-toolbar>
     </q-header>
 
@@ -43,6 +46,7 @@
 import { defineComponent, ref, onMounted } from "vue";
 import { useQuasar } from "quasar";
 import LeftSidebar from "src/components/LeftSidebar.vue";
+import logoUrl from "../assets/logo.png";
 
 const linksList = [
   {
@@ -81,6 +85,7 @@ export default defineComponent({
     return {
       LeftSidebars: linksList,
       leftDrawerOpen,
+      logoUrl,
       toggleLeftDrawer() {
         leftDrawerOpen.value = !leftDrawerOpen.value;
       },
@@ -88,3 +93,37 @@ export default defineComponent({
   },
 });
 </script>
+
+<style>
+/* global styles to override Quasar defaults */
+.q-header {
+  height: auto !important;
+}
+
+.q-toolbar {
+  min-height: 48px !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+.q-toolbar__title {
+  font-size: 18px;
+}
+</style>
+
+<style scoped>
+.logo-container {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo-image {
+  max-width: 130%;
+  max-height: 130%;
+  margin-right: 20px;
+  object-fit: contain;
+}
+</style>
