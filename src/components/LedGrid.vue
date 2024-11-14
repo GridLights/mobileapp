@@ -66,7 +66,7 @@ export default {
       return rowIndex * this.spacing + offset + 9; // margin
     },
 
-    //get potitioning points for bg polygon based on led grid
+    //get positioning points for bg polygon based on led grid
     getHexagonPoints() {
       const points = [];
 

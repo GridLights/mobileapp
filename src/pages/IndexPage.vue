@@ -85,7 +85,7 @@
             v-for="n in 10"
             :key="n"
             clickable
-            @click="isOn ? onItemClick(n) : null"
+            @click="isOn ? onListItemClick(n) : null"
             :ripple="false"
             :class="{
               'selected-item': selectedItem === n,
@@ -139,11 +139,12 @@ export default defineComponent({
   },
 
   mounted() {
-    // init all LEDs to black
+    // init all LEDs to black on load
     this.setAllLeds(0);
   },
 
   methods: {
+    //power button handler
     toggleButton() {
       this.isOn = !this.isOn;
 
@@ -151,16 +152,18 @@ export default defineComponent({
       if (!this.isOn) {
         this.setAllLeds(0);
       } else {
-        this.setAllLeds(this.sliderValue); // set to current slider value when turned on
+        // set LED color to current slider value when turned on
+        this.setAllLeds(this.sliderValue);
       }
 
-      console.log("button: " + this.isOn);
+      console.log("power button: " + this.isOn);
     },
 
     logSliderValue() {
       console.log("slider: " + this.sliderValue);
     },
 
+    //based on passed in value, pick an LED color
     setAllLeds(value) {
       const clampedValue = Math.max(0, Math.min(value, 100));
 
@@ -181,6 +184,7 @@ export default defineComponent({
       );
     },
 
+    //set all LEDs to a color based on slider value
     updateLedColors() {
       const colorScale = [
         "#FF0000", //red
@@ -205,6 +209,7 @@ export default defineComponent({
       );
     },
 
+    //spray all LEDs with random colors
     generateRandomPattern() {
       this.ledRows = this.ledRows.map((row) =>
         row.map(
@@ -216,7 +221,8 @@ export default defineComponent({
       );
     },
 
-    onItemClick(itemNumber) {
+    //set a random pattern of LED colors when list item is clicked
+    onListItemClick(itemNumber) {
       console.log("Clicked on item:", itemNumber);
 
       // generate random colors for each LED when an item is clicked
@@ -226,6 +232,7 @@ export default defineComponent({
       this.selectedItem = itemNumber;
     },
 
+    //timer input field handler
     onTimerInput() {
       if (this.timerValue > 50) {
         this.timerValue = 50;
@@ -236,6 +243,7 @@ export default defineComponent({
       console.log("Timer Value: " + this.timerValue);
     },
 
+    //frequency input field handler
     onFreqInput() {
       if (this.freqValue > 50) {
         this.freqValue = 50;
@@ -271,15 +279,15 @@ export default defineComponent({
 }
 
 .slider-container {
-  border: 1px solid #888; /* Border color */
-  border-radius: 4px; /* Rounded corners */
-  padding-left: 15px; /* Padding around the slider */
-  padding-right: 15px; /* Padding around the slider */
-  padding-top: 10px; /* Padding around the slider */
-  padding-bottom: 10px; /* Padding around the slider */
-  display: flex; /* Center the slider vertically */
-  justify-content: center; /* Center horizontally */
-  align-items: center; /* Center vertically */
+  border: 1px solid #888;
+  border-radius: 4px;
+  padding-left: 15px;
+  padding-right: 15px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 .button-container {
   border: 1px solid #888;
