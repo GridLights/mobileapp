@@ -1,10 +1,6 @@
 //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-// IndexPage.vue
-//
-// Home page with light controls
-//
-// Author: Tavis Hord - tavis@sideburn.com
-// Created 11/12/24
+// IndexPage.vue // // Home page with light controls // // Author: Tavis Hord -
+tavis@sideburn.com // Created 11/12/24
 //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 <template>
@@ -16,8 +12,8 @@
       >
         <q-btn
           :ripple="false"
-          :icon="isOn ? 'lightbulb' : 'lightbulb_outline'"
-          :color="isOn ? 'orange' : 'grey'"
+          :icon="this.wledState.on ? 'lightbulb' : 'lightbulb_outline'"
+          :color="this.wledState.on ? 'orange' : 'grey'"
           @click="toggleButton"
           round
         />
@@ -35,8 +31,7 @@
             :min="0"
             :max="100"
             style="height: 170px"
-            @update:model-value="updateLedColors"
-            :disable="!isOn"
+            :disable="!this.wledState.on"
           />
         </div>
       </div>
@@ -82,17 +77,19 @@
           style="width: 100%; max-height: 200px; overflow-y: auto"
         >
           <q-item
-            v-for="n in 10"
-            :key="n"
+            v-for="(item, index) in itemList"
+            :key="index"
             clickable
-            @click="isOn ? onListItemClick(n) : null"
+            @click="
+              wledState.on ? onListItemClick(item.id, item.effectName) : null
+            "
             :ripple="false"
             :class="{
-              'selected-item': selectedItem === n,
-              'disabled-item': !isOn,
+              'selected-item': selectedItem === item.id,
+              'disabled-item': !wledState.on,
             }"
           >
-            <q-item-section>Shape {{ n }}</q-item-section>
+            <q-item-section>{{ item.label }}</q-item-section>
           </q-item>
         </q-list>
       </div>
@@ -101,8 +98,10 @@
 </template>
 
 <script>
-import { defineComponent } from "vue";
+import { defineComponent, effect } from "vue";
 import LedGrid from "src/components/LedGrid.vue";
+import webservices from "../webservices";
+import { diamondSpin, ben } from "../effects";
 
 export default defineComponent({
   name: "IndexPage",
@@ -117,6 +116,7 @@ export default defineComponent({
       isOn: false,
       timerValue: 0,
       freqValue: 0,
+      freqInterval: 10000, // 0 = 10s and 50 = 100ms
       ledRows: [
         ["#ff0000", "#00ff00", "#0000ff", "#ff00ff"],
         ["#ff0000", "#00ff00", "#0000ff", "#ff00ff", "#fcfcfc"],
@@ -133,100 +133,192 @@ export default defineComponent({
         ["#ff0000", "#00ff00", "#0000ff", "#ff00ff", "#ff00ff", "#fcfcfc"],
         ["#ff0000", "#00ff00", "#0000ff", "#ff00ff", "#fcfcfc"],
         ["#ff0000", "#00ff00", "#0000ff", "#ff00ff"],
-      ],
+      ], // need this initial shape definition
       selectedItem: null,
+      itemList: [
+        { id: 1, label: "Ben", effectName: "ben" },
+        { id: 2, label: "Diamond Spin", effectName: "diamondSpin" },
+        { id: 3, label: "Colorwaves", effectName: "colorWaves" },
+        { id: 4, label: "All White", effectName: "allWhite" },
+        { id: 5, label: "Stop Effect", effectName: "pauseEffect" },
+        { id: 6, label: "Shape 6", effectName: "allWhite" },
+        { id: 7, label: "Shape 7", effectName: "allWhite" },
+        { id: 8, label: "Shape 8", effectName: "allWhite" },
+        { id: 9, label: "Shape 9", effectName: "allWhite" },
+        { id: 10, label: "Shape 10", effectName: "allWhite" },
+      ],
+      ws: null, // Store the WebSocket connection
+      wledState: {}, // Store the current WLED state
+      ledColors: [], // Store the real-time LED colors
+      messageCounter: 0, // Counter to track the number of messages
+      lastProcessedTime: 0,
+      intervalId: null,
+      frequencyDebounceTimer: null, // Timer for debouncing
+      currentCustomEffect: null, // Track the current custom effect
+      // messageCoun
     };
   },
 
   mounted() {
-    // init all LEDs to black on load
-    this.setAllLeds(0);
+    // Clear any interval that is running on refresh
+    if (this.intervalId !== null) {
+      clearInterval(this.intervalId);
+    }
+
+    // Store somewhere?
+    this.freqValue = 0;
+
+    // Initialize WebSocket when the component is mounted
+    const wsUrl = "ws://192.168.84.43:80/ws"; // TODO: set this in the UI?
+    webservices.initWebSocket(
+      wsUrl,
+      this.handleWebSocketMessage,
+      webservices.subscribeToLiveStream
+    );
+
+    // Subscribes to /live endpoint
+    webservices.subscribeToLiveStream();
+  },
+
+  beforeUnmount() {
+    webservices.unsubscribeFromLiveStream();
+    webservices.closeWebSocket();
   },
 
   methods: {
-    //power button handler
-    toggleButton() {
-      this.isOn = !this.isOn;
-
-      //  set all LEDs to black and disable the slider
-      if (!this.isOn) {
-        this.setAllLeds(0);
-      } else {
-        // set LED color to current slider value when turned on
-        this.setAllLeds(this.sliderValue);
+    updateLedRows(ledRows, colorList) {
+      if (colorList.length < 38) {
+        console.error("Color list must contain at least 38 colors.");
+        return;
       }
 
-      console.log("power button: " + this.isOn);
+      // Flatten the ledRows into a single array and map the first 38 elements
+      let updatedColors = colorList.slice(0, 38); // Take only the first 38 colors
+
+      let colorIndex = 0; // Track position in the updatedColors array
+      let updatedLedRows = ledRows.map((row) => {
+        return row.map(() => {
+          let color = updatedColors[colorIndex]; // Use the next color
+          colorIndex++; // Increment the index
+          return color;
+        });
+      });
+
+      return updatedLedRows;
+    },
+
+    // equivalency check for arrays where == is always false
+    areArraysEquivalent(arr1, arr2) {
+      // Check if lengths are equal
+      if (arr1.length !== arr2.length) {
+        return false;
+      }
+
+      // Iterate over each pair of inner arrays
+      for (let i = 0; i < arr1.length; i++) {
+        const innerArray1 = arr1[i];
+        const innerArray2 = arr2[i];
+
+        // Check if inner array lengths are equal
+        if (innerArray1.length !== innerArray2.length) {
+          return false;
+        }
+
+        // Compare elements within inner arrays
+        for (let j = 0; j < innerArray1.length; j++) {
+          if (innerArray1[j] !== innerArray2[j]) {
+            return false;
+          }
+        }
+      }
+
+      // console.log("true it matches");
+      // If all comparisons pass, the arrays are equivalent
+      return true;
+    },
+
+    // called when websocket receives an inbound message
+    handleWebSocketMessage(data) {
+      const now = Date.now();
+
+      if (data.state != undefined) {
+        // State message incoming
+        this.wledState = data.state;
+      }
+      if (data.leds != undefined) {
+        // if from the live stream, only process every X ms
+        const processTime = 100;
+        if (now - this.lastProcessedTime >= processTime) {
+          this.lastProcessedTime = now;
+
+          // Map the /live data to the UI fixture
+          let newLedRows = this.updateLedRows(this.ledRows, data.leds);
+
+          // Ensure each color has a "#" prefix
+          newLedRows = newLedRows.map((row) => row.map((color) => `#${color}`));
+
+          if (this.areArraysEquivalent(newLedRows, this.ledRows) === false) {
+            // Update the ledRows value (used by the UI fixture)
+            this.ledRows = newLedRows;
+          }
+        }
+      }
+    },
+
+    //power button handler
+    toggleButton() {
+      var lightOn = this.wledState.on;
+
+      // Command to toggle the light
+      const command = { on: !lightOn };
+      webservices.sendCommandToWebSocket(command);
+      console.log(`Toggled light to: ${!lightOn}`);
     },
 
     logSliderValue() {
       console.log("slider: " + this.sliderValue);
     },
 
-    //based on passed in value, pick an LED color
-    setAllLeds(value) {
-      const clampedValue = Math.max(0, Math.min(value, 100));
+    setBrightness() {
+      var level = Math.floor(((100 - this.sliderValue) / 100) * 255);
 
-      // convert to hex color
-      const colorScale = [
-        "#000000", // 0 (black)
-        "#FF0000", // 20 (red)
-        "#FFFF00", // 40 (yellow)
-        "#00FF00", // 60 (green)
-        "#00FFFF", // 80 (cyan)
-        "#FFFFFF", // 100 (white)
-      ];
+      const data = {
+        on: true,
+        seg: { bri: level },
+      };
 
-      const index = Math.floor((clampedValue / 100) * (colorScale.length - 1));
-
-      this.ledRows = this.ledRows.map((row) =>
-        row.map(() => colorScale[index])
-      );
+      webservices.sendCommandToWebSocket(data);
     },
 
-    //set all LEDs to a color based on slider value
-    updateLedColors() {
-      const colorScale = [
-        "#FF0000", //red
-        "#FF7F00",
-        "#FFFF00", //yellow
-        "#7FFF00",
-        "#00FF00", //green
-        "#00FF7F",
-        "#00FFFF", //cyan
-        "#007FFF",
-        "#0000FF",
-        "#7F00FF",
-        "#FF00FF",
-      ];
-
-      const index = Math.floor(
-        (this.sliderValue / 100) * (colorScale.length - 1)
-      );
-
-      this.ledRows = this.ledRows.map((row) =>
-        row.map(() => colorScale[index])
-      );
-    },
-
-    //spray all LEDs with random colors
-    generateRandomPattern() {
-      this.ledRows = this.ledRows.map((row) =>
-        row.map(
-          () =>
-            `#${Math.floor(Math.random() * 16777215)
-              .toString(16)
-              .padStart(6, "0")}`
-        )
-      );
-    },
-
-    //set a random pattern of LED colors when list item is clicked
-    onListItemClick(itemNumber) {
+    // Temporary mapping of list item click to action/effect
+    onListItemClick(itemNumber, effectName) {
       console.log("Clicked on item:", itemNumber);
 
-      // generate random colors for each LED when an item is clicked
-      this.generateRandomPattern();
+      // If an interval is already running, clear it first
+      if (this.intervalId !== null) {
+        clearInterval(this.intervalId);
+      }
+
+      this.currentCustomEffect = null;
+
+      // Could probably pass the click function as a parameter/value in the itemList
+      // For now, just do it this way
+      if (["ben", "diamondSpin"].includes(effectName)) {
+        this.setCustomEffect(effectName);
+      } else if (effectName === "colorWaves") {
+        this.setEffect(67);
+      } else if (effectName === "allWhite") {
+        this.setColor([255, 255, 255]);
+      } else if (effectName === "pauseEffect") {
+        console.log("interval cleared");
+      }
+
+      // if (itemNumber === 6) {
+      //   this.diamondSpin();
+      // }
+
+      // <button @click="setLedRange(1, 10, [0, 255, 0])">Set LED Range</button>
+      // <button @click="repeatProgressiveTrail(5, 125, 8)">Start Trail Effect</button>
 
       // set the selected item for highlighting
       this.selectedItem = itemNumber;
@@ -251,7 +343,130 @@ export default defineComponent({
       if (this.freqValue < 0) {
         this.freqValue = 0;
       }
-      console.log("Frequency Value: " + this.freqValue);
+      // Clear the existing debounce timer
+      clearTimeout(this.frequencyDebounceTimer);
+
+      // Set a new debounce timer
+      this.frequencyDebounceTimer = setTimeout(() => {
+        console.log("Frequency Value: " + this.freqValue);
+        const msValue = this.calculateMs(this.freqValue);
+        this.freqInterval = msValue;
+        console.log("Frequency Interval: " + this.freqInterval);
+        this.restartCustomEffectWithNewInterval();
+      }, 1000); // Delay of 1 second
+    },
+
+    // Calculate ms value based on freqValue
+    calculateMs(freqValue) {
+      const minFreq = 0; // Min frequency value
+      const maxFreq = 50; // Max frequency value
+      const minMs = 10000; // Corresponding ms value for minFreq
+      const maxMs = 100; // Corresponding ms value for maxFreq
+
+      // Linear interpolation formula
+      return (
+        minMs + ((maxMs - minMs) / (maxFreq - minFreq)) * (freqValue - minFreq)
+      );
+    },
+
+    async setLedRange(startLed, stopLed, color) {
+      // const url = "http://4.3.2.1/json/state"; // Replace with your WLED IP
+      const command = {
+        on: true,
+        bri: 100,
+        seg: [
+          {
+            id: 0,
+            start: startLed - 1, // Adjust for 0-indexed
+            stop: stopLed,
+            col: [color],
+          },
+        ],
+      };
+
+      webservices.sendCommandToWebSocket(command);
+    },
+
+    setAllLedsToBrightness(brightness) {
+      let on;
+      if (brightness === 0) {
+        on = false;
+      } else {
+        on = true;
+      }
+      const command = {
+        on: on,
+        seg: { bri: brightness },
+      };
+
+      webservices.sendCommandToWebSocket(command);
+    },
+
+    turnOffAndOn(delayMs, repetitions) {
+      let delay = 0;
+      for (let i = 0; i < repetitions; i++) {
+        setTimeout(() => this.toggleButton(), delay);
+        delay += delayMs;
+      }
+    },
+
+    setColor(color) {
+      const data = {
+        on: true,
+        seg: [
+          {
+            col: [color],
+            fx: 0,
+          },
+        ],
+      };
+      webservices.sendCommandToWebSocket(data);
+    },
+
+    setEffect(effectId) {
+      const data = { seg: { fx: effectId } };
+      webservices.sendCommandToWebSocket(data);
+    },
+
+    restartCustomEffectWithNewInterval() {
+      if (this.currentCustomEffect) {
+        // Cancel current interval, restart with new frequency value
+        if (this.intervalId !== null) {
+          clearInterval(this.intervalId);
+        }
+        this.setCustomEffect(this.currentCustomEffect);
+      }
+    },
+
+    setCustomEffect(effectName) {
+      console.log(effectName);
+
+      // Define frames for the animation
+      let frames;
+      if (effectName === "ben") {
+        frames = ben.frames;
+      } else if (effectName === "diamondSpin") {
+        frames = diamondSpin.frames;
+      }
+
+      console.log(frames);
+
+      if (frames) {
+        this.currentCustomEffect = effectName;
+
+        // Initialize the current frame
+        let currentFrame = 0;
+        // Set an interval to cycle through the frames
+        this.intervalId = setInterval(() => {
+          // Send the current frame to the WLED WebSocket
+          webservices.sendCommandToWebSocket({ seg: frames[currentFrame].seg });
+          console.log("Frame sent:", frames[currentFrame].seg);
+          // console.log("filled", this.fillGaps(frames[currentFrame].seg));
+          // Switch to the next frame
+          currentFrame = (currentFrame + 1) % frames.length;
+          // currentFrame = 1;
+        }, this.freqInterval); // Update every X second
+      }
     },
   },
 });
