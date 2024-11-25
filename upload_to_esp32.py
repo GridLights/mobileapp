@@ -1,9 +1,14 @@
 import os
 import time
 import subprocess
+import sys
+
+if len(sys.argv) != 2:
+  print("Usage: upload_to_esp.py PORT")
+  exit()
 
 # Configuration
-ESP_PORT = "/dev/tty.SLAB_USBtoUART"  # Change this to your ESP32's port
+ESP_PORT = sys.argv[1]
 BAUD_RATE = 115200
 FILES_TO_UPLOAD = [
     'boot.py',
