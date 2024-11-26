@@ -29,9 +29,10 @@ tavis@sideburn.com // Created 11/12/24
             v-model="sliderValue"
             vertical
             :min="0"
-            :max="100"
+            :max="255"
             style="height: 170px"
             :disable="!this.wledState.on"
+            @update:model-value="onSliderUpdate"
           />
         </div>
       </div>
@@ -81,7 +82,9 @@ tavis@sideburn.com // Created 11/12/24
             :key="index"
             clickable
             @click="
-              wledState.on ? onListItemClick(item.id, item.effectName) : null
+              wledState.on
+                ? onListItemClick(item.id, item.effectName, item.effectId)
+                : null
             "
             :ripple="false"
             :class="{
@@ -112,7 +115,7 @@ export default defineComponent({
 
   data() {
     return {
-      sliderValue: 50,
+      sliderValue: null,
       isOn: false,
       timerValue: 0,
       freqValue: 0,
@@ -136,16 +139,31 @@ export default defineComponent({
       ], // need this initial shape definition
       selectedItem: null,
       itemList: [
-        { id: 1, label: "Ben", effectName: "ben" },
-        { id: 2, label: "Diamond Spin", effectName: "diamondSpin" },
-        { id: 3, label: "Colorwaves", effectName: "colorWaves" },
-        { id: 4, label: "All White", effectName: "allWhite" },
-        { id: 5, label: "Stop Effect", effectName: "pauseEffect" },
-        { id: 6, label: "Shape 6", effectName: "allWhite" },
-        { id: 7, label: "Shape 7", effectName: "allWhite" },
-        { id: 8, label: "Shape 8", effectName: "allWhite" },
-        { id: 9, label: "Shape 9", effectName: "allWhite" },
-        { id: 10, label: "Shape 10", effectName: "allWhite" },
+        { id: 1, label: "Ben", effectName: "ben", effectId: 191 },
+        {
+          id: 2,
+          label: "Diamond Spin",
+          effectName: "diamondSpin",
+          effectId: 189,
+        },
+        {
+          id: 3,
+          label: "Drunk Diamond Spin",
+          effectName: "drunkDiamondSpin",
+          effectId: 190,
+        },
+        {
+          id: 4,
+          label: "Square Spin",
+          effectName: "squareSpin",
+          effectId: 187,
+        },
+        { id: 5, label: "Crazy Spin", effectName: "crazySpin", effectId: 188 },
+        { id: 6, label: "All White", effectName: "allWhite", effectId: null },
+        { id: 7, label: "All White", effectName: "allWhite", effectId: null },
+        { id: 8, label: "All White", effectName: "allWhite", effectId: null },
+        { id: 9, label: "All White", effectName: "allWhite", effectId: null },
+        { id: 10, label: "All White", effectName: "allWhite", effectId: null },
       ],
       ws: null, // Store the WebSocket connection
       wledState: {}, // Store the current WLED state
@@ -154,7 +172,10 @@ export default defineComponent({
       lastProcessedTime: 0,
       intervalId: null,
       frequencyDebounceTimer: null, // Timer for debouncing
+      brightnessDebounceTimer: null,
       currentCustomEffect: null, // Track the current custom effect
+      wledUrl: "4.3.2.1", // local
+      // wledUrl: "192.168.84.43", // remote
       // messageCoun
     };
   },
@@ -169,15 +190,16 @@ export default defineComponent({
     this.freqValue = 0;
 
     // Initialize WebSocket when the component is mounted
-    const wsUrl = "ws://192.168.84.43:80/ws"; // TODO: set this in the UI?
+    const wsUrl = `ws://${this.wledUrl}:80/ws`; // TODO: set this in the UI?
     webservices.initWebSocket(
       wsUrl,
       this.handleWebSocketMessage,
+      this.handleLiveStreamData,
       webservices.subscribeToLiveStream
     );
 
     // Subscribes to /live endpoint
-    webservices.subscribeToLiveStream();
+    // webservices.subscribeToLiveStream();
   },
 
   beforeUnmount() {
@@ -196,15 +218,23 @@ export default defineComponent({
       let updatedColors = colorList.slice(0, 38); // Take only the first 38 colors
 
       let colorIndex = 0; // Track position in the updatedColors array
+      var all_off = true;
       let updatedLedRows = ledRows.map((row) => {
         return row.map(() => {
           let color = updatedColors[colorIndex]; // Use the next color
           colorIndex++; // Increment the index
+          if (color != "000000") {
+            all_off = false;
+          }
           return color;
         });
       });
 
-      return updatedLedRows;
+      if (all_off == false) {
+        return updatedLedRows;
+      }
+
+      return [];
     },
 
     // equivalency check for arrays where == is always false
@@ -241,18 +271,60 @@ export default defineComponent({
     handleWebSocketMessage(data) {
       const now = Date.now();
 
-      if (data.state != undefined) {
+      console.log("web socket dat");
+      console.log(data);
+
+      if (data?.state != undefined) {
         // State message incoming
         this.wledState = data.state;
+        this.sliderValue = data.bri - 255;
       }
-      if (data.leds != undefined) {
+      // if (data?.leds != undefined) {
+      //   console.log("live stream update");
+      //   // if from the live stream, only process every X ms
+      //   const processTime = 100;
+      //   if (now - this.lastProcessedTime >= processTime) {
+      //     this.lastProcessedTime = now;
+
+      //     // Map the /live data to the UI fixture
+      //     let newLedRows = this.updateLedRows(this.ledRows, data.info.leds);
+
+      //     if (!newLedRows.length) {
+      //       // strobing, do not update
+      //       return
+      //     }
+
+      //     // Ensure each color has a "#" prefix
+      //     newLedRows = newLedRows.map((row) => row.map((color) => `#${color}`));
+
+      //     if (this.areArraysEquivalent(newLedRows, this.ledRows) === false) {
+      //       // Update the ledRows value (used by the UI fixture)
+      //       this.ledRows = newLedRows;
+      //     }
+      //   }
+      // }
+    },
+
+    // called when websocket receives an inbound message
+    handleLiveStreamData(data) {
+      const now = Date.now();
+
+      console.log("web socket dat");
+      console.log(data);
+
+      if (data?.leds != undefined) {
         // if from the live stream, only process every X ms
-        const processTime = 100;
+        const processTime = 10;
         if (now - this.lastProcessedTime >= processTime) {
           this.lastProcessedTime = now;
 
           // Map the /live data to the UI fixture
           let newLedRows = this.updateLedRows(this.ledRows, data.leds);
+
+          if (!newLedRows.length) {
+            // strobing, do not update
+            return;
+          }
 
           // Ensure each color has a "#" prefix
           newLedRows = newLedRows.map((row) => row.map((color) => `#${color}`));
@@ -279,19 +351,79 @@ export default defineComponent({
       console.log("slider: " + this.sliderValue);
     },
 
-    setBrightness() {
-      var level = Math.floor(((100 - this.sliderValue) / 100) * 255);
+    setStrobe() {
+      console.log("strobing: ");
 
       const data = {
+        tt: 0,
+        // on: true,
+        seg: [
+          {
+            fx: 23,
+            sx: 255,
+            // ix: 255,
+            // // tt: 0,
+            // ix: 255,
+            // pal: 0,
+          },
+        ],
+      };
+
+      // const data1 = {
+      //   // tt: 0,
+      //   on: true,
+      //   // seg: [
+      //   //   {
+      //   //     fx: 1,
+      //   //     sx: 255,
+      //   //     // // tt: 0,
+      //   //     // ix: 255,
+      //   //     // pal: 0,
+      //   //   },
+      //   // ],
+      // };
+
+      // for (let i = 0; i < 5000; i++) {
+      //   const num1 = i % 2;
+      //   const dataToSend = num1 === 0 ? data : data1;
+
+      //   // Send the command and schedule the next one
+      //   webservices.sendCommandToWebSocket(dataToSend);
+      //   setTimeout(() => {
+      //     // Do nothing, just a delay
+      //   }, 500); // Adjust the delay time (in milliseconds) as needed
+      // }
+      webservices.sendCommandToWebSocket(data);
+    },
+
+    setBrightness(bri) {
+      const absBri = Math.abs(bri - 255);
+      // var level = Math.floor(((100 - this.sliderValue) / 100) * 255);
+      const data = {
         on: true,
-        seg: { bri: level },
+        bri: absBri,
+        seg: { bri: absBri },
       };
 
       webservices.sendCommandToWebSocket(data);
     },
 
+    onSliderUpdate() {
+      // Clear the existing debounce timer
+      clearTimeout(this.brightnessDebounceTimer);
+
+      // Set a new debounce timer
+      this.brightnessDebounceTimer = setTimeout(() => {
+        console.log("Slider Value: " + this.sliderValue);
+
+        this.setBrightness(this.sliderValue);
+        // console.log("Frequency Interval: " + this.freqInterval);
+        // this.restartCustomEffectWithNewInterval();
+      }, 1000); // Delay of 1 second
+    },
+
     // Temporary mapping of list item click to action/effect
-    onListItemClick(itemNumber, effectName) {
+    onListItemClick(itemNumber, effectName, effectId) {
       console.log("Clicked on item:", itemNumber);
 
       // If an interval is already running, clear it first
@@ -303,15 +435,22 @@ export default defineComponent({
 
       // Could probably pass the click function as a parameter/value in the itemList
       // For now, just do it this way
-      if (["ben", "diamondSpin"].includes(effectName)) {
-        this.setCustomEffect(effectName);
-      } else if (effectName === "colorWaves") {
-        this.setEffect(67);
-      } else if (effectName === "allWhite") {
+      if (effectId) {
+        this.setEffect(effectId);
+      } else if (effectName == "allWhite") {
         this.setColor([255, 255, 255]);
-      } else if (effectName === "pauseEffect") {
-        console.log("interval cleared");
       }
+      // if (["ben", "diamondSpin"].includes(effectName)) {
+      //   this.setCustomEffect(effectName);
+      // } else if (effectName === "colorWaves") {
+      //   this.setEffect(189);
+      // } else if (effectName === "allWhite") {
+      //   this.setColor([255, 255, 255]);
+      // } else if (effectName === "pauseEffect") {
+      //   console.log("interval cleared");
+      // } else if (effectName === "strobe") {
+      //   this.setStrobe();
+      // }
 
       // if (itemNumber === 6) {
       //   this.diamondSpin();
@@ -349,10 +488,13 @@ export default defineComponent({
       // Set a new debounce timer
       this.frequencyDebounceTimer = setTimeout(() => {
         console.log("Frequency Value: " + this.freqValue);
-        const msValue = this.calculateMs(this.freqValue);
-        this.freqInterval = msValue;
-        console.log("Frequency Interval: " + this.freqInterval);
-        this.restartCustomEffectWithNewInterval();
+
+        this.setFrequency(this.freqValue);
+
+        // const msValue = this.calculateMs(this.freqValue);
+        // this.freqInterval = msValue;
+        // console.log("Frequency Interval: " + this.freqInterval);
+        // this.restartCustomEffectWithNewInterval();
       }, 1000); // Delay of 1 second
     },
 
@@ -424,50 +566,58 @@ export default defineComponent({
     },
 
     setEffect(effectId) {
-      const data = { seg: { fx: effectId } };
+      const scaledFreqValue = Math.round((this.freqValue / 50) * 255);
+      const data = { seg: { fx: effectId, ix: scaledFreqValue } };
       webservices.sendCommandToWebSocket(data);
     },
 
-    restartCustomEffectWithNewInterval() {
-      if (this.currentCustomEffect) {
-        // Cancel current interval, restart with new frequency value
-        if (this.intervalId !== null) {
-          clearInterval(this.intervalId);
-        }
-        this.setCustomEffect(this.currentCustomEffect);
-      }
+    setFrequency(frequencyVal) {
+      // Map the selected frequency (0-50 Hz) to the 0-255 scale
+      const scaledFreqValue = Math.round((frequencyVal / 50) * 255);
+      const data = { seg: { ix: scaledFreqValue } };
+      webservices.sendCommandToWebSocket(data);
     },
 
-    setCustomEffect(effectName) {
-      console.log(effectName);
+    // restartCustomEffectWithNewInterval() {
+    //   if (this.currentCustomEffect) {
+    //     // Cancel current interval, restart with new frequency value
+    //     if (this.intervalId !== null) {
+    //       clearInterval(this.intervalId);
+    //     }
+    //     this.setCustomEffect(this.currentCustomEffect);
+    //   }
+    // },
 
-      // Define frames for the animation
-      let frames;
-      if (effectName === "ben") {
-        frames = ben.frames;
-      } else if (effectName === "diamondSpin") {
-        frames = diamondSpin.frames;
-      }
+    // setCustomEffect(effectName) {
+    //   console.log(effectName);
 
-      console.log(frames);
+    //   // Define frames for the animation
+    //   let frames;
+    //   if (effectName === "ben") {
+    //     frames = ben.frames;
+    //   } else if (effectName === "diamondSpin") {
+    //     frames = diamondSpin.frames;
+    //   }
 
-      if (frames) {
-        this.currentCustomEffect = effectName;
+    //   console.log(frames);
 
-        // Initialize the current frame
-        let currentFrame = 0;
-        // Set an interval to cycle through the frames
-        this.intervalId = setInterval(() => {
-          // Send the current frame to the WLED WebSocket
-          webservices.sendCommandToWebSocket({ seg: frames[currentFrame].seg });
-          console.log("Frame sent:", frames[currentFrame].seg);
-          // console.log("filled", this.fillGaps(frames[currentFrame].seg));
-          // Switch to the next frame
-          currentFrame = (currentFrame + 1) % frames.length;
-          // currentFrame = 1;
-        }, this.freqInterval); // Update every X second
-      }
-    },
+    //   if (frames) {
+    //     this.currentCustomEffect = effectName;
+
+    //     // Initialize the current frame
+    //     let currentFrame = 0;
+    //     // Set an interval to cycle through the frames
+    //     this.intervalId = setInterval(() => {
+    //       // Send the current frame to the WLED WebSocket
+    //       webservices.sendCommandToWebSocket({ seg: frames[currentFrame].seg });
+    //       console.log("Frame sent:", frames[currentFrame].seg);
+    //       // console.log("filled", this.fillGaps(frames[currentFrame].seg));
+    //       // Switch to the next frame
+    //       currentFrame = (currentFrame + 1) % frames.length;
+    //       // currentFrame = 1;
+    //     }, this.freqInterval); // Update every X second
+    //   }
+    // },
   },
 });
 </script>

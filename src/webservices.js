@@ -6,12 +6,18 @@ export const webservices = {
   reconnectTimeout: 3000, // Initial timeout for reconnect attempts (in milliseconds)
   maxReconnectAttempts: 10, // Maximum number of reconnection attempts
   reconnectAttempts: 0, // Counter for reconnection attempts
+  lastProcessedTime: 0,
 
   /**
    * Initialize a WebSocket connection.
    * @param {string} wsUrl - The WebSocket URL (e.g., "ws://<WLED-IP>/ws").
    */
-  initWebSocket(wsUrl, onMessageCallback, onConnectedCallback) {
+  initWebSocket(
+    wsUrl,
+    onMessageCallback,
+    onLiveStreamDataCallback,
+    onConnectedCallback
+  ) {
     const self = this; // Preserve `this` context for inner functions
 
     function connect() {
@@ -25,11 +31,117 @@ export const webservices = {
         }
       };
 
-      ws.onmessage = (event) => {
-        // Parse the incoming message as JSON
-        const data = JSON.parse(event.data);
-        if (onMessageCallback) {
-          onMessageCallback(data); // Pass the message to the callback
+      ws.onmessage = function (event) {
+        const messageData = event.data;
+
+        if (messageData instanceof Blob) {
+          const now = Date.now();
+          // from the live stream, only process every X ms
+          const processTime = 50;
+          console.log("here");
+
+          if (now - self.lastProcessedTime >= processTime) {
+            console.log("not here");
+            self.lastProcessedTime = now;
+
+            const reader = new FileReader();
+
+            reader.onload = function () {
+              const arrayBuffer = reader.result;
+              const byteArray = new Uint8Array(arrayBuffer);
+
+              // Skip the first byte (header byte 'L')
+              const ledData = byteArray.slice(1);
+
+              console.log(ledData);
+
+              // Array to hold the hex color values
+              const leds = [];
+
+              // Assuming each LED is represented by 3 bytes (RGB)
+              for (let i = 1; i < ledData.length; i += 3) {
+                // Extract RGB values (make sure there are enough bytes)
+                // const r = ledData[i];
+                // const g = ledData[i + 1];
+                // const b = ledData[i + 2];
+
+                const r = ledData[i] == 0 ? 0 : 255;
+                const g = ledData[i + 1] == 0 ? 0 : 255;
+                const b = ledData[i + 2] == 0 ? 0 : 255;
+
+                // Convert RGB to hex color string (e.g., "7D0000")
+                const hexColor = ((1 << 24) | (r << 16) | (g << 8) | b)
+                  .toString(16)
+                  .slice(1)
+                  .toUpperCase();
+
+                // Push the hex color string to the LEDs array (skip the first)
+                if (i > 0) {
+                  leds.push(hexColor);
+                }
+              }
+
+              // Output the result in the desired format
+              const response = {
+                leds: leds,
+                n: 1,
+              };
+
+              console.log("Decoded LED Data:", response);
+
+              if (onConnectedCallback) {
+                onLiveStreamDataCallback(response);
+              }
+              // this.led
+            };
+
+            // Read the Blob as an ArrayBuffer
+            reader.readAsArrayBuffer(messageData);
+          }
+          // const reader = new FileReader();
+
+          // // When reading is complete, process the data
+          // reader.onload = function () {
+          //   const result = reader.result;
+
+          //   try {
+          //     // Attempt to parse as JSON
+          //     const parsedData = JSON.parse(result);
+          //     console.log("Parsed Data:", parsedData);
+          //   } catch (error) {
+          //     console.error("Error parsing data:", error);
+          //     console.log("Raw Data:", result);
+          //   }
+          // };
+
+          // // Read the Blob as text
+          // reader.readAsText(messageData);
+
+          // Read the Blob as an ArrayBuffer
+          // const reader = new FileReader();
+          // reader.onloadend = function () {
+          //   const arrayBuffer = reader.result;
+          //   const text = new TextDecoder().decode(arrayBuffer); // Decode it as text
+          //   console.log("Decoded text:", text);
+          //   try {
+          //     const parsedData = JSON.parse(text); // Try parsing it as JSON if it's a string
+          //     console.log("Parsed JSON:", parsedData);
+          //   } catch (e) {
+          //     console.error("Failed to parse JSON:", e);
+          //   }
+          // };
+          // reader.readAsArrayBuffer(messageData); // Convert Blob to ArrayBuffer
+        } else {
+          // If it's already text or another valid format
+          try {
+            const parsedData = JSON.parse(messageData);
+            console.log("Parsed data:", parsedData);
+            if (onMessageCallback) {
+              onMessageCallback(parsedData);
+            }
+          } catch (e) {
+            console.error("Error parsing JSON:", e);
+          }
         }
       };
 
@@ -61,7 +173,12 @@ export const webservices = {
       console.log(`Attempting to reconnect in ${delay / 1000} seconds...`);
 
       setTimeout(() => {
-        this.initWebSocket(wsUrl, onMessageCallback, onConnectedCallback);
+        this.initWebSocket(
+          wsUrl,
+          onMessageCallback,
+          onLiveStreamDataCallback,
+          onConnectedCallback
+        );
       }, delay);
     } else {
       console.error(
@@ -80,6 +197,7 @@ export const webservices = {
     } else {
       console.error("WebSocket is not open. Cannot subscribe to live stream.");
     }
+    // console.log("nothing");
   },
 
   closeWebSocket() {
