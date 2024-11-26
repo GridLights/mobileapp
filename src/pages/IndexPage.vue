@@ -1,6 +1,10 @@
 //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-// IndexPage.vue // // Home page with light controls // // Author: Tavis Hord -
-tavis@sideburn.com // Created 11/12/24
+// IndexPage.vue
+//
+// Home page with light controls
+//
+// Author: Tavis Hord - tavis@sideburn.com
+// Created 11/12/24
 //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 <template>
@@ -169,7 +173,9 @@ export default defineComponent({
     this.freqValue = 0;
 
     // Initialize WebSocket when the component is mounted
-    const wsUrl = "ws://192.168.84.43:80/ws"; // TODO: set this in the UI?
+    //const wsUrl = "ws://192.168.84.43:80/ws"; // TODO: set this in the UI?
+    const wsUrl = "ws://4.3.2.1:80/ws"; // Tavis
+
     webservices.initWebSocket(
       wsUrl,
       this.handleWebSocketMessage,

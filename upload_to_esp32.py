@@ -3,7 +3,8 @@ import time
 import subprocess
 
 # Configuration
-ESP_PORT = "/dev/tty.SLAB_USBtoUART"  # Change this to your ESP32's port
+#ESP_PORT = "/dev/tty.SLAB_USBtoUART"  # Change this to your ESP32's port
+ESP_PORT = "/dev/tty.usbserial-0001"  # Change this to your ESP32's port
 BAUD_RATE = 115200
 FILES_TO_UPLOAD = [
     'boot.py',
