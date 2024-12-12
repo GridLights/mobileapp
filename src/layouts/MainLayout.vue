@@ -66,7 +66,7 @@ const linksList = [
   },
   {
     title: "Journeys",
-    caption: "Select a Jouney",
+    caption: "Select a Journey",
     icon: "rule",
     link: "/journeys",
   },
