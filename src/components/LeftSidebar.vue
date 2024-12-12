@@ -6,9 +6,13 @@
 // Author: Tavis Hord - tavis@sideburn.com
 // Created 11/12/24
 //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-
 <template>
-  <q-item clickable tag="a" target="_blank" :href="link">
+  <q-item
+    clickable
+    :to="isInternalLink ? link : undefined"
+    :href="!isInternalLink ? link : undefined"
+    :target="!isInternalLink ? '_blank' : undefined"
+  >
     <q-item-section v-if="icon" avatar>
       <q-icon :name="icon" />
     </q-item-section>
@@ -21,7 +25,7 @@
 </template>
 
 <script>
-import { defineComponent } from "vue";
+import { defineComponent, computed } from "vue";
 
 export default defineComponent({
   name: "LeftSidebar",
@@ -45,6 +49,16 @@ export default defineComponent({
       type: String,
       default: "",
     },
+  },
+
+  setup(props) {
+    const isInternalLink = computed(() => {
+      return props.link && props.link.startsWith("/");
+    });
+
+    return {
+      isInternalLink,
+    };
   },
 });
 </script>
