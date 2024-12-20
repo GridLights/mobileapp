@@ -1,10 +1,6 @@
 //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-// IndexPage.vue
-//
-// Home page with light controls
-//
-// Author: Tavis Hord - tavis@sideburn.com
-// Created 11/12/24
+// IndexPage.vue // // Home page with light controls // // Author: Tavis Hord -
+tavis@sideburn.com // Created 11/12/24
 //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 <template>
@@ -108,6 +104,7 @@
 import { defineComponent, effect } from "vue";
 import LedGrid from "src/components/LedGrid.vue";
 import webservices from "../webservices";
+// import webSocketManager from "../utils/websocketmanager";
 import { diamondSpin, ben } from "../effects";
 
 export default defineComponent({
@@ -186,16 +183,22 @@ export default defineComponent({
 
   mounted() {
     // Clear any interval that is running on refresh
-    if (this.intervalId !== null) {
-      clearInterval(this.intervalId);
-    }
+    // if (this.intervalId !== null) {
+    //   clearInterval(this.intervalId);
+    // }
 
     // Store somewhere?
     this.freqValue = 0;
 
     // Initialize WebSocket when the component is mounted
     //const wsUrl = "ws://192.168.84.43:80/ws"; // TODO: set this in the UI?
-    const wsUrl = "ws://4.3.2.1:80/ws"; // Tavis
+    var wsUrl = "ws://4.3.2.1:80/ws"; // Tavis
+
+    // Load IP Address from local storage on page reload
+    const savedIp = localStorage.getItem("ipAddress");
+    if (savedIp) {
+      wsUrl = `ws://${savedIp}:80/ws`;
+    }
 
     webservices.initWebSocket(
       wsUrl,

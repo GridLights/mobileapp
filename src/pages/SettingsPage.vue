@@ -28,15 +28,24 @@
 </template>
 
 <script>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 
 export default {
   name: "SettingsPage",
   setup() {
     const ipAddress = ref("4.3.2.1");
 
+    // Load IP Address from local storage on page reload
+    onMounted(() => {
+      const savedIp = localStorage.getItem("ipAddress");
+      if (savedIp) {
+        ipAddress.value = savedIp;
+      }
+    });
+
     const saveIpAddress = () => {
       console.log("Saved IP Address: http://" + ipAddress.value);
+      localStorage.setItem("ipAddress", ipAddress.value);
     };
 
     const validateIpAddress = (value) => {

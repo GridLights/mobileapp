@@ -16,7 +16,7 @@ ESP_PORT = sys.argv[1]
 BAUD_RATE = 115200
 FILES_TO_UPLOAD = [
     'boot.py',
-    'main.py'
+    'main.py',
     'server.py',
     'dist/spa/*'
 ]
@@ -37,7 +37,7 @@ def upload_file(file_path, target_name, esp_port, baud_rate):
         )
         print(f"Successfully uploaded {file_path} as {target_name}.")
     except subprocess.CalledProcessError as e:
-        print(f"Failed to upload {file_path}: {e}")
+        print(f"Failed to upload {file_path}")
 
 
 # Helper function to recursively upload all files in a folder
@@ -85,7 +85,7 @@ def list_files_on_esp32():
         print("Files on ESP32 after reset:")
         print(result.stdout.decode())
     except subprocess.CalledProcessError as e:
-        print(f"Error listing files on ESP32: {e}")
+        print(f"Error listing files on ESP32")
 
 
 # Main routine to upload all files

@@ -7,6 +7,23 @@ export const webservices = {
   maxReconnectAttempts: 10, // Maximum number of reconnection attempts
   reconnectAttempts: 0, // Counter for reconnection attempts
   lastProcessedTime: 0,
+  commandQueue: [], // Queue for commands
+
+  handleReconnect(wsUrl) {
+    if (this.reconnectAttempts < this.maxReconnectAttempts) {
+      this.reconnectAttempts++;
+      const delay = this.reconnectTimeout * this.reconnectAttempts; // Exponential backoff
+      console.log(`Attempting to reconnect in ${delay / 1000} seconds...`);
+
+      setTimeout(() => {
+        this.initWebSocket(wsUrl);
+      }, delay);
+    } else {
+      console.error(
+        "Max reconnection attempts reached. Could not reconnect to WebSocket."
+      );
+    }
+  },
 
   /**
    * Initialize a WebSocket connection.
@@ -26,6 +43,13 @@ export const webservices = {
       ws.onopen = () => {
         console.log("WebSocket connection established.");
         self.reconnectAttempts = 0; // Reset the reconnection attempts on successful connection
+
+        // Process queued commands
+        while (self.commandQueue.length > 0) {
+          const command = self.commandQueue.shift();
+          self.sendCommandToWebSocket(command);
+        }
+
         if (onConnectedCallback) {
           onConnectedCallback(); // Call the provided callback after the connection is established
         }
@@ -222,7 +246,7 @@ export const webservices = {
   },
 
   /**
-   * Send a command to the WebSocket.
+   * Send a command to the WebSocket. Queue the command if not open.
    * @param {object} command - The JSON command object to send.
    */
   sendCommandToWebSocket(command) {
@@ -230,7 +254,8 @@ export const webservices = {
       ws.send(JSON.stringify(command));
       console.log("Command sent via WebSocket:", command);
     } else {
-      console.error("WebSocket connection is not open.");
+      console.warn("WebSocket is not open. Queuing command:", command);
+      this.commandQueue.push(command);
     }
   },
 
