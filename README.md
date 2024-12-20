@@ -57,6 +57,6 @@ See [Configuring quasar.config.js](https://v2.quasar.dev/quasar-cli-webpack/quas
    python3 -m venv env
    source env/bin/activate
    pip3 install -r requirements.txt
-   python3 upload_to_esp32.py
+   python3 upload_to_esp32.py /dev/tty.SLAB_USBtoUART
    '''
 2. The script takes a while, but once it is done, you should be able to disconnect then reconnect the power to the fixture, and connect to the WLED wifi. From there you can navigate to 4.3.2.2 and view the app.
