@@ -8,6 +8,10 @@ const routes = [
         path: "/journeys",
         component: () => import("src/pages/JourneysPage.vue"),
       },
+      {
+        path: "/settings",
+        component: () => import("src/pages/SettingsPage.vue"),
+      },
     ],
   },
   {
