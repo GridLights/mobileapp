@@ -9,22 +9,6 @@ export const webservices = {
   lastProcessedTime: 0,
   commandQueue: [], // Queue for commands
 
-  handleReconnect(wsUrl) {
-    if (this.reconnectAttempts < this.maxReconnectAttempts) {
-      this.reconnectAttempts++;
-      const delay = this.reconnectTimeout * this.reconnectAttempts; // Exponential backoff
-      console.log(`Attempting to reconnect in ${delay / 1000} seconds...`);
-
-      setTimeout(() => {
-        this.initWebSocket(wsUrl);
-      }, delay);
-    } else {
-      console.error(
-        "Max reconnection attempts reached. Could not reconnect to WebSocket."
-      );
-    }
-  },
-
   /**
    * Initialize a WebSocket connection.
    * @param {string} wsUrl - The WebSocket URL (e.g., "ws://<WLED-IP>/ws").
