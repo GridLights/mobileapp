@@ -59,20 +59,22 @@ import logoUrl from "../assets/logo.png";
 
 const linksList = [
   {
-    title: "About",
-    caption: "About us",
-    icon: "info",
+    title: "Home",
+    caption: "Home Page",
+    icon: "home",
+    link: "/",
+  },
+  {
+    title: "Journeys",
+    caption: "Select a Journey",
+    icon: "rule",
+    link: "/journeys",
   },
   {
     title: "Gridlights",
     caption: "Powered by Gridlights",
     icon: "code",
     link: "https://www.gridlights.co",
-  },
-  {
-    title: "Settings",
-    caption: "User preferences",
-    icon: "settings",
   },
 ];
 
