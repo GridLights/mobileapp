@@ -234,7 +234,10 @@ def handle_request(conn):
                     content_type = 'image/png'
                 elif path.endswith('ico'):
                     content_type = 'image/x-icon'
-                    # Add more content types as needed
+                elif path.endswith('.woff'):
+                    content_type = 'font/woff'
+                elif path.endswith('.woff2'):
+                    content_type = 'font/woff2'
                 else:
                     content_type = None
                 if content_type:
