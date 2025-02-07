@@ -1,10 +1,6 @@
 //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-// MainLayout.vue
-//
-// Main application layout with page container
-//
-// Author: Tavis Hord - tavis@sideburn.com
-// Created 11/12/24
+// MainLayout.vue // // Main application layout with page container // //
+Author: Tavis Hord - tavis@sideburn.com // Created 11/12/24
 //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 <template>
@@ -69,6 +65,12 @@ const linksList = [
     caption: "Select a Journey",
     icon: "rule",
     link: "/journeys",
+  },
+  {
+    title: "Settings",
+    caption: "Settings Menu",
+    icon: "settings",
+    link: "/settings",
   },
   {
     title: "Gridlights",

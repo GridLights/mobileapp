@@ -1,2 +1,4 @@
 # boot.py -- run on boot-up
-import server
+print('Executing boot.py')
+
+import main
