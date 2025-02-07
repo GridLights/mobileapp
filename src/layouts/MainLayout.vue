@@ -9,7 +9,7 @@
 
 <template>
   <q-layout view="lHh Lpr lFf">
-    <q-header class="bg-grey-8">
+    <q-header class="bg-grey-8 safe-header">
       <q-toolbar class="q-py-sm">
         <q-btn
           flat
@@ -136,5 +136,9 @@ export default defineComponent({
   max-height: 130%;
   margin-right: 20px;
   object-fit: contain;
+}
+
+.safe-header {
+  padding-top: env(safe-area-inset-top);
 }
 </style>
