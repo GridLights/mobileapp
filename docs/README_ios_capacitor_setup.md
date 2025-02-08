@@ -7,31 +7,52 @@ quasar dev
 
 ## Add Capacitor:
 
-```bash
+````bash
+## Update Node version
+
+## ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+##
+## install nvm if you don't have it already:
+##
+##	curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+##	After installation, add these lines to your shell's configuration file (~/.zshrc or ~/.bash_profile):
+##
+##	export NVM_DIR="$HOME/.nvm"
+##		[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+##		[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+##
+##	source ~/.zshrc   # if using zsh
+##	nvm install 20
+##	nvm use 20
+##
+## ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+source ~/.zshrc
+nvm use 20
+
 quasar mode add capacitor
 # When prompted for app ID, use: com.gridlights.app
-# When prompted for npm/yarn, hit return to use npm
-```
 
 ## Edit capacitor.config.json:
 
 ```bash
 #add the following to src-capacitor/capacitor.config.json:
-	"ios": {
+	,"ios": {
     "minVersion": "15.0"
   }
-```
+````
 
 ## Setup Capacitor dependencies:
 
-````bash
+```bash
 # Nav to capacitor directory
 cd src-capacitor
 
-```bash
+# Clean and reinstall dependencies
+npm install @capacitor/core@5.5.0 @capacitor/ios@5.5.0
 # Add iOS platform
 npx cap add ios
-````
+```
 
 ## Build and handle web app content:
 
@@ -46,7 +67,6 @@ quasar dev -m capacitor -T ios
 #OR
 
 # to build and deploy:
-# Note: Will show errors and fail but continue to next steps...
 quasar build -m capacitor -T ios
 ```
 

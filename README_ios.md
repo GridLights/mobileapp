@@ -1,13 +1,12 @@
 ## Build for ios:
 
 ```bash
+# From project root...
 
-#from project root...
-
-# to run in dev with hot-reload:
+# To run in dev with hot-reload:
 quasar dev -m capacitor -T ios
 
-# to build and deploy:
+# To build and deploy:
 
 quasar build -m capacitor -T ios
 ```
