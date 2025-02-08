@@ -40,6 +40,12 @@ npx cap add ios
 cd ..
 
 # Build the app
+# to run in dev with hot-reload:
+quasar dev -m capacitor -T ios
+
+#OR
+
+# to build and deploy:
 # Note: Will show errors and fail but continue to next steps...
 quasar build -m capacitor -T ios
 ```
