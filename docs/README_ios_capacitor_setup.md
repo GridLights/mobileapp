@@ -61,24 +61,24 @@ quasar mode add capacitor
 # Nav to capacitor directory
 cd src-capacitor
 
-# Clean and reinstall dependencies
+# Install dependencies
 npm install @capacitor/ios@6.2
 npm install @capacitor/assets
 
-#verify all versions match
+#verify all versions match (except for assets)
 npm list @capacitor/core
 npm list @capacitor/ios
 npm list @capacitor/app
 npm list @capacitor/assets
 
-# Add iOS platform
+# Add iOS project
 npx cap add ios
 ```
 
 ## to generate app icon / assets
 
 ```bash
-copy ./resources to ./src-capacitor
+cp -r ../resources .
 npx @capacitor/assets generate
 ```
 
