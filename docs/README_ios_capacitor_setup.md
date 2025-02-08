@@ -36,10 +36,23 @@ quasar mode add capacitor
 ## Edit capacitor.config.json:
 
 ```bash
-#add the following to src-capacitor/capacitor.config.json:
-	,"ios": {
+#replace the following src-capacitor/capacitor.config.json:
+{
+  "appId": "com.gridlights.app",
+  "appName": "Gridlights",
+  "webDir": "www",
+  "ios": {
     "minVersion": "15.0"
+  },
+  "plugins": {
+    "@capacitor/assets": {
+      "ios": {
+        "iconBackground": "#ffffff",
+        "icon": "resources/ios/icon.png"
+      }
+    }
   }
+}
 ````
 
 ## Setup Capacitor dependencies:
@@ -49,9 +62,24 @@ quasar mode add capacitor
 cd src-capacitor
 
 # Clean and reinstall dependencies
-npm install @capacitor/core@5.5.0 @capacitor/ios@5.5.0
+npm install @capacitor/ios@6.2
+npm install @capacitor/assets
+
+#verify all versions match
+npm list @capacitor/core
+npm list @capacitor/ios
+npm list @capacitor/app
+npm list @capacitor/assets
+
 # Add iOS platform
 npx cap add ios
+```
+
+## to generate app icon / assets
+
+```bash
+copy ./resources to ./src-capacitor
+npx @capacitor/assets generate
 ```
 
 ## Build and handle web app content:

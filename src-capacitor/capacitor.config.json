@@ -1,8 +1,0 @@
-{
-  "appId": "com.gridlights.app",
-  "appName": "Gridlights",
-  "webDir": "www",
-  "ios": {
-    "minVersion": "15.0"
-  }
-}
