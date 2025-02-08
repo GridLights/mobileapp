@@ -1,0 +1,10 @@
+{
+  "appId": "com.gridlights.app",
+  "appName": "Gridlights",
+  "bundledWebRuntime": false,
+  "npmClient": "npm",
+  "webDir": "www",
+  "ios": {
+    "minVersion": "15.0"
+  }
+}
