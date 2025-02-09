@@ -23,4 +23,7 @@ export default defineComponent({
   user-select: none /* All modern browsers disable text select*/
   -webkit-user-select: none /* Safari */
   cursor: default
+  img
+    pointer-events: none
+    -webkit-touch-callout: none
 </style>

@@ -1,6 +1,6 @@
 <template>
   <q-page padding>
-    <div class="q-pa-md safe-header">
+    <div class="no-text-select q-pa-md safe-header">
       <h1 class="text-h4 q-mb-md">Journeys</h1>
 
       <q-list

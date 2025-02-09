@@ -1,10 +1,14 @@
 //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-// IndexPage.vue // // Home page with light controls // // Author: Tavis Hord -
-tavis@sideburn.com // Created 11/12/24
+// IndexPage.vue
+//
+// Home page with light controls
+//
+// Author: Tavis Hord - tavis@sideburn.com
+// Created 11/12/24
 //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 <template>
-  <q-page class="flex flex-col items-center">
+  <q-page class="no-text-select flex flex-col items-center">
     <div class="grid-container">
       <!-- row 1 -->
       <div

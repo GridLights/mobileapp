@@ -1,5 +1,5 @@
 <template>
-  <q-page class="flex flex-col items-center">
+  <q-page class="no-text-select flex flex-col items-center">
     <div class="grid-container">
       <!-- Input Field with Label -->
       <div class="grid-item col-span-3 input-container">

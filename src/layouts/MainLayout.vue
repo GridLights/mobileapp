@@ -1,6 +1,10 @@
 //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-// MainLayout.vue // // Main application layout with page container // //
-Author: Tavis Hord - tavis@sideburn.com // Created 11/12/24
+// MainLayout.vue
+//
+// Main application layout with page container
+//
+// Author: Tavis Hord - tavis@sideburn.com
+// Created 11/12/24
 //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 <template>
@@ -22,8 +26,8 @@ Author: Tavis Hord - tavis@sideburn.com // Created 11/12/24
         <!-- so far not helping.... -->
         <div class="logo-container no-text-select">
           <img :src="logoUrl" alt="Logo" class="logo-image" />
-          <q-tooltip anchor="top left" self="bottom middle" :offset="[50, -10]">
-            v1.0.7
+          <q-tooltip anchor="top left" self="bottom middle" :offset="[70, -40]">
+            v1.0.8
           </q-tooltip>
         </div>
       </q-toolbar>
