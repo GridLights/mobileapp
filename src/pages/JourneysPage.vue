@@ -290,8 +290,10 @@ export default {
 }
 
 .journey-list {
-  font-family: monospace;
-  white-space: pre;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
+  font-size: 14px;
+  white-space: pre-wrap;
+  -webkit-font-smoothing: antialiased;
 }
 
 .journey-line {
