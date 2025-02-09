@@ -36,7 +36,7 @@ quasar mode add capacitor
 ## Edit capacitor.config.json:
 
 ```bash
-#replace the following src-capacitor/capacitor.config.json:
+# Replace the following src-capacitor/capacitor.config.json:
 {
   "appId": "com.gridlights.app",
   "appName": "Gridlights",
@@ -61,11 +61,12 @@ quasar mode add capacitor
 # Nav to capacitor directory
 cd src-capacitor
 
-# Install dependencies
+# Install dependencies for ios
 npm install @capacitor/ios@6.2
 npm install @capacitor/assets
 
-#verify all versions match (except for assets)
+# Verify all versions match (except for assets)
+# You can skip this step.. here for debugging
 npm list @capacitor/core
 npm list @capacitor/ios
 npm list @capacitor/app
@@ -89,12 +90,12 @@ npx @capacitor/assets generate
 cd ..
 
 # Build the app
-# to run in dev with hot-reload:
+# To run in dev with hot-reload:
 quasar dev -m capacitor -T ios
 
 #OR
 
-# to build and deploy:
+# To build and deploy:
 quasar build -m capacitor -T ios
 ```
 
