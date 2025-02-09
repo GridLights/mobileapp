@@ -2,8 +2,11 @@
 .thumbs.db
 node_modules
 
-# ios
+# ios & android
 src-capacitor/
+
+# android code signing keys
+android-keys/gridlights.keystore
 
 # Quasar core related directories
 .quasar
