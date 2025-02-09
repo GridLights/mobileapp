@@ -86,13 +86,10 @@ quasar build -m capacitor -T android
     :: scroll down to "Signing Config" and select $signingConfigs.gridlights_release
     :: click apply and ok
 
-• Configure permissions in AndroidManifest.xml:
+• Configure permissions in AndroidManifest.xml (can skip this step, reserved for future reference):
 
     :: in Android Studio, open app->manifests->AndroidManifest.xml
-
-• In Android Studio, open app->manifests->AndroidManifest.xml
-
-    :: verify we have <uses-permission android:name="android.permission.INTERNET" />
+    :: Add any permissions we need, auto added-> <uses-permission android:name="android.permission.INTERNET" />
 ```
 
 ## Test App
@@ -100,7 +97,7 @@ quasar build -m capacitor -T android
 ```bash
 • Connect Android device via USB with USB debugging enabled
 
-    :: Settings->About Phone->tap Build Number 7 times
+    :: Settings->About Phone - tap Build Number 7 times
     :: go back to Settings->Developer Options->Enable USB debugging
 
 • Or use an emulator:
