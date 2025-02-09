@@ -21,6 +21,6 @@ export default defineComponent({
 <style lang="sass">
 .no-text-select
   user-select: none /* All modern browsers disable text select*/
-  -webkit-user-select: none /* Safari */ç
+  -webkit-user-select: none /* Safari */
   cursor: default
 </style>

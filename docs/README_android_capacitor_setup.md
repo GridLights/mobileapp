@@ -1,3 +1,5 @@
+## Relies on previous ios setup
+
 ## Install Android Studio and set environment vars:
 
 ````bash
