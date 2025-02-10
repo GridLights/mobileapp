@@ -99,8 +99,12 @@ quasar build -m capacitor -T android
 ```bash
 • Connect Android device via USB with USB debugging enabled
 
-    :: Settings->About Phone - tap Build Number 7 times
-    :: go back to Settings->Developer Options->Enable USB debugging
+    :: Settings->About Phone - tap Build Number 7 times (it should alert you saying you are now a developer)
+    :: go back to Settings->System->Developer Options->Enable USB debugging (device will show up in Android Studio)
+    :: Optional: Pair for wireless debuigging.
+        - in Settings->System->Developer Options->Allow Wireless Debugging
+        - now tap on "Wireless Debugging" and then tap "Pair device with QR code"
+        - In Android Studio select "Pair Device Using Wifi" from the device menu up top
 
 • Or use an emulator:
 
