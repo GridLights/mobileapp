@@ -49,6 +49,11 @@ quasar mode add capacitor
       "ios": {
         "iconBackground": "#ffffff",
         "icon": "resources/ios/icon.png"
+      },
+      "android": {
+        "iconBackground": "#ffffff",
+        "icon": "resources/ios/icon.png",
+        "iconForeground": "resources/ios/icon.png"
       }
     }
   }
