@@ -9,6 +9,8 @@
 <template>
   <q-item
     clickable
+    :active="isActive"
+    active-class="text-orange"
     :to="isInternalLink ? link : undefined"
     :href="!isInternalLink ? link : undefined"
     :target="!isInternalLink ? '_blank' : undefined"
@@ -26,6 +28,7 @@
 
 <script>
 import { defineComponent, computed } from "vue";
+import { useRoute } from "vue-router";
 
 export default defineComponent({
   name: "LeftSidebar",
@@ -52,12 +55,19 @@ export default defineComponent({
   },
 
   setup(props) {
+    const route = useRoute();
+
     const isInternalLink = computed(() => {
       return props.link && props.link.startsWith("/");
     });
 
+    const isActive = computed(() => {
+      return props.link === route.path;
+    });
+
     return {
       isInternalLink,
+      isActive,
     };
   },
 });

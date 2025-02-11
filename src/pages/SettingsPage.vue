@@ -21,7 +21,14 @@
       </div>
       <!-- Save Button -->
       <div class="grid-item col-span-3 button-container mt-4">
-        <q-btn label="Save" color="primary" @click="saveIpAddress" />
+        <q-btn
+          label="Save"
+          flat
+          dark
+          :ripple="false"
+          :style="{ backgroundColor: '#5e5e5e' }"
+          @click="saveIpAddress"
+        />
       </div>
     </div>
   </q-page>

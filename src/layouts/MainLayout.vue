@@ -8,7 +8,7 @@
 //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 <template>
-  <q-layout view="lHh Lpr lFf">
+  <q-layout view="lHh Lpr lff">
     <q-header class="bg-grey-8 safe-header">
       <q-toolbar class="q-py-sm">
         <q-btn
@@ -22,12 +22,10 @@
 
         <q-toolbar-title class="no-text-select"> Sol Spektrum </q-toolbar-title>
 
-        <!-- make the logo a background image to try to prevent ios from zooming it on a tap when getting version -->
-        <!-- so far not helping.... -->
         <div class="logo-container no-text-select">
           <img :src="logoUrl" alt="Logo" class="logo-image" />
           <q-tooltip anchor="top left" self="bottom middle" :offset="[70, -40]">
-            v1.0.8
+            v1.0.9
           </q-tooltip>
         </div>
       </q-toolbar>
@@ -45,16 +43,28 @@
       </q-list>
     </q-drawer>
 
-    <q-page-container>
-      <router-view />
+    <q-page-container class="q-pb-md">
+      <router-view v-slot="{ Component }">
+        <transition
+          :enter-active-class="transitionClasses.enter"
+          :leave-active-class="transitionClasses.leave"
+          :duration="300"
+        >
+          <component :is="Component" />
+        </transition>
+      </router-view>
     </q-page-container>
+
+    <BottomTabBar :items="LeftSidebars" />
   </q-layout>
 </template>
 
 <script>
-import { defineComponent, ref, onMounted } from "vue";
+import { defineComponent, ref, computed, watch, onMounted } from "vue";
 import { useQuasar } from "quasar";
+import { useRoute } from "vue-router";
 import LeftSidebar from "src/components/LeftSidebar.vue";
+import BottomTabBar from "components/BottomTabBar.vue";
 import logoUrl from "../assets/logo.png";
 
 const linksList = [
@@ -89,11 +99,49 @@ export default defineComponent({
 
   components: {
     LeftSidebar,
+    BottomTabBar,
   },
 
   setup() {
     const $q = useQuasar();
     const leftDrawerOpen = ref(false);
+    const route = useRoute();
+    const lastPath = ref(route.path);
+
+    //transition classes based on navigation direction
+    const transitionClasses = ref({
+      enter: "animated slideInRight",
+      leave: "animated slideOutLeft",
+    });
+
+    // watch route changes to control slide direction
+    watch(
+      () => route.path,
+      (newPath) => {
+        const currentIndex = linksList.findIndex(
+          (link) => link.link === newPath
+        );
+        const lastIndex = linksList.findIndex(
+          (link) => link.link === lastPath.value
+        );
+
+        if (currentIndex > lastIndex) {
+          // slide right
+          transitionClasses.value = {
+            enter: "animated slideInRight",
+            leave: "animated slideOutLeft",
+          };
+        } else {
+          // slide left
+          transitionClasses.value = {
+            enter: "animated slideInLeft",
+            leave: "animated slideOutRight",
+          };
+        }
+
+        lastPath.value = newPath;
+      }
+    );
 
     onMounted(() => {
       $q.dark.set(true);
@@ -103,6 +151,7 @@ export default defineComponent({
       LeftSidebars: linksList,
       leftDrawerOpen,
       logoUrl,
+      transitionClasses,
       toggleLeftDrawer() {
         leftDrawerOpen.value = !leftDrawerOpen.value;
       },
@@ -125,6 +174,71 @@ export default defineComponent({
 
 .q-toolbar__title {
   font-size: 18px;
+}
+
+.animated {
+  animation-duration: 300ms;
+  animation-fill-mode: both;
+  position: absolute;
+  width: 100%;
+  left: 0;
+  right: 0;
+}
+
+.slideInRight {
+  animation-name: slideInRight;
+  z-index: 1;
+}
+
+.slideOutLeft {
+  animation-name: slideOutLeft;
+  z-index: 0;
+}
+
+.slideInLeft {
+  animation-name: slideInLeft;
+  z-index: 1;
+}
+
+.slideOutRight {
+  animation-name: slideOutRight;
+  z-index: 0;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideOutLeft {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideOutRight {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(100%);
+  }
 }
 </style>
 
