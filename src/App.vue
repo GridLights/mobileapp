@@ -26,4 +26,19 @@ export default defineComponent({
   img
     pointer-events: none
     -webkit-touch-callout: none
+
+.custom-btn
+  transition: transform 0.1s ease
+
+.custom-btn:active
+  opacity: 0.5
+
+.safe-header
+  padding-top: env(safe-area-inset-top)
+
+.label-font
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace
+  font-size: 14px
+  white-space: pre-wrap
+  -webkit-font-smoothing: antialiased
 </style>

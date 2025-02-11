@@ -2,7 +2,7 @@
   <q-page padding>
     <div class="no-text-select q-pa-md safe-header">
       <h1 class="text-h4 q-mb-md">Journeys</h1>
-
+      <q-separator class="q-mb-lg"></q-separator>
       <q-list
         bordered
         class="rounded-borders q-mb-md"
@@ -42,12 +42,13 @@
       <!-- Save Button -->
       <div class="grid-item col-span-3 button-container mt-4">
         <q-btn
-          label="Start Journey"
-          @click="startJourney"
           flat
           dark
           :ripple="false"
+          class="custom-btn"
           :style="{ backgroundColor: '#5e5e5e' }"
+          label="Start Journey"
+          @click="startJourney"
         />
       </div>
     </div>
@@ -305,9 +306,5 @@ export default {
 
 .journey-line {
   margin-bottom: 0.5rem;
-}
-
-.safe-header {
-  padding-top: env(safe-area-inset-top);
 }
 </style>

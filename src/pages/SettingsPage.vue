@@ -1,35 +1,33 @@
 <template>
-  <q-page class="no-text-select flex flex-col items-center">
-    <div class="grid-container">
-      <!-- Input Field with Label -->
-      <div class="grid-item col-span-3 input-container">
-        <label for="ipAddress" class="block text-center mb-2"
-          >Enter IP Address</label
-        >
-        <q-input
-          id="ipAddress"
-          v-model="ipAddress"
-          type="text"
-          filled
-          style="width: 100%"
-          @update:model-value="validateIpAddress"
-        >
-          <template v-slot:prepend>
-            <span>http://</span>
-          </template>
-        </q-input>
-      </div>
-      <!-- Save Button -->
-      <div class="grid-item col-span-3 button-container mt-4">
-        <q-btn
-          label="Save"
-          flat
-          dark
-          :ripple="false"
-          :style="{ backgroundColor: '#5e5e5e' }"
-          @click="saveIpAddress"
-        />
-      </div>
+  <q-page padding>
+    <div class="no-text-select q-pa-md safe-header">
+      <h1 class="text-h4 q-mb-md">Settings</h1>
+      <q-separator class="q-mb-lg"></q-separator>
+      <p class="label-font">IP Address:</p>
+      <q-input
+        id="ipAddress"
+        v-model="ipAddress"
+        type="text"
+        filled
+        style="width: 100%"
+        @update:model-value="validateIpAddress"
+      >
+        <template v-slot:prepend>
+          <span>http://</span>
+        </template>
+      </q-input>
+    </div>
+    <!-- Save Button -->
+    <div class="q-pl-md mt-4">
+      <q-btn
+        flat
+        dark
+        :ripple="false"
+        class="custom-btn"
+        :style="{ backgroundColor: '#5e5e5e' }"
+        label="Save"
+        @click="saveIpAddress"
+      />
     </div>
   </q-page>
 </template>
