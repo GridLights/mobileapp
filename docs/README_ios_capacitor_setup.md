@@ -120,3 +120,14 @@ npx cap open ios
 • Under "General" tab, set Minimum Deployment to IOS 15
 • Click the Play button or press Cmd + R
 • The app should now show
+
+## Additional edits:
+
+```bash
+• to lock the app in portrait orientation
+  :: open src-capacitor/ios/App/App/Info.plist
+  :: remove all of the UIInterfaceOrientationLandscape strings
+  :: after making these changes:
+    cd src-capacitor
+    npx cap sync
+```

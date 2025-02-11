@@ -116,3 +116,14 @@ quasar build -m capacitor -T android
 
 • Click the green play button to the right of the device
 ```
+
+## Additional edits:
+
+```bash
+• to lock the app in portrait orientation
+  :: open src-capacitor/android/app/src/main/AndroidManifest.xml
+  :: find "activity" tag and add android:screenOrientation="portrait"
+  :: after making these changes:
+    cd src-capacitor
+    npx cap sync
+```
