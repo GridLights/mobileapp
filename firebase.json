@@ -1,0 +1,12 @@
+{
+  "hosting": {
+    "public": "dist/spa", // Make sure this points to the correct build folder
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "rewrites": [
+      {
+        "source": "/**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}
