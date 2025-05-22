@@ -1,10 +1,6 @@
 //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-// MainLayout.vue
-//
-// Main application layout with page container
-//
-// Author: Tavis Hord - tavis@sideburn.com
-// Created 11/12/24
+// MainLayout.vue // // Main application layout with page container // //
+Author: Tavis Hord - tavis@sideburn.com // Created 11/12/24
 //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 <template>

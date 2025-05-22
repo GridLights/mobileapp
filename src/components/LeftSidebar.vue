@@ -1,10 +1,6 @@
 //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-// LeftSidebar.vue
-//
-// Left slide in menu bar with nav buttons
-//
-// Author: Tavis Hord - tavis@sideburn.com
-// Created 11/12/24
+// LeftSidebar.vue // // Left slide in menu bar with nav buttons // // Author:
+Tavis Hord - tavis@sideburn.com // Created 11/12/24
 //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 <template>
   <q-item

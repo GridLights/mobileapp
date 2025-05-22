@@ -1,10 +1,6 @@
 //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-// ErrorNotFound.vue
-//
-// 404 Error page
-//
-// Author: Tavis Hord - tavis@sideburn.com
-// Created 11/12/24
+// ErrorNotFound.vue // // 404 Error page // // Author: Tavis Hord -
+tavis@sideburn.com // Created 11/12/24
 //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 <template>

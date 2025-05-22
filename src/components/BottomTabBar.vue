@@ -1,7 +1,5 @@
 //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-// BottomTabBar.vue
-//
-// Bottom navigation tab bar for mobile view
+// BottomTabBar.vue // // Bottom navigation tab bar for mobile view
 //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 <template>
   <q-footer class="bg-grey-8">
