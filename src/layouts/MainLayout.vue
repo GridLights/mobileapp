@@ -81,6 +81,12 @@ const linksList = [
     link: "/journeys",
   },
   {
+    title: "Randomizer",
+    caption: "Sliders and stuff",
+    icon: "rule",
+    link: "/randomizer",
+  },
+  {
     title: "Settings",
     caption: "Settings Menu",
     icon: "settings",

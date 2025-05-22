@@ -9,6 +9,10 @@ const routes = [
         component: () => import("src/pages/JourneysPage.vue"),
       },
       {
+        path: "/randomizer",
+        component: () => import("src/pages/RandomizerPage.vue"),
+      },
+      {
         path: "/settings",
         component: () => import("src/pages/SettingsPage.vue"),
       },
