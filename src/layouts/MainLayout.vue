@@ -9,7 +9,7 @@
 
 <template>
   <q-layout view="lHh Lpr lff">
-    <q-header class="bg-grey-8 safe-header">
+    <!-- <q-header class="bg-grey-8 safe-header">
       <q-toolbar class="q-py-sm">
         <q-btn
           flat
@@ -29,9 +29,9 @@
           </q-tooltip>
         </div>
       </q-toolbar>
-    </q-header>
+    </q-header> -->
 
-    <q-drawer v-model="leftDrawerOpen" bordered>
+    <!-- <q-drawer v-model="leftDrawerOpen" bordered>
       <q-list>
         <q-item-label header> Menu </q-item-label>
 
@@ -41,7 +41,7 @@
           v-bind="link"
         />
       </q-list>
-    </q-drawer>
+    </q-drawer> -->
 
     <q-page-container class="q-pb-md">
       <router-view v-slot="{ Component }">
@@ -65,13 +65,13 @@ import { useQuasar } from "quasar";
 import { useRoute } from "vue-router";
 import LeftSidebar from "src/components/LeftSidebar.vue";
 import BottomTabBar from "components/BottomTabBar.vue";
-import logoUrl from "../assets/logo.png";
+//import logoUrl from "../assets/logo.png";
 
 const linksList = [
   {
     title: "Home",
     caption: "Home Page",
-    icon: "home",
+    icon: `img:${require("../assets/logo.png")}`,
     link: "/",
   },
   {
@@ -156,7 +156,7 @@ export default defineComponent({
     return {
       LeftSidebars: linksList,
       leftDrawerOpen,
-      logoUrl,
+      //logoUrl,
       transitionClasses,
       toggleLeftDrawer() {
         leftDrawerOpen.value = !leftDrawerOpen.value;
