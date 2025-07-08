@@ -327,10 +327,10 @@ export default {
       // Base positioning (for row 0, column 0)
       dotRadius: 2,
       baseX: 118,
-      baseY: 72,
+      baseY: 71,
 
       // LED spacing
-      ledSpacing: 21,
+      ledSpacing: 20.6,
 
       // Row offsets from base position
       row0XOffset: 0,
@@ -339,11 +339,11 @@ export default {
       row1XOffset: -11,
       row1YOffset: 18,
 
-      row2XOffset: -22,
+      row2XOffset: -21,
       row2YOffset: 36,
 
-      row3XOffset: -33,
-      row3YOffset: 54,
+      row3XOffset: -30,
+      row3YOffset: 53,
 
       row4XOffset: -22,
       row4YOffset: 73,

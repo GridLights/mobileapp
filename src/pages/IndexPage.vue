@@ -41,20 +41,17 @@
             />
           </svg>
           <span class="control-label">FREQUENCY</span>
+          <span class="control-value">60Hz</span>
         </div>
         <div class="slider-container">
           <input
             type="range"
             v-model="freqValue"
             min="0"
-            max="50"
+            max="60"
             class="slider"
             @input="onFreqInput"
           />
-          <div class="slider-labels">
-            <span>0 Hz</span>
-            <span>60 Hz</span>
-          </div>
         </div>
       </div>
 
@@ -146,7 +143,7 @@ export default defineComponent({
       timerValue: 0,
       freqValue: 0,
       speedValue: 50,
-      selectedEffect: null,
+      selectedEffect: "",
       freqInterval: 10000, // 0 = 10s and 50 = 100ms
       ledRows: [
         ["#000000", "#000000", "#000000", "#000000"],
@@ -451,8 +448,8 @@ export default defineComponent({
 
     //frequency input field handler
     onFreqInput() {
-      if (this.freqValue > 50) {
-        this.freqValue = 50;
+      if (this.freqValue > 60) {
+        this.freqValue = 60;
       }
       if (this.freqValue < 0) {
         this.freqValue = 0;
@@ -612,7 +609,8 @@ export default defineComponent({
 .control-header {
   display: flex;
   align-items: center;
-  margin-bottom: 0px;
+  margin-bottom: 10px;
+  margin-top: 0px;
 }
 
 .control-header svg {
@@ -653,8 +651,8 @@ export default defineComponent({
 .slider::-webkit-slider-thumb {
   appearance: none;
   -webkit-appearance: none;
-  width: 10px;
-  height: 10px;
+  width: 20px;
+  height: 20px;
   background: #333;
   border-radius: 50%;
   cursor: pointer;
@@ -684,7 +682,7 @@ export default defineComponent({
 .effects-dropdown {
   width: 100%;
   margin-top: 10px;
-  padding: 8px 0px;
+  padding: 8px 12px;
   background-color: #fff;
   border: none;
   border-radius: 6px;
