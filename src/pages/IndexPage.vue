@@ -8,99 +8,8 @@
 //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 <template>
-  <q-page class="no-text-select flex flex-col items-center">
-    <div class="grid-container">
-      <!-- row 1 -->
-      <div
-        class="grid-item col-2 flex justify-center items-center button-container"
-      >
-        <q-btn
-          :ripple="false"
-          :icon="this.wledState.on ? 'lightbulb' : 'lightbulb_outline'"
-          :color="this.wledState.on ? 'orange' : 'grey'"
-          @click="toggleButton"
-          round
-        />
-      </div>
-
-      <div class="grid-item col-3">
-        <LedGrid :rows="ledRows" />
-      </div>
-
-      <div class="grid-item col-1 flex justify-center items-center">
-        <div class="slider-container">
-          <q-slider
-            v-model="sliderValue"
-            vertical
-            :min="0"
-            :max="255"
-            style="height: 170px"
-            :disable="!this.wledState.on"
-            @update:model-value="onSliderUpdate"
-          />
-        </div>
-      </div>
-
-      <!-- row 2 -->
-      <div class="grid-item col-span-3 input-container">
-        <div class="flex justify-between">
-          <q-input
-            class="q-mr-sm"
-            v-model="timerValue"
-            type="number"
-            min="0"
-            max="50"
-            filled
-            style="width: 171px"
-            @update:model-value="onTimerInput"
-          >
-            <template v-slot:prepend>
-              <q-icon name="timer" />
-            </template>
-          </q-input>
-
-          <q-input
-            v-model="freqValue"
-            type="number"
-            filled
-            min="0"
-            max="50"
-            style="width: 171px"
-            @update:model-value="onFreqInput"
-          >
-            <template v-slot:prepend>
-              <q-icon name="timeline" />
-            </template>
-          </q-input>
-        </div>
-      </div>
-
-      <div class="grid-item col-span-3 list-container">
-        <q-list
-          bordered
-          class="rounded-borders"
-          style="width: 100%; max-height: 200px; overflow-y: auto"
-        >
-          <q-item
-            v-for="(item, index) in itemList"
-            :key="index"
-            clickable
-            @click="
-              wledState.on
-                ? onListItemClick(item.id, item.effectName, item.effectId)
-                : null
-            "
-            :ripple="false"
-            :class="{
-              'selected-item': selectedItem === item.id,
-              'disabled-item': !wledState.on,
-            }"
-          >
-            <q-item-section>{{ item.label }}</q-item-section>
-          </q-item>
-        </q-list>
-      </div>
-    </div>
+  <q-page class="no-text-select flex flex-col items-center justify-center">
+    <LedGrid :rows="ledRows" />
   </q-page>
 </template>
 
@@ -126,21 +35,21 @@ export default defineComponent({
       freqValue: 0,
       freqInterval: 10000, // 0 = 10s and 50 = 100ms
       ledRows: [
-        ["#ff0000", "#00ff00", "#0000ff", "#ff00ff"],
-        ["#ff0000", "#00ff00", "#0000ff", "#ff00ff", "#fcfcfc"],
-        ["#ff0000", "#00ff00", "#0000ff", "#ff00ff", "#ff00ff", "#fcfcfc"],
+        ["#000000", "#000000", "#000000", "#000000"],
+        ["#000000", "#000000", "#000000", "#000000", "#000000"],
+        ["#000000", "#000000", "#000000", "#000000", "#000000", "#000000"],
         [
-          "#ff0000",
-          "#00ff00",
-          "#0000ff",
-          "#ff00ff",
-          "#fcfcfc",
-          "#ff0000",
-          "#ffccff",
+          "#000000",
+          "#000000",
+          "#000000",
+          "#000000",
+          "#000000",
+          "#000000",
+          "#000000",
         ],
-        ["#ff0000", "#00ff00", "#0000ff", "#ff00ff", "#ff00ff", "#fcfcfc"],
-        ["#ff0000", "#00ff00", "#0000ff", "#ff00ff", "#fcfcfc"],
-        ["#ff0000", "#00ff00", "#0000ff", "#ff00ff"],
+        ["#000000", "#000000", "#000000", "#000000", "#000000", "#000000"],
+        ["#000000", "#000000", "#000000", "#000000", "#000000"],
+        ["#000000", "#000000", "#000000", "#000000"],
       ], // need this initial shape definition
       selectedItem: null,
       itemList: [

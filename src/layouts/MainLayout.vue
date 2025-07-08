@@ -71,7 +71,7 @@ const linksList = [
   {
     title: "Home",
     caption: "Home Page",
-    icon: `img:${require("../assets/logo.png")}`,
+    icon: "home",
     link: "/",
   },
   {
