@@ -1,15 +1,127 @@
-//:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-// IndexPage.vue
-//
-// Home page with light controls
-//
-// Author: Tavis Hord - tavis@sideburn.com
-// Created 11/12/24
-//:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-
 <template>
   <q-page class="no-text-select flex flex-col items-center justify-center">
-    <LedGrid :rows="ledRows" />
+    <!-- Header Container -->
+    <div class="header-container">
+      <!-- Left Icon -->
+      <div class="header-icon left-icon">
+        <img src="../assets/star.svg" alt="Star" width="24" height="24" />
+      </div>
+
+      <!-- Center Text -->
+      <div class="header-title">EFFECTS</div>
+
+      <!-- Right Icon -->
+      <div class="header-icon right-icon">
+        <img src="../assets/gear.svg" alt="Settings" width="24" height="24" />
+      </div>
+    </div>
+
+    <!-- Test div instead of LED Grid -->
+    <div class="led-grid-bg">
+      <LedGrid :rows="ledRows" @power-changed="handlePowerChange" />
+    </div>
+
+    <!-- Controls Container -->
+    <div class="controls-container">
+      <!-- Frequency Slider -->
+      <div class="control-section">
+        <div class="control-header">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"
+              stroke="currentColor"
+              stroke-width="2"
+              fill="none"
+            />
+          </svg>
+          <span class="control-label">FREQUENCY</span>
+        </div>
+        <div class="slider-container">
+          <input
+            type="range"
+            v-model="freqValue"
+            min="0"
+            max="50"
+            class="slider"
+            @input="onFreqInput"
+          />
+          <div class="slider-labels">
+            <span>0 Hz</span>
+            <span>60 Hz</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Speed Slider -->
+      <div class="control-section">
+        <div class="control-header">
+          <span class="control-label">SPEED</span>
+          <span class="control-value">50%</span>
+        </div>
+        <div class="slider-container">
+          <input
+            type="range"
+            v-model="speedValue"
+            min="0"
+            max="100"
+            class="slider"
+          />
+        </div>
+      </div>
+
+      <!-- Effects Dropdown -->
+      <div class="control-section">
+        <div class="control-header">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <polygon
+              points="12,2 15.09,8.26 22,9 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9 8.91,8.26"
+              stroke="currentColor"
+              stroke-width="2"
+              fill="none"
+            />
+          </svg>
+          <span class="control-label">EFFECTS</span>
+        </div>
+        <div class="dropdown-container">
+          <select v-model="selectedEffect" class="effects-dropdown">
+            <option value="">Select Effect</option>
+            <option v-for="item in itemList" :key="item.id" :value="item">
+              {{ item.label }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Brightness Slider -->
+      <div class="control-section">
+        <div class="control-header">
+          <span class="control-label">BRIGHTNESS</span>
+          <span class="control-value">50%</span>
+        </div>
+        <div class="slider-container">
+          <input
+            type="range"
+            v-model="sliderValue"
+            min="0"
+            max="255"
+            class="slider"
+            @input="onSliderUpdate"
+          />
+        </div>
+      </div>
+    </div>
   </q-page>
 </template>
 
@@ -29,10 +141,12 @@ export default defineComponent({
 
   data() {
     return {
-      sliderValue: null,
+      sliderValue: 127,
       isOn: false,
       timerValue: 0,
       freqValue: 0,
+      speedValue: 50,
+      selectedEffect: null,
       freqInterval: 10000, // 0 = 10s and 50 = 100ms
       ledRows: [
         ["#000000", "#000000", "#000000", "#000000"],
@@ -130,6 +244,12 @@ export default defineComponent({
   },
 
   methods: {
+    // Handle power button toggle from LedGrid
+    handlePowerChange(newState) {
+      console.log("Power state changed:", newState);
+      this.toggleButton();
+    },
+
     updateLedRows(ledRows, colorList) {
       if (colorList.length < 38) {
         console.error("Color list must contain at least 38 colors.");
@@ -201,30 +321,6 @@ export default defineComponent({
         this.wledState = data.state;
         this.sliderValue = data.bri - 255;
       }
-      // if (data?.leds != undefined) {
-      //   console.log("live stream update");
-      //   // if from the live stream, only process every X ms
-      //   const processTime = 100;
-      //   if (now - this.lastProcessedTime >= processTime) {
-      //     this.lastProcessedTime = now;
-
-      //     // Map the /live data to the UI fixture
-      //     let newLedRows = this.updateLedRows(this.ledRows, data.info.leds);
-
-      //     if (!newLedRows.length) {
-      //       // strobing, do not update
-      //       return
-      //     }
-
-      //     // Ensure each color has a "#" prefix
-      //     newLedRows = newLedRows.map((row) => row.map((color) => `#${color}`));
-
-      //     if (this.areArraysEquivalent(newLedRows, this.ledRows) === false) {
-      //       // Update the ledRows value (used by the UI fixture)
-      //       this.ledRows = newLedRows;
-      //     }
-      //   }
-      // }
     },
 
     // called when websocket receives an inbound message
@@ -290,31 +386,6 @@ export default defineComponent({
           },
         ],
       };
-
-      // const data1 = {
-      //   // tt: 0,
-      //   on: true,
-      //   // seg: [
-      //   //   {
-      //   //     fx: 1,
-      //   //     sx: 255,
-      //   //     // // tt: 0,
-      //   //     // ix: 255,
-      //   //     // pal: 0,
-      //   //   },
-      //   // ],
-      // };
-
-      // for (let i = 0; i < 5000; i++) {
-      //   const num1 = i % 2;
-      //   const dataToSend = num1 === 0 ? data : data1;
-
-      //   // Send the command and schedule the next one
-      //   webservices.sendCommandToWebSocket(dataToSend);
-      //   setTimeout(() => {
-      //     // Do nothing, just a delay
-      //   }, 500); // Adjust the delay time (in milliseconds) as needed
-      // }
       webservices.sendCommandToWebSocket(data);
     },
 
@@ -362,24 +433,6 @@ export default defineComponent({
       } else if (effectName == "allWhite") {
         this.setColor([255, 255, 255]);
       }
-      // if (["ben", "diamondSpin"].includes(effectName)) {
-      //   this.setCustomEffect(effectName);
-      // } else if (effectName === "colorWaves") {
-      //   this.setEffect(189);
-      // } else if (effectName === "allWhite") {
-      //   this.setColor([255, 255, 255]);
-      // } else if (effectName === "pauseEffect") {
-      //   console.log("interval cleared");
-      // } else if (effectName === "strobe") {
-      //   this.setStrobe();
-      // }
-
-      // if (itemNumber === 6) {
-      //   this.diamondSpin();
-      // }
-
-      // <button @click="setLedRange(1, 10, [0, 255, 0])">Set LED Range</button>
-      // <button @click="repeatProgressiveTrail(5, 125, 8)">Start Trail Effect</button>
 
       // set the selected item for highlighting
       this.selectedItem = itemNumber;
@@ -499,52 +552,157 @@ export default defineComponent({
       const data = { seg: { ix: scaledFreqValue } };
       webservices.sendCommandToWebSocket(data);
     },
-
-    // restartCustomEffectWithNewInterval() {
-    //   if (this.currentCustomEffect) {
-    //     // Cancel current interval, restart with new frequency value
-    //     if (this.intervalId !== null) {
-    //       clearInterval(this.intervalId);
-    //     }
-    //     this.setCustomEffect(this.currentCustomEffect);
-    //   }
-    // },
-
-    // setCustomEffect(effectName) {
-    //   console.log(effectName);
-
-    //   // Define frames for the animation
-    //   let frames;
-    //   if (effectName === "ben") {
-    //     frames = ben.frames;
-    //   } else if (effectName === "diamondSpin") {
-    //     frames = diamondSpin.frames;
-    //   }
-
-    //   console.log(frames);
-
-    //   if (frames) {
-    //     this.currentCustomEffect = effectName;
-
-    //     // Initialize the current frame
-    //     let currentFrame = 0;
-    //     // Set an interval to cycle through the frames
-    //     this.intervalId = setInterval(() => {
-    //       // Send the current frame to the WLED WebSocket
-    //       webservices.sendCommandToWebSocket({ seg: frames[currentFrame].seg });
-    //       console.log("Frame sent:", frames[currentFrame].seg);
-    //       // console.log("filled", this.fillGaps(frames[currentFrame].seg));
-    //       // Switch to the next frame
-    //       currentFrame = (currentFrame + 1) % frames.length;
-    //       // currentFrame = 1;
-    //     }, this.freqInterval); // Update every X second
-    //   }
-    // },
   },
 });
 </script>
 
 <style scoped>
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 300px;
+  padding: 0px 00px;
+  margin-top: 55px;
+  margin-bottom: 0px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+}
+
+.header-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  color: #666;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.header-icon:hover {
+  color: #333;
+}
+
+.header-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  letter-spacing: 1px;
+}
+
+.controls-container {
+  width: 300px;
+  margin-top: 0px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.control-section {
+  background-color: #e5e5e5;
+  border-radius: 8px;
+  padding: 12px 16px;
+}
+
+.control-section:last-child {
+  margin-bottom: 5px;
+}
+
+.control-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0px;
+}
+
+.control-header svg {
+  margin-right: 8px;
+  color: #666;
+  flex-shrink: 0;
+}
+
+.control-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  letter-spacing: 0.5px;
+  flex-grow: 1;
+}
+
+.control-value {
+  font-size: 14px;
+  font-weight: 500;
+  color: #666;
+  margin-left: auto;
+}
+
+.slider-container {
+  position: relative;
+}
+
+.slider {
+  width: 100%;
+  height: 4px;
+  background: #ccc;
+  border-radius: 2px;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.slider::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 10px;
+  height: 10px;
+  background: #333;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+  width: 10px;
+  height: 10px;
+  background: #333;
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+}
+
+.slider-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+  font-size: 12px;
+  color: #666;
+}
+
+.dropdown-container {
+  position: relative;
+}
+
+.effects-dropdown {
+  width: 100%;
+  margin-top: 10px;
+  padding: 8px 0px;
+  background-color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #333;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 12px center;
+  background-repeat: no-repeat;
+  background-size: 16px;
+}
+
+.effects-dropdown:focus {
+  outline: none;
+}
+
 .grid-container {
   display: grid;
   grid-template-columns: 3fr 1fr 2fr;
@@ -561,16 +719,12 @@ export default defineComponent({
   align-items: center;
 }
 
-.col-span-3 {
-  grid-column: span 3;
-}
-
 .slider-container {
-  border: 1px solid #888;
+  border: 0px solid #888;
   border-radius: 4px;
-  padding-left: 15px;
-  padding-right: 15px;
-  padding-top: 15px;
+  padding-left: 0px;
+  padding-right: 0px;
+  padding-top: 0px;
   padding-bottom: 15px;
   display: flex;
   justify-content: center;
@@ -579,7 +733,7 @@ export default defineComponent({
 .button-container {
   border: 1px solid #888;
   border-radius: 4px;
-  padding: 10px;
+  padding: 5px;
 }
 
 .input-container {
@@ -599,5 +753,12 @@ export default defineComponent({
 /* hilighted selected item */
 .selected-item {
   background-color: #555; /* bg color for highlighted item */
+}
+
+.led-grid-bg {
+  background-color: #e5e5e5; /* bg color for highlighted item */
+  border-radius: 4px;
+  margin-top: 0px;
+  margin-bottom: 0px;
 }
 </style>

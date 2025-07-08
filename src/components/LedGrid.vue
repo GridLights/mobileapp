@@ -10,10 +10,18 @@
 <template>
   <div class="svg-container">
     <!-- Background image -->
-    <img class="groupIcon" alt="" src="../assets/LedGridBG.svg" />
+    <img class="groupIcon" alt="" src="../assets/LedGridBGNoButt2.svg" />
+
+    <!-- PowerButton positioned over the background -->
+    <PowerButton
+      v-model="powerState"
+      class="power-button-overlay"
+      :size="32"
+      @toggle="handlePowerToggle"
+    />
 
     <!-- LEDs overlay -->
-    <svg class="led-overlay" width="300" height="300">
+    <svg class="led-overlay" width="300" height="250">
       <!-- Manual LED positioning with dynamic colors -->
 
       <!-- Row 1 (top) - 4 LEDs -->
@@ -293,7 +301,12 @@
 </template>
 
 <script>
+import PowerButton from "src/components/PowerButton.vue";
+
 export default {
+  components: {
+    PowerButton,
+  },
   props: {
     rows: {
       type: Array,
@@ -310,56 +323,45 @@ export default {
   },
   data() {
     return {
+      powerState: false,
       // Base positioning (for row 0, column 0)
-      dotRadius: 3,
-      baseX: 116,
-      baseY: 92,
+      dotRadius: 2,
+      baseX: 118,
+      baseY: 72,
 
       // LED spacing
-      ledSpacing: 22,
+      ledSpacing: 21,
 
       // Row offsets from base position
       row0XOffset: 0,
       row0YOffset: 0,
 
       row1XOffset: -11,
-      row1YOffset: 20,
+      row1YOffset: 18,
 
       row2XOffset: -22,
-      row2YOffset: 39,
+      row2YOffset: 36,
 
       row3XOffset: -33,
-      row3YOffset: 58,
+      row3YOffset: 54,
 
       row4XOffset: -22,
-      row4YOffset: 77,
+      row4YOffset: 73,
 
       row5XOffset: -11,
-      row5YOffset: 97,
+      row5YOffset: 90,
 
       row6XOffset: 0,
-      row6YOffset: 117,
+      row6YOffset: 108,
     };
   },
   methods: {
-    //get positioning points for bg polygon based on led grid
-    // getHexagonPoints() {
-    //   const points = [];
-    //   const centerX = 100;
-    //   const centerY = 100;
-    //   const radius =
-    //     Math.max(
-    //       (this.rows.length * this.spacing) / 2,
-    //       (this.rows[0].length * this.spacing) / 2
-    //     ) + 15; // + 15 margin...
-    //   for (let i = 0; i < 6; i++) {
-    //     const angle = (Math.PI / 3) * i;
-    //     const x = centerX + radius * Math.cos(angle);
-    //     const y = centerY + radius * Math.sin(angle);
-    //     points.push(`${x},${y}`);
-    //   }
-    //   return points.join(" ");
-    // },
+    handlePowerToggle(newState) {
+      console.log("Power button toggled:", newState);
+      //  power toggle logic here
+      //  emit an event to parent component
+      this.$emit("power-changed", newState);
+    },
   },
 };
 </script>
@@ -367,13 +369,9 @@ export default {
 <style scoped>
 .svg-container {
   position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border: 0px solid #888;
-  border-radius: 4px;
+  margin: 0px;
   width: 300px;
-  height: 300px;
+  height: 250px;
 }
 
 .groupIcon {
@@ -384,6 +382,13 @@ export default {
   height: 100%;
   object-fit: contain;
   z-index: 1;
+}
+
+.power-button-overlay {
+  position: absolute;
+  top: 23px;
+  right: 23px;
+  z-index: 3;
 }
 
 .led-overlay {
