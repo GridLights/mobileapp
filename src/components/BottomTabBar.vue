@@ -4,12 +4,12 @@
 // Bottom navigation tab bar for mobile view
 //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 <template>
-  <q-footer class="bg-grey-8">
+  <q-footer class="bg-grey-5">
     <q-tabs
       modelValue="tab"
-      class="text-white"
-      active-color="amber-6"
-      indicator-color="amber-"
+      class="text-black"
+      active-color="white"
+      indicator-color="black"
       align="justify"
       narrow-indicator
     >

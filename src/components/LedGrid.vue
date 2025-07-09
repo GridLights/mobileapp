@@ -343,9 +343,9 @@ export default {
       row2YOffset: 36,
 
       row3XOffset: -30,
-      row3YOffset: 53,
+      row3YOffset: 54,
 
-      row4XOffset: -22,
+      row4XOffset: -21,
       row4YOffset: 73,
 
       row5XOffset: -11,
