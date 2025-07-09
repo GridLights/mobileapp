@@ -609,7 +609,7 @@ export default defineComponent({
 .control-header {
   display: flex;
   align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: 5px;
   margin-top: 0px;
 }
 
@@ -682,7 +682,7 @@ export default defineComponent({
 .effects-dropdown {
   width: 100%;
   margin-top: 10px;
-  padding: 8px 12px;
+  padding: 5px 12px;
   background-color: #fff;
   border: none;
   border-radius: 6px;
@@ -705,7 +705,7 @@ export default defineComponent({
   display: grid;
   grid-template-columns: 3fr 1fr 2fr;
   grid-template-rows: auto auto;
-  gap: 10px;
+  gap: 5px;
   width: 100%;
   max-width: 350px;
   margin: 0 auto;
@@ -723,7 +723,7 @@ export default defineComponent({
   padding-left: 0px;
   padding-right: 0px;
   padding-top: 10px;
-  padding-bottom: 15px;
+  padding-bottom: 5px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -731,7 +731,7 @@ export default defineComponent({
 .button-container {
   border: 1px solid #888;
   border-radius: 4px;
-  padding: 5px;
+  padding: 0px;
 }
 
 .input-container {
