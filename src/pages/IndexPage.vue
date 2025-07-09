@@ -41,7 +41,7 @@
             />
           </svg>
           <span class="control-label">FREQUENCY</span>
-          <span class="control-value">60Hz</span>
+          <span class="control-value">{{ freqValue }}Hz</span>
         </div>
         <div class="slider-container">
           <input
@@ -59,7 +59,7 @@
       <div class="control-section">
         <div class="control-header">
           <span class="control-label">SPEED</span>
-          <span class="control-value">50%</span>
+          <span class="control-value">{{ speedValue }}%</span>
         </div>
         <div class="slider-container">
           <input
@@ -105,14 +105,14 @@
       <div class="control-section">
         <div class="control-header">
           <span class="control-label">BRIGHTNESS</span>
-          <span class="control-value">50%</span>
+          <span class="control-value">{{ sliderValue }}%</span>
         </div>
         <div class="slider-container">
           <input
             type="range"
             v-model="sliderValue"
             min="0"
-            max="255"
+            max="100"
             class="slider"
             @input="onSliderUpdate"
           />
@@ -138,10 +138,10 @@ export default defineComponent({
 
   data() {
     return {
-      sliderValue: 127,
+      sliderValue: 50,
       isOn: false,
       timerValue: 0,
-      freqValue: 0,
+      freqValue: 50,
       speedValue: 50,
       selectedEffect: "",
       freqInterval: 10000, // 0 = 10s and 50 = 100ms
@@ -212,7 +212,7 @@ export default defineComponent({
     // }
 
     // Store somewhere?
-    this.freqValue = 0;
+    //this.freqValue = 0;
 
     // Initialize WebSocket when the component is mounted
     //const wsUrl = "ws://192.168.84.43:80/ws"; // TODO: set this in the UI?
@@ -473,7 +473,7 @@ export default defineComponent({
     // Calculate ms value based on freqValue
     calculateMs(freqValue) {
       const minFreq = 0; // Min frequency value
-      const maxFreq = 50; // Max frequency value
+      const maxFreq = 60; // Max frequency value
       const minMs = 10000; // Corresponding ms value for minFreq
       const maxMs = 100; // Corresponding ms value for maxFreq
 
@@ -545,7 +545,7 @@ export default defineComponent({
 
     setFrequency(frequencyVal) {
       // Map the selected frequency (0-50 Hz) to the 0-255 scale
-      const scaledFreqValue = Math.round((frequencyVal / 50) * 255);
+      const scaledFreqValue = Math.round((frequencyVal / 60) * 255);
       const data = { seg: { ix: scaledFreqValue } };
       webservices.sendCommandToWebSocket(data);
     },
@@ -722,7 +722,7 @@ export default defineComponent({
   border-radius: 4px;
   padding-left: 0px;
   padding-right: 0px;
-  padding-top: 0px;
+  padding-top: 10px;
   padding-bottom: 15px;
   display: flex;
   justify-content: center;
