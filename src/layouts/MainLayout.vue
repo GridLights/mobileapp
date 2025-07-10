@@ -77,21 +77,27 @@ const linksList = [
   {
     title: "Journeys",
     caption: "Select a Journey",
-    icon: "rule",
+    icon: "auto_awesome",
     link: "/journeys",
+  },
+  {
+    title: "Sequencer",
+    caption: "Sliders and stuff",
+    icon: "menu_open",
+    link: "/randomizer",
   },
   {
     title: "Randomizer",
     caption: "Sliders and stuff",
-    icon: "rule",
+    icon: "tune",
     link: "/randomizer",
   },
-  {
-    title: "Settings",
-    caption: "Settings Menu",
-    icon: "settings",
-    link: "/settings",
-  },
+  // {
+  //   title: "Settings",
+  //   caption: "Settings Menu",
+  //   icon: "settings",
+  //   link: "/settings",
+  // },
   {
     title: "Gridlights",
     caption: "Powered by Gridlights",

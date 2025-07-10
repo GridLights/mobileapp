@@ -1,11 +1,9 @@
 // app global css in SCSS form
 body {
-  //background-color: #424242; // This is a dark gray color
   background-color: #eee;
 }
 
 .q-page {
-  background-color: #424242;
   background-color: #eee;
 }
 .header-container {
@@ -48,4 +46,7 @@ body {
   margin-bottom: 10px; /* Space for bottom nav bar - adjust as needed */
   height: calc(100vh - 112px); /* Full height minus header and nav bar */
   overflow-y: auto;
+}
+.q-layout {
+  background-color: #f5f5f5; /* bg color behind pages when swiping */
 }
