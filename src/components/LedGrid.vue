@@ -12,8 +12,8 @@
     <!-- Background image -->
     <img class="groupIcon" alt="" src="../assets/LedGridBGNoButt.svg" />
 
-    <!-- PowerButton positioned over the background -->
-    <PowerButton
+    <!-- PowerSwitch positioned over the background -->
+    <PowerSwitch
       v-model="powerState"
       class="power-button-overlay"
       :size="32"
@@ -301,11 +301,11 @@
 </template>
 
 <script>
-import PowerButton from "src/components/PowerButton.vue";
+import PowerSwitch from "./PowerSwitch.vue";
 
 export default {
   components: {
-    PowerButton,
+    PowerSwitch,
   },
   props: {
     rows: {
@@ -387,7 +387,7 @@ export default {
 .power-button-overlay {
   position: absolute;
   top: 23px;
-  right: 23px;
+  right: 10px;
   z-index: 3;
 }
 

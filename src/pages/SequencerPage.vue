@@ -8,7 +8,7 @@
       </div> -->
 
       <!-- Center Text -->
-      <div class="header-title">RANDOMIZER</div>
+      <div class="header-title">SEQUENCER</div>
 
       <!-- Right Icon -->
       <!-- <div class="header-icon right-icon">

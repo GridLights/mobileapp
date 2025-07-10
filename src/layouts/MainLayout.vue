@@ -9,40 +9,6 @@
 
 <template>
   <q-layout view="lHh Lpr lff">
-    <!-- <q-header class="bg-grey-8 safe-header">
-      <q-toolbar class="q-py-sm">
-        <q-btn
-          flat
-          dense
-          round
-          icon="menu"
-          aria-label="Menu"
-          @click="toggleLeftDrawer"
-        />
-
-        <q-toolbar-title class="no-text-select"> Sol Spektrum </q-toolbar-title>
-
-        <div class="logo-container no-text-select">
-          <img :src="logoUrl" alt="Logo" class="logo-image" />
-          <q-tooltip anchor="top left" self="bottom middle" :offset="[70, -40]">
-            v1.0.9
-          </q-tooltip>
-        </div>
-      </q-toolbar>
-    </q-header> -->
-
-    <!-- <q-drawer v-model="leftDrawerOpen" bordered>
-      <q-list>
-        <q-item-label header> Menu </q-item-label>
-
-        <LeftSidebar
-          v-for="link in LeftSidebars"
-          :key="link.title"
-          v-bind="link"
-        />
-      </q-list>
-    </q-drawer> -->
-
     <q-page-container class="q-pb-md">
       <router-view v-slot="{ Component }">
         <transition
@@ -63,7 +29,6 @@
 import { defineComponent, ref, computed, watch, onMounted } from "vue";
 import { useQuasar } from "quasar";
 import { useRoute } from "vue-router";
-import LeftSidebar from "src/components/LeftSidebar.vue";
 import BottomTabBar from "components/BottomTabBar.vue";
 //import logoUrl from "../assets/logo.png";
 
@@ -82,9 +47,9 @@ const linksList = [
   },
   {
     title: "Sequencer",
-    caption: "Sliders and stuff",
+    caption: "Sequencer",
     icon: "menu_open",
-    link: "/randomizer",
+    link: "/sequencer",
   },
   {
     title: "Randomizer",
@@ -110,7 +75,6 @@ export default defineComponent({
   name: "MainLayout",
 
   components: {
-    LeftSidebar,
     BottomTabBar,
   },
 

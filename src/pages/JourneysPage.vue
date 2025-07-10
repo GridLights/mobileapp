@@ -127,6 +127,33 @@
           @journey-start="handleJourneyStart"
         />
       </div>
+      <div class="content-padding">
+        <SolExpansionItem
+          title="Activate"
+          icon="bolt"
+          :journey-active="false"
+          caption="Energize your space with dynamic high-energy pattern designed to boost focus and motivation."
+          description="Energize your space with dynamic high-energy pattern designed to boost focus and motivation."
+          :journey-items="[
+            {
+              name: 'Activate 1',
+              duration: '1m',
+              description: 'test 1 warm-up with soft breathing lights',
+            },
+            {
+              name: 'Activate 2',
+              duration: '2m',
+              description: 'Test 2 energy with dynamic patterns',
+            },
+            {
+              name: 'Activate 3',
+              duration: '3m',
+              description: 'Test 3 immersion in cosmic light displays',
+            },
+          ]"
+          @journey-start="handleJourneyStart"
+        />
+      </div>
     </div>
   </q-page>
 </template>
