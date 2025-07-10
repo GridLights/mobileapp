@@ -377,7 +377,6 @@ export default {
 /* Remove expansion-related styles since we're not using expansion items */
 
 /* Remove the conflicting transition override */
-:deep(.q-expansion-item__container) {
-  /* Let Quasar handle its own transitions */
-}
+/* :deep(.q-expansion-item__container) {
+} */
 </style>

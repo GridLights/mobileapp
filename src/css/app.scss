@@ -1,4 +1,15 @@
 // app global css in SCSS form
+:root {
+  --controls-bg-color: #e5e5e5;
+  --controls-icon-color: #555;
+  --controls-label-color: #333;
+  --controls-slider-bar--color: #ccc;
+  --controls-slider-thumb--color: #333;
+  --controls-dropdown-menu--color: #fff;
+  --header-text-color: #555;
+  --controls-button--color: #000;
+}
+
 body {
   background-color: #eee;
 }
@@ -6,6 +17,7 @@ body {
 .q-page {
   background-color: #eee;
 }
+
 .header-container {
   position: fixed;
   top: 55px; /* Account for phone status bar */

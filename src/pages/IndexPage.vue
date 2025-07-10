@@ -592,7 +592,7 @@ export default defineComponent({
 }
 
 .control-section {
-  background-color: #e5e5e5;
+  background-color: var(--controls-bg-color);
   border-radius: 8px;
   padding: 12px 16px;
 }
@@ -610,14 +610,14 @@ export default defineComponent({
 
 .control-header svg {
   margin-right: 8px;
-  color: #666;
+  color: var(--controls-icon-color);
   flex-shrink: 0;
 }
 
 .control-label {
   font-size: 14px;
   font-weight: 600;
-  color: #333;
+  color: var(--controls-label-color);
   letter-spacing: 0.5px;
   flex-grow: 1;
 }
@@ -625,13 +625,12 @@ export default defineComponent({
 .control-value {
   font-size: 14px;
   font-weight: 500;
-  color: #666;
+  color: var(--controls-label-color);
   margin-left: auto;
 }
 
 .slider-container {
   position: relative;
-  border: 0px solid #888;
   border-radius: 4px;
   padding-left: 0px;
   padding-right: 0px;
@@ -645,7 +644,8 @@ export default defineComponent({
 .slider {
   width: 100%;
   height: 4px;
-  background: #ccc;
+  background: var(--controls-slider-bar--color);
+
   border-radius: 2px;
   outline: none;
   appearance: none;
@@ -657,7 +657,8 @@ export default defineComponent({
   -webkit-appearance: none;
   width: 20px;
   height: 20px;
-  background: #333;
+  background: var(--controls-slider-thumb--color);
+
   border-radius: 50%;
   cursor: pointer;
 }
@@ -665,7 +666,7 @@ export default defineComponent({
 .slider::-moz-range-thumb {
   width: 10px;
   height: 10px;
-  background: #333;
+  background: var(--controls-slider-thumb--color);
   border-radius: 50%;
   cursor: pointer;
   border: none;
@@ -679,7 +680,8 @@ export default defineComponent({
   width: 100%;
   margin-top: 10px;
   padding: 5px 12px;
-  background-color: #fff;
+  background-color: var(--controls-dropdown-menu--color);
+
   border: none;
   border-radius: 6px;
   font-size: 14px;
