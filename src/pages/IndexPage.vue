@@ -1,6 +1,6 @@
 <template>
-  <q-page class="no-text-select flex flex-col items-center justify-center">
-    <!-- Header Container -->
+  <q-page class="no-text-select">
+    <!-- Fixed Header Container -->
     <div class="header-container">
       <!-- Left Icon -->
       <div class="header-icon left-icon">
@@ -16,106 +16,111 @@
       </div>
     </div>
 
-    <!-- Test div instead of LED Grid -->
-    <div class="led-grid-bg">
-      <LedGrid :rows="ledRows" @power-changed="handlePowerChange" />
-    </div>
+    <!-- Scrollable Content Area -->
+    <div class="content-area">
+      <div class="content-padding">
+        <!-- LED Grid -->
+        <div class="led-grid-bg">
+          <LedGrid :rows="ledRows" @power-changed="handlePowerChange" />
+        </div>
 
-    <!-- Controls Container -->
-    <div class="controls-container">
-      <!-- Frequency Slider -->
-      <div class="control-section">
-        <div class="control-header">
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"
-              stroke="currentColor"
-              stroke-width="2"
-              fill="none"
-            />
-          </svg>
-          <span class="control-label">FREQUENCY</span>
-          <span class="control-value">{{ freqValue }}Hz</span>
-        </div>
-        <div class="slider-container">
-          <input
-            type="range"
-            v-model="freqValue"
-            min="0"
-            max="60"
-            class="slider"
-            @input="onFreqInput"
-          />
-        </div>
-      </div>
+        <!-- Controls Container -->
+        <div class="controls-container">
+          <!-- Frequency Slider -->
+          <div class="control-section">
+            <div class="control-header">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  fill="none"
+                />
+              </svg>
+              <span class="control-label">FREQUENCY</span>
+              <span class="control-value">{{ freqValue }}Hz</span>
+            </div>
+            <div class="slider-container">
+              <input
+                type="range"
+                v-model="freqValue"
+                min="0"
+                max="60"
+                class="slider"
+                @input="onFreqInput"
+              />
+            </div>
+          </div>
 
-      <!-- Speed Slider -->
-      <div class="control-section">
-        <div class="control-header">
-          <span class="control-label">SPEED</span>
-          <span class="control-value">{{ speedValue }}%</span>
-        </div>
-        <div class="slider-container">
-          <input
-            type="range"
-            v-model="speedValue"
-            min="0"
-            max="100"
-            class="slider"
-          />
-        </div>
-      </div>
+          <!-- Speed Slider -->
+          <div class="control-section">
+            <div class="control-header">
+              <span class="control-label">SPEED</span>
+              <span class="control-value">{{ speedValue }}%</span>
+            </div>
+            <div class="slider-container">
+              <input
+                type="range"
+                v-model="speedValue"
+                min="0"
+                max="100"
+                class="slider"
+              />
+            </div>
+          </div>
 
-      <!-- Effects Dropdown -->
-      <div class="control-section">
-        <div class="control-header">
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <polygon
-              points="12,2 15.09,8.26 22,9 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9 8.91,8.26"
-              stroke="currentColor"
-              stroke-width="2"
-              fill="none"
-            />
-          </svg>
-          <span class="control-label">EFFECTS</span>
-        </div>
-        <div class="dropdown-container">
-          <select v-model="selectedEffect" class="effects-dropdown">
-            <option value="">Select Effect</option>
-            <option v-for="item in itemList" :key="item.id" :value="item">
-              {{ item.label }}
-            </option>
-          </select>
-        </div>
-      </div>
+          <!-- Effects Dropdown -->
+          <div class="control-section">
+            <div class="control-header">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <polygon
+                  points="12,2 15.09,8.26 22,9 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9 8.91,8.26"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  fill="none"
+                />
+              </svg>
+              <span class="control-label">EFFECTS</span>
+            </div>
+            <div class="dropdown-container">
+              <select v-model="selectedEffect" class="effects-dropdown">
+                <option value="">Select Effect</option>
+                <option v-for="item in itemList" :key="item.id" :value="item">
+                  {{ item.label }}
+                </option>
+              </select>
+            </div>
+          </div>
 
-      <!-- Brightness Slider -->
-      <div class="control-section">
-        <div class="control-header">
-          <span class="control-label">BRIGHTNESS</span>
-          <span class="control-value">{{ sliderValue }}%</span>
-        </div>
-        <div class="slider-container">
-          <input
-            type="range"
-            v-model="sliderValue"
-            min="0"
-            max="100"
-            class="slider"
-            @input="onSliderUpdate"
-          />
+          <!-- Brightness Slider -->
+          <div class="control-section">
+            <div class="control-header">
+              <span class="control-label">BRIGHTNESS</span>
+              <span class="control-value">{{ sliderValue }}%</span>
+            </div>
+            <div class="slider-container">
+              <input
+                type="range"
+                v-model="sliderValue"
+                min="0"
+                max="100"
+                class="slider"
+                @input="onSliderUpdate"
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -554,43 +559,33 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.header-container {
+.q-page {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 300px;
-  padding: 0px 00px;
-  margin-top: 55px;
-  margin-bottom: 0px;
-  background-color: #f5f5f5;
-  border-radius: 8px;
+  flex-direction: column;
+  height: calc(100vh - 90px); /* Account for bottom nav */
+  overflow: hidden;
+  position: relative;
 }
 
-.header-icon {
+.content-padding {
+  padding: 0 20px 0px 20px;
   display: flex;
+  flex-direction: column;
   align-items: center;
+}
+
+.led-grid-bg {
+  display: flex;
+  width: 100%;
+  background-color: #e5e5e5;
+  border-radius: 4px;
   justify-content: center;
-  width: 40px;
-  height: 40px;
-  color: #666;
-  cursor: pointer;
-  transition: color 0.2s ease;
-}
-
-.header-icon:hover {
-  color: #333;
-}
-
-.header-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #333;
-  letter-spacing: 1px;
+  margin-top: 10px;
+  margin-bottom: 15px;
 }
 
 .controls-container {
-  width: 300px;
-  margin-top: 0px;
+  width: 100%;
   display: flex;
   flex-direction: column;
   gap: 15px;
@@ -636,6 +631,15 @@ export default defineComponent({
 
 .slider-container {
   position: relative;
+  border: 0px solid #888;
+  border-radius: 4px;
+  padding-left: 0px;
+  padding-right: 0px;
+  padding-top: 10px;
+  padding-bottom: 5px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .slider {
@@ -667,14 +671,6 @@ export default defineComponent({
   border: none;
 }
 
-.slider-labels {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 6px;
-  font-size: 12px;
-  color: #666;
-}
-
 .dropdown-container {
   position: relative;
 }
@@ -701,62 +697,14 @@ export default defineComponent({
   outline: none;
 }
 
-.grid-container {
-  display: grid;
-  grid-template-columns: 3fr 1fr 2fr;
-  grid-template-rows: auto auto;
-  gap: 5px;
-  width: 100%;
-  max-width: 350px;
-  margin: 0 auto;
-}
-
-.grid-item {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.slider-container {
-  border: 0px solid #888;
-  border-radius: 4px;
-  padding-left: 0px;
-  padding-right: 0px;
-  padding-top: 10px;
-  padding-bottom: 5px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-.button-container {
-  border: 1px solid #888;
-  border-radius: 4px;
-  padding: 0px;
-}
-
-.input-container {
-  width: 100%;
-}
-
-.list-container {
-  width: 100%;
-}
-
 /* disabled list items */
 .disabled-item {
-  opacity: 0.5; /* disabled */
-  pointer-events: none; /* prevent interaction */
+  opacity: 0.5;
+  pointer-events: none;
 }
 
-/* hilighted selected item */
+/* highlighted selected item */
 .selected-item {
-  background-color: #555; /* bg color for highlighted item */
-}
-
-.led-grid-bg {
-  background-color: #e5e5e5; /* bg color for highlighted item */
-  border-radius: 4px;
-  margin-top: 0px;
-  margin-bottom: 0px;
+  background-color: #555;
 }
 </style>

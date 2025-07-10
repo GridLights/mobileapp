@@ -8,3 +8,44 @@ body {
   background-color: #424242;
   background-color: #eee;
 }
+.header-container {
+  position: fixed;
+  top: 55px; /* Account for phone status bar */
+  left: 5%; /* Center with 90% width */
+  right: 5%;
+  z-index: 1000;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0px 20px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+}
+
+.header-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  color: #666;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.header-icon:hover {
+  color: #333;
+}
+
+.header-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  letter-spacing: 1px;
+}
+.content-area {
+  margin-top: 100px; /* Same as header height */
+  margin-bottom: 10px; /* Space for bottom nav bar - adjust as needed */
+  height: calc(100vh - 112px); /* Full height minus header and nav bar */
+  overflow-y: auto;
+}

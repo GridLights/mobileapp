@@ -10,7 +10,7 @@
 <template>
   <div class="svg-container">
     <!-- Background image -->
-    <img class="groupIcon" alt="" src="../assets/LedGridBGNoButt2.svg" />
+    <img class="groupIcon" alt="" src="../assets/LedGridBGNoButt.svg" />
 
     <!-- PowerButton positioned over the background -->
     <PowerButton
