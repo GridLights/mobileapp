@@ -47,12 +47,12 @@
               <span class="control-value">{{ freqValue }}Hz</span>
             </div>
             <div class="slider-container">
-              <input
-                type="range"
+              <q-slider
                 v-model="freqValue"
-                min="0"
-                max="60"
-                class="slider"
+                :min="0"
+                :max="60"
+                color="black"
+                track-color="grey-1"
                 @input="onFreqInput"
               />
             </div>
@@ -65,12 +65,12 @@
               <span class="control-value">{{ speedValue }}%</span>
             </div>
             <div class="slider-container">
-              <input
-                type="range"
+              <q-slider
                 v-model="speedValue"
-                min="0"
-                max="100"
-                class="slider"
+                :min="0"
+                :max="100"
+                color="black"
+                track-color="grey-1"
               />
             </div>
           </div>
@@ -111,12 +111,12 @@
               <span class="control-value">{{ sliderValue }}%</span>
             </div>
             <div class="slider-container">
-              <input
-                type="range"
+              <q-slider
                 v-model="sliderValue"
-                min="0"
-                max="100"
-                class="slider"
+                :min="0"
+                :max="100"
+                color="black"
+                track-color="grey-1"
                 @input="onSliderUpdate"
               />
             </div>
@@ -639,37 +639,6 @@ export default defineComponent({
   display: flex;
   justify-content: center;
   align-items: center;
-}
-
-.slider {
-  width: 100%;
-  height: 4px;
-  background: var(--controls-slider-bar--color);
-
-  border-radius: 2px;
-  outline: none;
-  appearance: none;
-  -webkit-appearance: none;
-}
-
-.slider::-webkit-slider-thumb {
-  appearance: none;
-  -webkit-appearance: none;
-  width: 20px;
-  height: 20px;
-  background: var(--controls-slider-thumb--color);
-
-  border-radius: 50%;
-  cursor: pointer;
-}
-
-.slider::-moz-range-thumb {
-  width: 10px;
-  height: 10px;
-  background: var(--controls-slider-thumb--color);
-  border-radius: 50%;
-  cursor: pointer;
-  border: none;
 }
 
 .dropdown-container {

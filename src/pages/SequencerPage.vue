@@ -18,7 +18,7 @@
 
     <!-- Fixed Description Bar -->
     <div class="description-bar">
-      Queue and sequence your lighting effects with custom parameters
+      Queue and sequence lighting effects with custom parameters
     </div>
 
     <!-- Scrollable Content Area -->
@@ -148,9 +148,9 @@
                     v-model="effect.brightness"
                     :min="0"
                     :max="100"
+                    color="black"
+                    track-color="grey-1"
                     class="brightness-slider"
-                    color="grey-8"
-                    track-color="grey-4"
                   />
                 </div>
               </div>
@@ -212,13 +212,13 @@ export default {
         brightness: 50,
       },
       {
-        name: "Effect name",
+        name: "Effect 2 name",
         hertz: 10,
         time: 5,
         brightness: 50,
       },
       {
-        name: "Effect name",
+        name: "Effect 3 name",
         hertz: 10,
         time: 5,
         brightness: 50,
@@ -259,7 +259,7 @@ export default {
 }
 
 .description-bar {
-  font-size: 10px;
+  font-size: 12px;
   color: var(--header-text-color);
 
   padding: 20px 20px;
@@ -480,5 +480,7 @@ export default {
 
 .brightness-slider {
   width: 100%;
+  --q-primary: var(--controls-slider-bar--color);
+  --q-track-color: var(--controls-slider-bar--color);
 }
 </style>
