@@ -103,7 +103,6 @@
                 <q-btn
                   icon="add"
                   label="Add To Queue"
-                  color="primary"
                   unelevated
                   size="sm"
                   class="add-to-queue-btn"
@@ -351,9 +350,10 @@ export default {
   justify-content: space-between;
   align-items: center;
   padding: 12px 16px;
-  background: #f9f9f9;
   border-radius: 6px;
   border: 1px solid #e0e0e0;
+  color: var(--controls-label-color);
+  background-color: var(--controls-bg-color);
 }
 
 .effect-info {
@@ -425,7 +425,7 @@ export default {
 }
 
 .add-to-queue-btn {
-  background: #000;
+  background-color: var(--controls-button--color);
   color: white;
   border-radius: 4px;
   padding: 6px 12px;
@@ -454,13 +454,22 @@ export default {
   align-items: center;
   gap: 4px;
   font-size: 14px;
-  color: #555;
+  color: var(--controls-label-color);
   font-weight: 500;
   min-width: 80px;
 }
 
 .parameter-input {
   width: 120px;
+}
+
+.parameter-input :deep(.q-field__control) {
+  background-color: var(--controls-input-field-bg-color) !important;
+  border-radius: 4px;
+}
+
+.parameter-input :deep(.q-field__native) {
+  color: var(--controls-label-color) !important;
 }
 
 .brightness-row {

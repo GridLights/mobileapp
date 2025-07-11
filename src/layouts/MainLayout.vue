@@ -20,8 +20,7 @@
         </transition>
       </router-view>
     </q-page-container>
-
-    <BottomTabBar :items="LeftSidebars" />
+    <BottomTabBar :items="NavLinks" />
   </q-layout>
 </template>
 
@@ -124,7 +123,7 @@ export default defineComponent({
     });
 
     return {
-      LeftSidebars: linksList,
+      NavLinks: linksList,
       leftDrawerOpen,
       //logoUrl,
       transitionClasses,
