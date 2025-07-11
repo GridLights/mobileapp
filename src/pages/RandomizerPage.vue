@@ -22,28 +22,30 @@
 
         <!-- Wave Type Sliders -->
         <div class="wave-sliders-section">
-          <div
-            class="wave-slider-container"
-            @touchmove.prevent
-            @touchstart.prevent
-          >
-            <div class="wave-slider" v-for="wave in waveTypes" :key="wave.id">
-              <div class="wave-slider-track">
-                <q-slider
-                  v-model="wave.value"
-                  vertical
-                  reverse
-                  :min="0"
-                  :max="100"
-                  color="black"
-                  track-color="grey-3"
-                  class="vertical-slider"
-                />
-              </div>
-              <div class="wave-label">
-                <div class="wave-symbol">{{ wave.symbol }}</div>
-                <div class="wave-name">{{ wave.name }}</div>
-                <div class="wave-freq">{{ wave.frequency }}</div>
+          <div class="wave-sliders-background">
+            <div
+              class="wave-slider-container"
+              @touchmove.prevent
+              @touchstart.prevent
+            >
+              <div class="wave-slider" v-for="wave in waveTypes" :key="wave.id">
+                <div class="wave-slider-track">
+                  <q-slider
+                    v-model="wave.value"
+                    vertical
+                    reverse
+                    :min="0"
+                    :max="100"
+                    color="black"
+                    track-color="grey-3"
+                    class="vertical-slider"
+                  />
+                </div>
+                <div class="wave-label">
+                  <div class="wave-symbol">{{ wave.symbol }}</div>
+                  <div class="wave-name">{{ wave.name }}</div>
+                  <div class="wave-freq">{{ wave.frequency }}</div>
+                </div>
               </div>
             </div>
           </div>
@@ -52,70 +54,76 @@
         <!-- Horizontal Sliders -->
         <div class="horizontal-sliders-section">
           <!-- Brightness Slider -->
-          <div class="slider-row">
-            <div class="slider-label">Brightness</div>
-            <div class="slider-value">{{ brightness }}</div>
-            <div class="slider-container">
-              <q-slider
-                v-model="brightness"
-                :min="0"
-                :max="100"
-                color="black"
-                track-color="grey-3"
-                class="custom-slider"
-              />
-              <div class="slider-scale">
-                <span>0</span>
-                <span>25</span>
-                <span>50</span>
-                <span>75</span>
-                <span>100</span>
+          <div class="slider-control-section">
+            <div class="slider-row">
+              <div class="slider-label">Brightness</div>
+              <div class="slider-value">{{ brightness }}</div>
+              <div class="slider-container">
+                <q-slider
+                  v-model="brightness"
+                  :min="0"
+                  :max="100"
+                  color="black"
+                  track-color="grey-3"
+                  class="custom-slider"
+                />
+                <div class="slider-scale">
+                  <span>0</span>
+                  <span>25</span>
+                  <span>50</span>
+                  <span>75</span>
+                  <span>100</span>
+                </div>
               </div>
             </div>
           </div>
 
           <!-- Frequency Time Slider -->
-          <div class="slider-row">
-            <div class="slider-label">Frequence Time</div>
-            <div class="slider-value">{{ frequencyTime }} s</div>
-            <div class="slider-container">
-              <q-slider
-                v-model="frequencyTime"
-                :min="0"
-                :max="100"
-                color="black"
-                track-color="grey-3"
-                class="custom-slider"
-              />
-              <div class="slider-scale">
-                <span>0</span>
-                <span>25</span>
-                <span>50</span>
-                <span>75</span>
-                <span>100</span>
+          <div class="slider-control-section">
+            <div class="slider-row">
+              <div class="slider-label">Frequence Time</div>
+              <div class="slider-value">{{ frequencyTime }} s</div>
+              <div class="slider-container">
+                <q-slider
+                  v-model="frequencyTime"
+                  :min="0"
+                  :max="100"
+                  color="black"
+                  track-color="grey-3"
+                  class="custom-slider"
+                />
+                <div class="slider-scale">
+                  <span>0</span>
+                  <span>25</span>
+                  <span>50</span>
+                  <span>75</span>
+                  <span>100</span>
+                </div>
               </div>
             </div>
           </div>
 
           <!-- Time Slider -->
-          <div class="slider-row">
-            <div class="slider-label">Time</div>
-            <div class="slider-value">{{ time }} Min</div>
-            <div class="slider-container">
-              <q-slider
-                v-model="time"
-                :min="0"
-                :max="100"
-                color="black"
-                track-color="grey-3"
-                class="custom-slider"
-              />
-              <div class="slider-scale">
-                <span>0</span>
-                <span>25</span>
-                <span>50</span>
-                <span>75</span>
-                <span>100</span>
+          <div class="slider-control-section">
+            <div class="slider-row">
+              <div class="slider-label">Time</div>
+              <div class="slider-value">{{ time }} Min</div>
+              <div class="slider-container">
+                <q-slider
+                  v-model="time"
+                  :min="0"
+                  :max="100"
+                  color="black"
+                  track-color="grey-3"
+                  class="custom-slider"
+                />
+                <div class="slider-scale">
+                  <span>0</span>
+                  <span>25</span>
+                  <span>50</span>
+                  <span>75</span>
+                  <span>100</span>
+                </div>
               </div>
             </div>
           </div>
@@ -283,9 +291,10 @@ export default {
 .start-timer-section {
   width: 100%;
   text-align: center;
-  padding: 20px 0;
+  padding-top: 3px;
+  padding-bottom: 10px;
   border-bottom: 1px solid #e0e0e0;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
 }
 
 .tap-to-start {
@@ -296,25 +305,32 @@ export default {
 }
 
 .timer-display {
-  font-size: 20px;
+  font-size: 14px;
   font-weight: 600;
   color: #333;
-  font-family: "Courier New", monospace;
+  /*font-family: "Courier New", monospace;*/
 }
 
 .wave-sliders-section {
   width: 100%;
-  margin-bottom: 30px;
-  touch-action: none; /* Prevents default touch behaviors like scrolling */
+  margin-bottom: 15px;
+  touch-action: none;
+}
+
+.wave-sliders-background {
+  background-color: var(--controls-bg-color);
+
+  border-radius: 8px;
+  padding: 20px 15px;
+  margin: 0 0px;
 }
 
 .wave-slider-container {
   display: flex;
-  justify-content: space-between;
+  justify-content: space-around;
   align-items: flex-end;
   height: 200px;
-  padding: 0 10px;
-  touch-action: none; /* Additional prevention of touch scrolling */
+  touch-action: none;
 }
 
 .wave-slider {
@@ -322,17 +338,22 @@ export default {
   flex-direction: column;
   align-items: center;
   height: 100%;
+  width: 60px;
 }
 
 .wave-slider-track {
   position: relative;
-  width: 40px;
+  width: 100%;
   height: 120px;
   margin-bottom: 10px;
+  display: flex;
+  justify-content: flex-end;
+  padding-right: 5px;
 }
 
 .vertical-slider {
   height: 120px;
+  width: 40px;
   --q-primary: #333;
   --q-track-color: #e0e0e0;
 }
@@ -340,6 +361,7 @@ export default {
 .wave-label {
   text-align: center;
   font-size: 12px;
+  width: 100%;
 }
 
 .wave-symbol {
@@ -362,10 +384,19 @@ export default {
 .horizontal-sliders-section {
   width: 100%;
   margin-bottom: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.slider-control-section {
+  background-color: var(--controls-bg-color);
+  border-radius: 8px;
+  padding: 12px 16px;
 }
 
 .slider-row {
-  margin-bottom: 25px;
+  margin-bottom: 0;
 }
 
 .slider-label {
@@ -411,7 +442,8 @@ export default {
 }
 
 .effects-list {
-  background-color: #f5f5f5;
+  background-color: var(--controls-bg-color);
+
   border-radius: 8px;
   padding: 10px;
 }

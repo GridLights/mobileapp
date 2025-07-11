@@ -1,3 +1,13 @@
+##
+
+##
+
+## !!! See Docs folder for IOS and Android device setup instructions
+
+##
+
+##
+
 ## Use Node 20 (if not already, build may fail if not)
 
 ```bash
