@@ -167,7 +167,6 @@ import { ref, computed, onMounted } from "vue";
 
 import setEffect from "../utils/utils";
 import webservices from "../webservices";
-import SolExpansionItem from "src/components/SolExpansionItem.vue";
 
 export default {
   name: "JourneysPage",
