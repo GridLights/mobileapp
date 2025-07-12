@@ -392,7 +392,7 @@ export default {
 .slider-control-section {
   background-color: var(--controls-bg-color);
   border-radius: 8px;
-  padding: 12px 16px;
+  padding: 8px 16px;
 }
 
 .slider-row {
@@ -402,7 +402,7 @@ export default {
 .slider-label {
   font-size: 14px;
   color: #333;
-  margin-bottom: 5px;
+  margin-bottom: -8px;
   font-weight: 500;
 }
 
@@ -410,7 +410,7 @@ export default {
   font-size: 12px;
   color: #666;
   text-align: right;
-  margin-bottom: 10px;
+  margin-bottom: 0px;
 }
 
 .slider-container {
