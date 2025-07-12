@@ -634,8 +634,8 @@ export default defineComponent({
   border-radius: 4px;
   padding-left: 0px;
   padding-right: 0px;
-  padding-top: 10px;
-  padding-bottom: 5px;
+  padding-top: 0px;
+  padding-bottom: 2px;
   display: flex;
   justify-content: center;
   align-items: center;
