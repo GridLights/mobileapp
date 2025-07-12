@@ -10,7 +10,7 @@
 <template>
   <q-layout view="lHh Lpr lFf" v-if="allPagesLoaded">
     <q-page-container class="q-pb-md">
-      <router-view v-slot="{ Component }">
+      <!-- <router-view v-slot="{ Component }">
         <transition
           :enter-active-class="transitionClasses.enter"
           :leave-active-class="transitionClasses.leave"
@@ -18,7 +18,8 @@
         >
           <component :is="Component" />
         </transition>
-      </router-view>
+      </router-view> -->
+      <router-view />
     </q-page-container>
     <BottomTabBar :items="NavLinks" />
   </q-layout>
