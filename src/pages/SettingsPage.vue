@@ -315,14 +315,20 @@ export default {
   gap: 8px;
   font-size: 16px;
   font-weight: 600;
-  color: #333;
+  color: var(--controls-label-color);
   margin-bottom: 15px;
+}
+
+.section-header svg,
+.section-header .q-icon {
+  color: var(--controls-icon-color);
 }
 
 .search-btn,
 .scan-btn {
   margin-left: auto;
   font-size: 12px;
+  color: var(--controls-button--color);
 }
 
 .setting-item {
@@ -336,18 +342,18 @@ export default {
 .setting-label {
   font-size: 14px;
   font-weight: 500;
-  color: #333;
+  color: var(--controls-label-color);
   margin-bottom: 8px;
 }
 
 .setting-sublabel {
   font-size: 12px;
-  color: #666;
+  color: var(--controls-icon-color);
   margin-bottom: 12px;
 }
 
 .network-status {
-  background-color: #f5f5f5;
+  background-color: var(--controls-input-field-bg-color);
   border-radius: 6px;
   padding: 12px;
 }
@@ -361,17 +367,17 @@ export default {
 .status-text {
   flex: 1;
   font-size: 14px;
-  color: #333;
+  color: var(--controls-label-color);
 }
 
 .disconnect-btn,
 .connect-btn {
   font-size: 12px;
-  color: #666;
+  color: var(--controls-icon-color);
 }
 
 .networks-list {
-  background-color: #f5f5f5;
+  background-color: var(--controls-input-field-bg-color);
   border-radius: 6px;
   padding: 8px;
   margin-top: 8px;
@@ -383,7 +389,7 @@ export default {
   gap: 12px;
   padding: 8px;
   margin-bottom: 4px;
-  background-color: white;
+  background-color: var(--controls-dropdown-menu--color);
   border-radius: 4px;
 }
 
@@ -391,19 +397,23 @@ export default {
   margin-bottom: 0;
 }
 
+.network-item .q-icon {
+  color: var(--controls-icon-color);
+}
+
 .network-name {
   flex: 1;
   font-size: 14px;
-  color: #333;
+  color: var(--controls-label-color);
 }
 
 .network-type {
   font-size: 12px;
-  color: #666;
+  color: var(--controls-icon-color);
 }
 
 .wled-devices-list {
-  background-color: #f5f5f5;
+  background-color: var(--controls-input-field-bg-color);
   border-radius: 6px;
   padding: 8px;
 }
@@ -414,18 +424,18 @@ export default {
   justify-content: space-between;
   padding: 12px;
   margin-bottom: 4px;
-  background-color: white;
+  background-color: var(--controls-dropdown-menu--color);
   border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.2s ease;
 }
 
 .wled-device-item:hover {
-  background-color: #f8f8f8;
+  background-color: var(--controls-bg-color);
 }
 
 .wled-device-item.selected {
-  background-color: #e8f4f8;
+  background-color: var(--controls-slider-bar--color);
 }
 
 .wled-device-item:last-child {
@@ -438,55 +448,64 @@ export default {
 
 .device-name {
   font-size: 14px;
-  color: #333;
+  color: var(--controls-label-color);
   font-weight: 500;
 }
 
 .device-ip {
   font-size: 12px;
-  color: #666;
+  color: var(--controls-icon-color);
 }
 
 .device-input {
   margin-top: 4px;
 }
 
+.device-input :deep(.q-field__control) {
+  background-color: var(--controls-input-field-bg-color) !important;
+  border-radius: 4px;
+}
+
+.device-input :deep(.q-field__native) {
+  color: var(--controls-label-color) !important;
+}
+
 .device-mac {
   font-size: 14px;
-  color: #666;
-  background-color: #f5f5f5;
+  color: var(--controls-icon-color);
+  background-color: var(--controls-input-field-bg-color);
   padding: 8px 12px;
   border-radius: 4px;
 }
 
 .firmware-info {
-  background-color: #f5f5f5;
+  background-color: var(--controls-input-field-bg-color);
   border-radius: 6px;
   padding: 12px;
 }
 
 .firmware-version {
   font-size: 14px;
-  color: #333;
+  color: var(--controls-label-color);
   font-weight: 500;
   margin-bottom: 8px;
 }
 
 .app-version {
   font-size: 12px;
-  color: #666;
+  color: var(--controls-icon-color);
   margin-bottom: 4px;
 }
 
 .version-number {
   font-size: 14px;
-  color: #333;
+  color: var(--controls-label-color);
 }
 
 .update-btn,
 .upload-btn {
   font-size: 12px;
-  color: #333;
+  color: var(--controls-button--color);
 }
 
 .upload-section {
@@ -498,7 +517,7 @@ export default {
 
 .file-status {
   font-size: 12px;
-  color: #666;
+  color: var(--controls-icon-color);
   flex: 1;
 }
 </style>
