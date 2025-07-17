@@ -11,7 +11,10 @@
   <q-layout view="lHh Lpr lFf" v-if="allPagesLoaded">
     <q-page-container class="q-pb-md">
       <router-view v-slot="{ Component, route }">
-        <transition :name="getTransitionName(route)" mode="out-in">
+        <transition
+          :name="getTransitionName(route)"
+          :mode="getTransitionName(route) ? null : 'out-in'"
+        >
           <component :is="Component" :key="route.path" />
         </transition>
       </router-view>
@@ -251,12 +254,34 @@ export default defineComponent({
 </script>
 
 <style>
-/* Slide transitions for settings */
+/* Slide transitions for settings - only apply absolute positioning for settings */
 .slide-left-enter-active,
 .slide-left-leave-active,
 .slide-right-enter-active,
 .slide-right-leave-active {
   transition: transform 0.3s ease-in-out;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+}
+
+.slide-left-enter-active {
+  z-index: 2;
+}
+
+.slide-left-leave-active {
+  z-index: 1;
+}
+
+.slide-right-enter-active {
+  z-index: 2;
+}
+
+.slide-right-leave-active {
+  z-index: 1;
 }
 
 .slide-left-enter-from {
