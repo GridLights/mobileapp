@@ -11,7 +11,7 @@
       <div class="header-title">EFFECTS</div>
 
       <!-- Right Icon -->
-      <div class="header-icon right-icon">
+      <div class="header-icon right-icon" @click="goToSettings">
         <img src="../assets/gear.svg" alt="Settings" width="24" height="24" />
       </div>
     </div>
@@ -246,6 +246,11 @@ export default defineComponent({
   },
 
   methods: {
+    // Navigate to settings page
+    goToSettings() {
+      this.$router.push("/settings");
+    },
+
     // Handle power button toggle from LedGrid
     handlePowerChange(newState) {
       console.log("Power state changed:", newState);
@@ -677,5 +682,15 @@ export default defineComponent({
 /* highlighted selected item */
 .selected-item {
   background-color: #555;
+}
+
+/* Make gear icon clickable */
+.right-icon {
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.right-icon:hover {
+  opacity: 0.7;
 }
 </style>

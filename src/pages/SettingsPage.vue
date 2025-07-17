@@ -1,33 +1,23 @@
 <template>
-  <q-page padding>
-    <div class="no-text-select q-pa-md safe-header">
-      <h1 class="text-h4 q-mb-md">Settings</h1>
-      <q-separator class="q-mb-lg"></q-separator>
-      <p class="label-font">IP Address:</p>
-      <q-input
-        id="ipAddress"
-        v-model="ipAddress"
-        type="text"
-        filled
-        style="width: 100%"
-        @update:model-value="validateIpAddress"
-      >
-        <template v-slot:prepend>
-          <span>http://</span>
-        </template>
-      </q-input>
+  <q-page class="no-text-select">
+    <!-- Fixed Header Container -->
+    <div class="header-container">
+      <!-- Left Icon - Back Arrow -->
+      <div class="header-icon left-icon clickable" @click="goBack">
+        <q-icon name="arrow_back" size="24px" />
+      </div>
+
+      <!-- Center Text -->
+      <div class="header-title">SETTINGS</div>
+
+      <!-- Right Icon - Empty for balance -->
+      <div class="header-icon right-icon"></div>
     </div>
-    <!-- Save Button -->
-    <div class="q-pl-md mt-4">
-      <q-btn
-        flat
-        dark
-        :ripple="false"
-        class="custom-btn"
-        :style="{ backgroundColor: '#5e5e5e' }"
-        label="Save"
-        @click="saveIpAddress"
-      />
+
+    <!-- Scrollable Content Area -->
+    <div class="content-area-settings">
+      <!-- content goes here wrapped in content-padding divs -->
+      <div class="content-padding"></div>
     </div>
   </q-page>
 </template>
@@ -66,38 +56,37 @@ export default {
       validateIpAddress,
     };
   },
+  methods: {
+    goBack() {
+      this.$router.push("/");
+    },
+  },
 };
 </script>
 
 <style scoped>
-.selected-item {
-  background-color: rgba(0, 0, 0, 0.1);
+.clickable {
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+  border-radius: 50%;
 }
 
-.journey-list {
-  font-family: monospace;
-  white-space: pre;
+.clickable:hover {
+  opacity: 0.7;
 }
 
-.journey-line {
-  margin-bottom: 0.5rem;
+.content-area-settings {
+  margin-top: 0px;
+  margin-bottom: 10px;
+  height: calc(100vh - 90px);
+  overflow-y: auto;
 }
 
-.grid-container {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 15px;
-  width: 100%;
-  max-width: 350px;
-  margin: 0 auto;
-}
-
-.input-container {
-  text-align: center;
-}
-
-.button-container {
+.content-padding {
+  margin-top: 10px;
+  padding: 0 20px 20px 20px;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
 }
 </style>
