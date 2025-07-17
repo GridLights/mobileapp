@@ -9,17 +9,23 @@
 
 <template>
   <q-layout view="lHh Lpr lFf" v-if="allPagesLoaded">
-    <q-page-container class="q-pb-md">
-      <router-view v-slot="{ Component, route }">
-        <transition
-          :name="getTransitionName(route)"
-          :mode="getTransitionName(route) ? null : 'out-in'"
-        >
-          <component :is="Component" :key="route.path" />
-        </transition>
-      </router-view>
+    <q-page-container class="q-pb-md transition-container">
+      <div class="transition-wrapper">
+        <router-view v-slot="{ Component, route }">
+          <transition
+            :name="getTransitionName(route)"
+            :mode="getTransitionName(route) ? null : 'out-in'"
+          >
+            <component :is="Component" :key="route.path" />
+          </transition>
+        </router-view>
+      </div>
     </q-page-container>
-    <BottomTabBar :items="NavLinks" />
+
+    <!-- Bottom navigation as a footer -->
+    <q-footer>
+      <BottomTabBar :items="NavLinks" class="stable-bottom-nav" />
+    </q-footer>
   </q-layout>
   <div v-else class="loading-container">
     <div class="loading-content">
@@ -254,7 +260,31 @@ export default defineComponent({
 </script>
 
 <style>
-/* Slide transitions for settings - only apply absolute positioning for settings */
+/* Work with existing page structure */
+.transition-container {
+  position: relative;
+  overflow: hidden;
+  height: calc(
+    100vh - 0px
+  ); /* to eliminate white gap at bottom of content area*/
+}
+
+/* Wrapper to contain transitions */
+.transition-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Stable bottom navigation */
+.stable-bottom-nav {
+  position: relative;
+  z-index: 1002 !important;
+  background-color: inherit;
+}
+
+/* Slide transitions for settings - constrain within wrapper */
 .slide-left-enter-active,
 .slide-left-leave-active,
 .slide-right-enter-active,
@@ -266,6 +296,8 @@ export default defineComponent({
   right: 0;
   bottom: 0;
   width: 100%;
+  height: 100%;
+  overflow-y: auto;
 }
 
 .slide-left-enter-active {
@@ -298,6 +330,16 @@ export default defineComponent({
 
 .slide-right-leave-to {
   transform: translateX(100%);
+}
+
+/* Layout styles - work with existing page CSS */
+.q-page-container {
+  position: relative;
+}
+
+.q-layout {
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
 }
 
 /* global styles to override Quasar defaults */
@@ -382,10 +424,9 @@ export default defineComponent({
   pointer-events: none;
 }
 
-/* Layout styles */
+/* Layout styles - work with existing page CSS */
 .q-page-container {
   position: relative;
-  min-height: calc(100vh - 60px);
 }
 
 .q-layout {
