@@ -1,3 +1,11 @@
+//:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+// SettingsPage.vue
+//
+// Application settings page
+//
+// Author: Tavis Hord - tavis@sideburn.com
+//:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
 <template>
   <q-page class="no-text-select">
     <!-- Fixed Header Container -->
@@ -208,9 +216,9 @@ export default {
     ]);
 
     const wledDevices = ref([
-      { name: "Living Room Led Strip", ip: "192.168.1.101", selected: true },
-      { name: "Kitchen Under Cabinet", ip: "192.168.1.101", selected: false },
-      { name: "Main Accent Light", ip: "192.168.1.101", selected: false },
+      { name: "Living Room Grid", ip: "192.168.1.101", selected: true },
+      { name: "Kitchen Grid", ip: "192.168.1.101", selected: false },
+      { name: "Main Area Grid", ip: "192.168.1.101", selected: false },
     ]);
 
     // Load IP Address from local storage on page reload

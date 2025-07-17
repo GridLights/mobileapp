@@ -1,3 +1,11 @@
+//:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+// IndexPage.vue
+//
+// Home effects page
+//
+// Author: Tavis Hord - tavis@sideburn.com
+//:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
 <template>
   <q-page class="no-text-select">
     <!-- Fixed Header Container -->
