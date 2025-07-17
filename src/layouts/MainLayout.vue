@@ -4,22 +4,17 @@
 // Main application layout with page container
 //
 // Author: Tavis Hord - tavis@sideburn.com
-// Created 11/12/24 - Updated 07/17/25
+// Created 11/12/24
 //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 <template>
   <q-layout view="lHh Lpr lFf" v-if="allPagesLoaded">
     <q-page-container class="q-pb-md">
-      <!-- <router-view v-slot="{ Component }">
-        <transition
-          :enter-active-class="transitionClasses.enter"
-          :leave-active-class="transitionClasses.leave"
-          :duration="300"
-        >
-          <component :is="Component" />
+      <router-view v-slot="{ Component, route }">
+        <transition :name="getTransitionName(route)" mode="out-in">
+          <component :is="Component" :key="route.path" />
         </transition>
-      </router-view> -->
-      <router-view />
+      </router-view>
     </q-page-container>
     <BottomTabBar :items="NavLinks" />
   </q-layout>
@@ -97,6 +92,12 @@ export default defineComponent({
     RandomizerPage,
   },
 
+  data() {
+    return {
+      previousRoutePath: null,
+    };
+  },
+
   setup() {
     const $q = useQuasar();
     const leftDrawerOpen = ref(false);
@@ -119,6 +120,27 @@ export default defineComponent({
       leave: "animated slideOutLeft",
     });
 
+    // Get transition classes based on route
+    const getTransitionClasses = (currentRoute) => {
+      // Special handling for settings page
+      if (currentRoute.path === "/settings") {
+        // Going TO settings - slide in from right
+        return {
+          enter: "animated slideInRight",
+          leave: "animated slideOutLeft",
+        };
+      } else if (lastPath.value === "/settings") {
+        // Coming FROM settings - slide in from left
+        return {
+          enter: "animated slideInLeft",
+          leave: "animated slideOutRight",
+        };
+      }
+
+      // Use existing logic for main navigation pages
+      return transitionClasses.value;
+    };
+
     // Handle component loading
     const onComponentLoaded = () => {
       loadedComponents.value.add(Date.now()); // Use timestamp to ensure uniqueness
@@ -135,6 +157,12 @@ export default defineComponent({
     watch(
       () => route.path,
       (newPath) => {
+        // Skip transition calculation for settings page (handled in getTransitionClasses)
+        if (newPath === "/settings" || lastPath.value === "/settings") {
+          lastPath.value = newPath;
+          return;
+        }
+
         const currentIndex = linksList.findIndex(
           (link) => link.link === newPath
         );
@@ -183,10 +211,70 @@ export default defineComponent({
       },
     };
   },
+
+  watch: {
+    $route(newRoute, oldRoute) {
+      console.log("WATCH - New route:", newRoute.path);
+      console.log("WATCH - Old route:", oldRoute ? oldRoute.path : "null");
+      this.previousRoutePath = oldRoute ? oldRoute.path : null;
+      console.log("WATCH - Stored previousRoutePath:", this.previousRoutePath);
+    },
+  },
+
+  methods: {
+    getTransitionName(route) {
+      const currentPath = this.previousRoutePath; // Use the stored previous route
+      const newPath = route.path;
+
+      console.log("switching");
+      console.log("currentPath (previousRoutePath):", currentPath);
+      console.log("newPath (route.path):", newPath);
+      console.log("currentPath === '/settings':", currentPath === "/settings");
+      console.log("newPath === '/settings':", newPath === "/settings");
+
+      // Going TO settings from any page
+      if (newPath === "/settings" && currentPath !== "/settings") {
+        console.log("left");
+        return "slide-left";
+      }
+      // Going FROM settings to any page
+      if (currentPath === "/settings" && newPath !== "/settings") {
+        console.log("right");
+        return "slide-right";
+      }
+
+      console.log("no match - returning empty");
+      return "";
+    },
+  },
 });
 </script>
 
 <style>
+/* Slide transitions for settings */
+.slide-left-enter-active,
+.slide-left-leave-active,
+.slide-right-enter-active,
+.slide-right-leave-active {
+  transition: transform 0.3s ease-in-out;
+}
+
+.slide-left-enter-from {
+  transform: translateX(100%);
+}
+
+.slide-left-leave-to {
+  transform: translateX(-100%);
+}
+
+.slide-right-enter-from {
+  transform: translateX(-100%);
+}
+
+.slide-right-leave-to {
+  transform: translateX(100%);
+}
+
 /* global styles to override Quasar defaults */
 .q-header {
   height: auto !important;

@@ -249,8 +249,8 @@ export default defineComponent({
   },
 
   beforeUnmount() {
-    webservices.unsubscribeFromLiveStream();
-    webservices.closeWebSocket();
+    //webservices.unsubscribeFromLiveStream();
+    //webservices.closeWebSocket();
   },
 
   methods: {
