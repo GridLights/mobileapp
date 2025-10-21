@@ -44,6 +44,7 @@
                   size="sm"
                   label="Disconnect"
                   class="disconnect-btn"
+                  @click="disconnectFromDevice"
                 />
               </div>
             </div>
@@ -58,6 +59,7 @@
               icon="search"
               label="Scan Network"
               class="scan-btn"
+              @click="scanNetworks"
             />
             <div class="networks-list">
               <div
@@ -74,6 +76,7 @@
                   size="sm"
                   label="Connect"
                   class="connect-btn"
+                  @click="connectToNetwork(network)"
                 />
               </div>
             </div>
@@ -92,37 +95,63 @@
               icon="search"
               label="Search Devices"
               class="search-btn"
+              @click="searchForDevices"
             />
           </div>
 
           <div class="setting-item">
-            <div class="setting-label">Found 3 WLED device (s).</div>
+            <!-- Add device inputs so users can supply an IP (temporary until dynamic discovery is implemented) -->
+            <div style="display:flex; gap:8px; align-items:center; margin-bottom:8px;">
+              <q-input v-model="newDeviceName" dense placeholder="Device name" />
+              <q-input v-model="newDeviceIp" dense placeholder="Device IP (e.g. 192.168.1.100)" />
+              <q-btn flat dense size="sm" label="Add" @click="addWledDevice" />
+            </div>
+
+            <div class="setting-label">Found {{ wledDevices.length }} WLED device(s).</div>
             <div class="setting-sublabel">Tap to select</div>
 
             <div class="wled-devices-list">
               <div
                 class="wled-device-item"
                 v-for="device in wledDevices"
-                :key="device.ip"
+                :key="device.ip + device.name"
                 :class="{ selected: device.selected }"
-                @click="selectDevice(device)"
               >
-                <div class="device-info">
+                <div class="device-info" @click="selectDevice(device)">
                   <div class="device-name">{{ device.name }}</div>
-                  <div class="device-ip">IP: {{ device.ip }}</div>
+                  <!-- Make the device IP editable so testers can input real IPs -->
+                  <div style="display:flex; gap:8px; align-items:center;">
+                    <q-input
+                      dense
+                      style="width: 180px"
+                      v-model="device.ip"
+                      placeholder="192.168.x.x"
+                    />
+                    <q-btn flat dense size="sm" label="Save IP" @click.stop="saveDeviceIp(device)" />
+                  </div>
                 </div>
-                <q-icon
-                  v-if="device.selected"
-                  name="radio_button_checked"
-                  size="20px"
-                  color="black"
-                />
-                <q-icon
-                  v-else
-                  name="radio_button_unchecked"
-                  size="20px"
-                  color="grey-5"
-                />
+                <div class="device-actions">
+                  <q-btn
+                    flat
+                    dense
+                    size="sm"
+                    label="Connect"
+                    class="connect-btn"
+                    @click.stop="connectToDevice(device)"
+                  />
+                  <q-icon
+                    v-if="device.selected"
+                    name="radio_button_checked"
+                    size="20px"
+                    color="black"
+                  />
+                  <q-icon
+                    v-else
+                    name="radio_button_unchecked"
+                    size="20px"
+                    color="grey-5"
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -149,6 +178,21 @@
           <div class="setting-item">
             <div class="setting-label">Device MAC</div>
             <div class="device-mac">{{ deviceMac }}</div>
+          </div>
+
+          <!-- Add IP input and save -->
+          <div class="setting-item">
+            <div class="setting-label">Device IP</div>
+            <div style="display:flex; gap:8px; align-items:center;">
+              <q-input
+                v-model="ipAddress"
+                outlined
+                dense
+                class="device-input"
+                placeholder="192.168.x.x"
+              />
+              <q-btn flat dense size="sm" label="Save" @click="saveIpAddress" />
+            </div>
           </div>
         </div>
 
@@ -201,6 +245,7 @@
 
 <script>
 import { ref, onMounted } from "vue";
+import webservices from "../webservices";
 
 export default {
   name: "SettingsPage",
@@ -217,15 +262,31 @@ export default {
 
     const wledDevices = ref([
       { name: "Living Room Grid", ip: "192.168.1.101", selected: true },
-      { name: "Kitchen Grid", ip: "192.168.1.101", selected: false },
-      { name: "Main Area Grid", ip: "192.168.1.101", selected: false },
+      { name: "Kitchen Grid", ip: "192.168.1.102", selected: false },
+      { name: "Main Area Grid", ip: "192.168.1.103", selected: false },
     ]);
+
+    const newDeviceName = ref("");
+    const newDeviceIp = ref("");
 
     // Load IP Address from local storage on page reload
     onMounted(() => {
       const savedIp = localStorage.getItem("ipAddress");
       if (savedIp) {
         ipAddress.value = savedIp;
+      }
+      // Load persisted WLED devices if present
+      try {
+        const saved = localStorage.getItem('wledDevices');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length) {
+            // Replace default list with persisted devices
+            wledDevices.value = parsed;
+          }
+        }
+      } catch (e) {
+        console.warn('Failed to load persisted wledDevices', e);
       }
     });
 
@@ -255,6 +316,96 @@ export default {
       // This would trigger a file picker
     };
 
+    const connectToDevice = (device) => {
+      try {
+        if (!device || !device.ip) {
+          console.warn('No IP set for device, cannot connect:', device && device.name);
+          return;
+        }
+        console.log("Connecting to device:", device.ip);
+        // Persist IP
+        localStorage.setItem("ipAddress", device.ip);
+        ipAddress.value = device.ip;
+        const wsUrl = `ws://${device.ip}:80/ws`;
+        webservices.initWebSocket(
+          wsUrl,
+          (msg) => console.log("WS MSG:", msg),
+          (live) => console.log("WS LIVE:", live),
+          webservices.subscribeToLiveStream
+        );
+        // mark selected
+        selectDevice(device);
+      } catch (err) {
+        console.error("Failed to connect to device:", err);
+      }
+    };
+
+    const persistWledDevices = () => {
+      try {
+        localStorage.setItem('wledDevices', JSON.stringify(wledDevices.value));
+      } catch (e) {
+        console.warn('Failed to persist wledDevices', e);
+      }
+    };
+
+    const addWledDevice = () => {
+      if (!newDeviceName.value) {
+        console.warn('Device name required');
+        return;
+      }
+      wledDevices.value.push({ name: newDeviceName.value, ip: newDeviceIp.value || '', selected: false });
+      newDeviceName.value = '';
+      newDeviceIp.value = '';
+      persistWledDevices();
+    };
+
+    const saveDeviceIp = (device) => {
+      if (!device || !device.ip) {
+        console.warn('Device IP empty, nothing to save');
+        return;
+      }
+      // Optionally update the main ipAddress field so connect flows can use it
+      localStorage.setItem('ipAddress', device.ip);
+      ipAddress.value = device.ip;
+      persistWledDevices();
+      console.log('Saved device IP for', device.name, device.ip);
+    };
+
+    const disconnectFromDevice = () => {
+      console.log("Disconnecting from device...");
+      try {
+        if (webservices.unsubscribeFromLiveStream) webservices.unsubscribeFromLiveStream();
+      } catch (e) {
+        /* ignore */
+      }
+      try {
+        if (webservices.closeWebSocket) webservices.closeWebSocket();
+      } catch (e) {
+        /* ignore */
+      }
+    };
+
+    const scanNetworks = () => {
+      console.log("Scanning networks (placeholder)...");
+      // placeholder - implement actual scan if desired
+    };
+
+    const searchForDevices = () => {
+      console.log("Searching for WLED devices (placeholder)...");
+      // placeholder - implement actual discovery if desired
+    };
+
+    // Placeholder/stub for connecting to a Wi-Fi network from the UI list.
+    // Keep behavior minimal and consistent with other placeholders in this file.
+    const connectToNetwork = (network) => {
+      try {
+        console.log("connectToNetwork placeholder - selected network:", network);
+        // placeholder - implement actual network connection flow if desired
+      } catch (err) {
+        console.error('connectToNetwork failed', err);
+      }
+    };
+
     return {
       ipAddress,
       deviceName,
@@ -262,11 +413,20 @@ export default {
       fileStatus,
       availableNetworks,
       wledDevices,
+      newDeviceName,
+      newDeviceIp,
       saveIpAddress,
       validateIpAddress,
       selectDevice,
       checkForUpdates,
       chooseFile,
+      connectToDevice,
+      connectToNetwork,
+      disconnectFromDevice,
+      addWledDevice,
+      saveDeviceIp,
+      scanNetworks,
+      searchForDevices,
     };
   },
   methods: {
@@ -401,131 +561,24 @@ export default {
   border-radius: 4px;
 }
 
-.network-item:last-child {
-  margin-bottom: 0;
-}
-
-.network-item .q-icon {
-  color: var(--controls-icon-color);
-}
-
-.network-name {
-  flex: 1;
-  font-size: 14px;
-  color: var(--controls-label-color);
-}
-
-.network-type {
-  font-size: 12px;
-  color: var(--controls-icon-color);
-}
-
-.wled-devices-list {
-  background-color: var(--controls-input-field-bg-color);
-  border-radius: 6px;
-  padding: 8px;
-}
-
 .wled-device-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px;
-  margin-bottom: 4px;
-  background-color: var(--controls-dropdown-menu--color);
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.wled-device-item:hover {
-  background-color: var(--controls-bg-color);
-}
-
-.wled-device-item.selected {
-  background-color: var(--controls-slider-bar--color);
-}
-
-.wled-device-item:last-child {
-  margin-bottom: 0;
+  padding: 8px;
+  margin-bottom: 8px;
+  background-color: var(--controls-input-field-bg-color);
+  border-radius: 6px;
 }
 
 .device-info {
   flex: 1;
+  cursor: pointer;
 }
 
-.device-name {
-  font-size: 14px;
-  color: var(--controls-label-color);
-  font-weight: 500;
-}
-
-.device-ip {
-  font-size: 12px;
-  color: var(--controls-icon-color);
-}
-
-.device-input {
-  margin-top: 4px;
-}
-
-.device-input :deep(.q-field__control) {
-  background-color: var(--controls-input-field-bg-color) !important;
-  border-radius: 4px;
-}
-
-.device-input :deep(.q-field__native) {
-  color: var(--controls-label-color) !important;
-}
-
-.device-mac {
-  font-size: 14px;
-  color: var(--controls-icon-color);
-  background-color: var(--controls-input-field-bg-color);
-  padding: 8px 12px;
-  border-radius: 4px;
-}
-
-.firmware-info {
-  background-color: var(--controls-input-field-bg-color);
-  border-radius: 6px;
-  padding: 12px;
-}
-
-.firmware-version {
-  font-size: 14px;
-  color: var(--controls-label-color);
-  font-weight: 500;
-  margin-bottom: 8px;
-}
-
-.app-version {
-  font-size: 12px;
-  color: var(--controls-icon-color);
-  margin-bottom: 4px;
-}
-
-.version-number {
-  font-size: 14px;
-  color: var(--controls-label-color);
-}
-
-.update-btn,
-.upload-btn {
-  font-size: 12px;
-  color: var(--controls-button--color);
-}
-
-.upload-section {
+.device-actions {
   display: flex;
+  gap: 8px;
   align-items: center;
-  gap: 12px;
-  margin-top: 8px;
-}
-
-.file-status {
-  font-size: 12px;
-  color: var(--controls-icon-color);
-  flex: 1;
 }
 </style>

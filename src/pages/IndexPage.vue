@@ -79,6 +79,7 @@
                 :max="100"
                 color="black"
                 track-color="grey-1"
+                @input="onSpeedInput"
               />
             </div>
           </div>
@@ -103,7 +104,11 @@
               <span class="control-label">EFFECTS</span>
             </div>
             <div class="dropdown-container">
-              <select v-model="selectedEffect" class="effects-dropdown">
+              <select
+                v-model="selectedEffect"
+                @change="applySelectedEffect"
+                class="effects-dropdown"
+              >
                 <option value="">Select Effect</option>
                 <option v-for="item in itemList" :key="item.id" :value="item">
                   {{ item.label }}
@@ -211,6 +216,7 @@ export default defineComponent({
       intervalId: null,
       frequencyDebounceTimer: null, // Timer for debouncing
       brightnessDebounceTimer: null,
+      speedDebounceTimer: null,
       currentCustomEffect: null, // Track the current custom effect
       wledUrl: "4.3.2.1", // local
       // wledUrl: "192.168.84.43", // remote
@@ -246,6 +252,10 @@ export default defineComponent({
 
     // Subscribes to /live endpoint
     // webservices.subscribeToLiveStream();
+
+    // Notify parent (MainLayout) that this preload-mounted page has finished mounting
+    // Emit a custom event the parent listens for: @preload-mounted
+    this.$emit('preload-mounted');
   },
 
   beforeUnmount() {
@@ -566,6 +576,34 @@ export default defineComponent({
       const scaledFreqValue = Math.round((frequencyVal / 60) * 255);
       const data = { seg: { ix: scaledFreqValue } };
       webservices.sendCommandToWebSocket(data);
+    },
+
+    // Speed slider handler (debounced)
+    onSpeedInput() {
+      // Clear the existing debounce timer
+      clearTimeout(this.speedDebounceTimer);
+
+      // Debounce and send speed update
+      this.speedDebounceTimer = setTimeout(() => {
+        const scaled = Math.round((this.speedValue / 100) * 255);
+        // Send as segment speed (sx) if supported by device
+        const data = { seg: { sx: scaled } };
+        webservices.sendCommandToWebSocket(data);
+        console.log("Speed Value sent:", this.speedValue, scaled);
+      }, 500);
+    },
+
+    // Apply the selected effect from the dropdown
+    applySelectedEffect() {
+      const sel = this.selectedEffect;
+      if (!sel) return;
+      if (sel.effectId) {
+        this.setEffect(sel.effectId);
+      } else if (sel.effectName === "allWhite") {
+        this.setColor([255, 255, 255]);
+      } else {
+        console.log("Selected effect has no effectId:", sel);
+      }
     },
   },
 });

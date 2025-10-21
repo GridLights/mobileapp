@@ -176,6 +176,34 @@ export default {
     handleJourneyStart(data) {
       // data = { item, index, journeyType }
       console.log("Started:", data.journeyType, data.item.title);
+
+      // Try to find a matching journey by label and start it using the journey engine from setup()
+      try {
+        const journeyLabel = data.journeyType;
+        const found = this.journeyList
+          ? this.journeyList.find((j) => j.label === journeyLabel)
+          : null;
+        if (found) {
+          // Select the matching item and start the journey engine
+          if (typeof this.selectItem === "function") {
+            this.selectItem(found.id);
+          } else if ("selectedItemId" in this) {
+            this.selectedItemId = found.id;
+          }
+
+          if (typeof this.startJourney === "function") {
+            this.startJourney();
+          } else {
+            console.log(
+              "Journey engine not available on this instance - cannot start automatically"
+            );
+          }
+        } else {
+          console.log("No matching journey found for", journeyLabel);
+        }
+      } catch (err) {
+        console.error("Error while attempting to start journey:", err);
+      }
     },
   },
 
@@ -235,14 +263,6 @@ export default {
         activeTimeout.value = null;
       }
       isRunning.value = false;
-    };
-
-    const finishJourney = () => {
-      cancelJourney();
-      localStorage.removeItem("journey");
-      localStorage.removeItem("currentIndex");
-      localStorage.removeItem("endTime");
-      console.log("Journey finished.");
     };
 
     const resumeJourney = () => {
@@ -386,7 +406,7 @@ export default {
 
 .content-padding {
   margin-top: 10px;
-  padding: 0 20px 0px 20px;
+  padding: 0 20px 0 20px;
   display: flex;
   flex-direction: column;
   align-items: center;

@@ -183,13 +183,54 @@ export default {
 
   methods: {
     startSequence() {
-      console.log("Starting sequence...");
-      // Add your sequence start logic here
+      if (this.sequenceRunning) {
+        console.log("Sequence already running");
+        return;
+      }
+      if (!this.effectQueue || this.effectQueue.length === 0) {
+        console.log("No effects to run in queue");
+        return;
+      }
+
+      this.sequenceRunning = true;
+      this._sequenceIndex = 0;
+
+      const runStep = (index) => {
+        if (!this.sequenceRunning) return;
+        if (index >= this.effectQueue.length) {
+          console.log("Sequence finished");
+          this.stopSequence();
+          return;
+        }
+
+        const entry = this.effectQueue[index];
+        const hertz = Number(entry.hertz) || 0;
+        const timeSec = Number(entry.time) || 3;
+        const brightness = Number(entry.brightness) || 50;
+
+        // Scale values to WLED ranges
+        const scaledFreq = Math.round((hertz / 100) * 255);
+        const scaledBri = Math.round((brightness / 100) * 255);
+
+        // Send a generic command - using seg fields to set brightness and intensity
+        const cmd = { seg: { fx: 0, ix: scaledFreq, bri: scaledBri } };
+        webservices.sendCommandToWebSocket(cmd);
+        console.log("Sequencer: running step", index, entry, cmd);
+
+        // Schedule next
+        this._sequenceTimeout = setTimeout(() => runStep(index + 1), timeSec * 1000);
+      };
+
+      runStep(0);
     },
 
     stopSequence() {
-      console.log("Stopping sequence...");
-      // Add your sequence stop logic here
+      if (this._sequenceTimeout) {
+        clearTimeout(this._sequenceTimeout);
+        this._sequenceTimeout = null;
+      }
+      this.sequenceRunning = false;
+      console.log("Sequence stopped");
     },
 
     removeEffect(index) {
@@ -232,10 +273,15 @@ export default {
       },
     ]);
 
+    const sequenceRunning = ref(false);
+    const _sequenceTimeout = ref(null);
+
     return {
       selectedItemId,
       effectQueue,
       availableEffects,
+      sequenceRunning,
+      _sequenceTimeout,
     };
   },
 };
@@ -259,7 +305,7 @@ export default {
 
 .content-padding {
   margin-top: 10px; /* Add space for the fixed description bar */
-  padding: 0 20px 0px 20px;
+  padding: 0 20px 0 20px;
   display: flex;
   flex-direction: column;
   align-items: center;

@@ -224,7 +224,7 @@ export default {
     },
   },
 
-  setup() {
+  setup(props, { emit }) {
     const selectedItemId = ref(null);
     const isRunning = ref(false);
     const currentTime = ref(0);
@@ -250,6 +250,11 @@ export default {
       { id: 2, name: "Breathing", active: false },
       { id: 3, name: "Strobe", active: false },
     ]);
+
+    // Notify parent (MainLayout) when preloaded page mounts
+    onMounted(() => {
+      emit("preload-mounted");
+    });
 
     return {
       selectedItemId,

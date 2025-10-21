@@ -40,7 +40,7 @@
       v-for="route in preloadRoutes"
       :key="route.path"
       :is="route.component"
-      @vue:mounted="onComponentLoaded"
+      @preload-mounted="onComponentLoaded(route.path)"
     />
   </div>
 </template>
@@ -114,6 +114,7 @@ export default defineComponent({
     const lastPath = ref(route.path);
     const allPagesLoaded = ref(false);
     const loadedComponents = ref(new Set());
+    let fallbackTimer = null;
 
     // Define routes to preload
     const preloadRoutes = [
@@ -151,14 +152,22 @@ export default defineComponent({
     };
 
     // Handle component loading
-    const onComponentLoaded = () => {
-      loadedComponents.value.add(Date.now()); // Use timestamp to ensure uniqueness
+    const onComponentLoaded = (path) => {
+      // Use the provided stable path id to dedupe
+      if (!path) return;
+      loadedComponents.value.add(path);
 
       // Check if all components are loaded
       if (loadedComponents.value.size >= preloadRoutes.length) {
+        // cancel fallback timer if present
+        if (fallbackTimer) {
+          clearTimeout(fallbackTimer);
+          fallbackTimer = null;
+        }
+        // small settle delay
         setTimeout(() => {
           allPagesLoaded.value = true;
-        }, 100); // Small delay to ensure everything is settled
+        }, 100);
       }
     };
 
@@ -201,9 +210,10 @@ export default defineComponent({
       $q.dark.set(true);
 
       // Fallback: if components don't trigger mounted events, show after timeout
-      setTimeout(() => {
+      fallbackTimer = setTimeout(() => {
         if (!allPagesLoaded.value) {
           allPagesLoaded.value = true;
+          fallbackTimer = null;
         }
       }, 2000);
     });
