@@ -374,12 +374,13 @@ export default {
     const disconnectFromDevice = () => {
       console.log("Disconnecting from device...");
       try {
-        if (webservices.unsubscribeFromLiveStream) webservices.unsubscribeFromLiveStream();
+        // Use optional chaining to avoid fragile existence checks
+        webservices.unsubscribeFromLiveStream?.();
       } catch (e) {
         /* ignore */
       }
       try {
-        if (webservices.closeWebSocket) webservices.closeWebSocket();
+        webservices.closeWebSocket?.();
       } catch (e) {
         /* ignore */
       }
@@ -402,7 +403,9 @@ export default {
         console.log("connectToNetwork placeholder - selected network:", network);
         // placeholder - implement actual network connection flow if desired
       } catch (err) {
-        console.error('connectToNetwork failed', err);
+        // Include an identifier for easier debugging
+        const id = network && (network.name || network.ssid || network.id) ? (network.name || network.ssid || network.id) : network;
+        console.error('connectToNetwork failed for', id, err);
       }
     };
 
