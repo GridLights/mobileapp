@@ -29,7 +29,7 @@
       <div class="content-padding">
         <!-- LED Grid -->
         <div class="led-grid-bg">
-          <LedGrid :rows="ledRows" @power-changed="handlePowerChange" />
+          <LedGrid :rows="ledRows" :powerOn="isOn" @power-changed="handlePowerChange" />
         </div>
 
         <!-- Controls Container -->
@@ -137,11 +137,9 @@
 </template>
 
 <script>
-import { defineComponent, effect } from "vue";
+import { defineComponent } from "vue";
 import LedGrid from "src/components/LedGrid.vue";
 import webservices from "../webservices";
-// import webSocketManager from "../utils/websocketmanager";
-import { diamondSpin, ben } from "../effects";
 
 export default defineComponent({
   name: "IndexPage",
@@ -154,6 +152,7 @@ export default defineComponent({
     return {
       sliderValue: 50,
       isOn: false,
+      isLiveSubscribed: false,
       timerValue: 0,
       freqValue: 50,
       speedValue: 50,
@@ -267,11 +266,12 @@ export default defineComponent({
       wsUrl = `ws://${savedIp}:80/ws`;
     }
 
+    // Do not auto-subscribe on connect; we'll manage subscription based on power state
     webservices.initWebSocket(
       wsUrl,
       this.handleWebSocketMessage,
       this.handleLiveStreamData,
-      webservices.subscribeToLiveStream
+      null
     );
 
     // Subscribes to /live endpoint
@@ -292,36 +292,23 @@ export default defineComponent({
     // Handle power button toggle from LedGrid
     handlePowerChange(newState) {
       console.log("Power state changed:", newState);
-      this.toggleButton();
+      this.setPower(newState);
     },
 
     updateLedRows(ledRows, colorList) {
-      if (colorList.length < 38) {
-        console.error("Color list must contain at least 38 colors.");
-        return;
-      }
+      const needed = 37; // 4+5+6+7+6+5+4
+      const sanitized = Array.isArray(colorList) ? colorList : [];
 
-      // Flatten the ledRows into a single array and map the first 38 elements
-      let updatedColors = colorList.slice(0, 38); // Take only the first 38 colors
+      // Build a list of exactly `needed` colors: take what we have; pad with "000000" if short
+      const updatedColors = sanitized.slice(0, needed);
+      while (updatedColors.length < needed) updatedColors.push("000000");
 
-      let colorIndex = 0; // Track position in the updatedColors array
-      var all_off = true;
-      let updatedLedRows = ledRows.map((row) => {
-        return row.map(() => {
-          let color = updatedColors[colorIndex]; // Use the next color
-          colorIndex++; // Increment the index
-          if (color != "000000") {
-            all_off = false;
-          }
-          return color;
-        });
-      });
+      let colorIndex = 0;
+      const updatedLedRows = ledRows.map((row) =>
+        row.map(() => updatedColors[colorIndex++])
+      );
 
-      if (all_off == false) {
-        return updatedLedRows;
-      }
-
-      return [];
+      return updatedLedRows;
     },
 
     // equivalency check for arrays where == is always false
@@ -356,17 +343,22 @@ export default defineComponent({
 
     // called when websocket receives an inbound message
     handleWebSocketMessage(data) {
-      const now = Date.now();
-
       console.log("web socket dat");
       console.log(data);
-
-      if (data?.state != undefined) {
-        // State message incoming
+      if (data?.state !== undefined) {
         this.wledState = data.state;
-        // Map WLED brightness (0-255) to UI percent (0-100)
-        if (typeof data.bri === 'number') {
-          this.sliderValue = Math.round((data.bri / 255) * 100);
+        if (typeof data.state.bri === "number") {
+          this.sliderValue = Math.round((data.state.bri / 255) * 100);
+        }
+        if (typeof data.state.on === "boolean") {
+          this.isOn = data.state.on;
+          if (this.isOn && !this.isLiveSubscribed) {
+            webservices.subscribeToLiveStream();
+            this.isLiveSubscribed = true;
+          } else if (!this.isOn && this.isLiveSubscribed) {
+            webservices.unsubscribeFromLiveStream();
+            this.isLiveSubscribed = false;
+          }
         }
       }
     },
@@ -374,43 +366,46 @@ export default defineComponent({
     // called when websocket receives an inbound message
     handleLiveStreamData(data) {
       const now = Date.now();
-
-      console.log("web socket dat");
-      console.log(data);
-
-      if (data?.leds != undefined) {
-        // if from the live stream, only process every X ms
+      if (!this.isOn) {
+        return;
+      }
+      if (data?.leds !== undefined) {
         const processTime = 10;
         if (now - this.lastProcessedTime >= processTime) {
           this.lastProcessedTime = now;
-
-          // Map the /live data to the UI fixture
           let newLedRows = this.updateLedRows(this.ledRows, data.leds);
-
-          if (!newLedRows.length) {
-            // strobing, do not update
-            return;
-          }
 
           // Ensure each color has a "#" prefix
           newLedRows = newLedRows.map((row) => row.map((color) => `#${color}`));
 
           if (this.areArraysEquivalent(newLedRows, this.ledRows) === false) {
-            // Update the ledRows value (used by the UI fixture)
             this.ledRows = newLedRows;
           }
         }
       }
     },
 
-    //power button handler
-    toggleButton() {
-      var lightOn = this.wledState.on;
-
-      // Command to toggle the light
-      const command = { on: !lightOn };
+    // Explicitly set power state and manage live updates subscription
+    setPower(turnOn) {
+      const command = { on: !!turnOn };
       webservices.sendCommandToWebSocket(command);
-      console.log(`Toggled light to: ${!lightOn}`);
+
+      // Update local state immediately for responsiveness
+      this.isOn = !!turnOn;
+
+      if (this.isOn && !this.isLiveSubscribed) {
+        webservices.subscribeToLiveStream();
+        this.isLiveSubscribed = true;
+      } else if (!this.isOn && this.isLiveSubscribed) {
+        webservices.unsubscribeFromLiveStream();
+        this.isLiveSubscribed = false;
+      }
+    },
+
+    //power button handler (kept for compatibility; now delegates to setPower)
+    toggleButton() {
+      const lightOn = !!this.wledState.on;
+      this.setPower(!lightOn);
     },
 
     logSliderValue() {
@@ -458,8 +453,6 @@ export default defineComponent({
         console.log("Slider Value: " + this.sliderValue);
 
         this.setBrightness(this.sliderValue);
-        // console.log("Frequency Interval: " + this.freqInterval);
-        // this.restartCustomEffectWithNewInterval();
       }, 1000); // Delay of 1 second
     },
 
@@ -478,7 +471,7 @@ export default defineComponent({
       // For now, just do it this way
       if (effectId) {
         this.setEffect(effectId);
-      } else if (effectName == "allWhite") {
+      } else if (effectName === "allWhite") {
         this.setColor([255, 255, 255]);
       }
 
@@ -565,14 +558,9 @@ export default defineComponent({
     },
 
     setAllLedsToBrightness(brightness) {
-      let on;
-      if (brightness === 0) {
-        on = false;
-      } else {
-        on = true;
-      }
+      const on = brightness !== 0;
       const command = {
-        on: on,
+        on,
         seg: { bri: brightness },
       };
 
@@ -601,7 +589,8 @@ export default defineComponent({
     },
 
     setEffect(effectId) {
-      const scaledFreqValue = Math.round((this.freqValue / 50) * 255);
+      // Map frequency to index value (0-255)
+      const scaledFreqValue = Math.round((this.freqValue / 60) * 255);
       const data = { seg: { fx: effectId, ix: scaledFreqValue } };
       webservices.sendCommandToWebSocket(data);
     },
@@ -614,7 +603,7 @@ export default defineComponent({
     },
 
     setFrequency(frequencyVal) {
-      // Map the selected frequency (0-50 Hz) to the 0-255 scale
+      // Map the selected frequency (0-60 Hz) to the 0-255 scale
       const scaledFreqValue = Math.round((frequencyVal / 60) * 255);
       const data = { seg: { ix: scaledFreqValue } };
       webservices.sendCommandToWebSocket(data);

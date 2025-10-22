@@ -10,7 +10,7 @@
 <template>
   <div class="svg-container">
     <!-- Background image -->
-    <img class="groupIcon" alt="" src="../assets/LedGridBGNoButt.svg" />
+    <img class="groupIcon" alt="" src="../assets/ledGridBGNoButt.svg" />
 
     <!-- PowerSwitch positioned over the background -->
     <PowerSwitch
@@ -320,12 +320,16 @@ export default {
       type: Number,
       default: 26,
     },
+    powerOn: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
-      powerState: false,
+      powerState: this.powerOn,
       // Base positioning (for row 0, column 0)
-      dotRadius: 2,
+      dotRadius: 5,
       baseX: 118,
       baseY: 71,
 
@@ -354,6 +358,12 @@ export default {
       row6XOffset: 0,
       row6YOffset: 108,
     };
+  },
+  watch: {
+    powerOn(newVal) {
+      // Keep local button state in sync with parent-provided power state
+      this.powerState = newVal;
+    },
   },
   methods: {
     handlePowerToggle(newState) {

@@ -63,38 +63,59 @@ export const webservices = {
 
               console.log(ledData);
 
-              // Array to hold the hex color values
-              const leds = [];
+              // Helper: build color array from a given offset
+              const buildColorsFromOffset = (offset) => {
+                const out = [];
+                for (let i = offset; i + 2 < ledData.length; i += 3) {
+                  const r = ledData[i] === 0 ? 0 : 255;
+                  const g = ledData[i + 1] === 0 ? 0 : 255;
+                  const b = ledData[i + 2] === 0 ? 0 : 255;
+                  const hexColor = ((1 << 24) | (r << 16) | (g << 8) | b)
+                    .toString(16)
+                    .slice(1)
+                    .toUpperCase();
+                  out.push(hexColor);
+                }
+                return out;
+              };
 
-              // Assuming each LED is represented by 3 bytes (RGB) and using
-              // the original MAIN behavior (thresholded values and indexing).
-              for (let i = 1; i < ledData.length; i += 3) {
-                // Threshold to 0/255 as in MAIN's working version
-                const r = ledData[i] == 0 ? 0 : 255;
-                const g = ledData[i + 1] == 0 ? 0 : 255;
-                const b = ledData[i + 2] == 0 ? 0 : 255;
+              const candidates = [
+                buildColorsFromOffset(0),
+                buildColorsFromOffset(1),
+                buildColorsFromOffset(2),
+              ];
 
-                // Convert RGB to hex color string (e.g., "7D0000")
-                const hexColor = ((1 << 24) | (r << 16) | (g << 8) | b)
-                  .toString(16)
-                  .slice(1)
-                  .toUpperCase();
+              // Score: prefer the one with most non-black; tie-breaker: longest
+              const score = (arr) => ({
+                nonBlack: arr.reduce((n, c) => n + (c !== "000000" ? 1 : 0), 0),
+                len: arr.length,
+              });
 
-                // Push the hex color string to the LEDs array (skip the first)
-                if (i > 0) {
-                  leds.push(hexColor);
+              let best = candidates[0];
+              let bestScore = score(best);
+              for (let k = 1; k < candidates.length; k++) {
+                const s = score(candidates[k]);
+                if (
+                  s.nonBlack > bestScore.nonBlack ||
+                  (s.nonBlack === bestScore.nonBlack && s.len > bestScore.len)
+                ) {
+                  best = candidates[k];
+                  bestScore = s;
                 }
               }
 
+              const leds = best;
+
               // Output the result in the desired format
               const response = {
-                leds: leds,
+                leds,
                 n: 1,
               };
 
               console.log("Decoded LED Data:", response);
 
-              if (onConnectedCallback) {
+              // Use the correct callback for live stream data
+              if (onLiveStreamDataCallback) {
                 onLiveStreamDataCallback(response);
               }
               // this.led
@@ -153,7 +174,7 @@ export const webservices = {
       ws.onclose = () => {
         console.log("WebSocket connection closed.");
         ws = null; // Reset WebSocket instance on close
-        self.handleReconnect(wsUrl, onMessageCallback, onConnectedCallback);
+        self.handleReconnect(wsUrl, onMessageCallback, onLiveStreamDataCallback, onConnectedCallback);
       };
 
       ws.onerror = (error) => {
@@ -169,9 +190,10 @@ export const webservices = {
    * Handle WebSocket reconnection attempts.
    * @param {string} wsUrl - The WebSocket URL (e.g., "ws://<WLED-IP>/ws").
    * @param {function} onMessageCallback - Callback for handling incoming WebSocket messages.
+   * @param {function} onLiveStreamDataCallback - Callback for handling live stream LED data.
    * @param {function} onConnectedCallback - Callback for when the WebSocket connects successfully.
    */
-  handleReconnect(wsUrl, onMessageCallback, onConnectedCallback) {
+  handleReconnect(wsUrl, onMessageCallback, onLiveStreamDataCallback, onConnectedCallback) {
     if (this.reconnectAttempts < this.maxReconnectAttempts) {
       this.reconnectAttempts++;
       const delay = this.reconnectTimeout * this.reconnectAttempts; // Exponential backoff
@@ -207,8 +229,9 @@ export const webservices = {
 
   closeWebSocket() {
     // Clean up WebSocket connection when the component is destroyed
-    if (this.ws) {
-      this.ws.close();
+    if (ws) {
+      ws.close();
+      ws = null;
     }
   },
 
