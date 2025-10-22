@@ -105,7 +105,7 @@
             <div class="dropdown-container">
               <select v-model="selectedEffect" class="effects-dropdown">
                 <option value="">Select Effect</option>
-                <option v-for="item in itemList" :key="item.id" :value="item">
+                <option v-for="item in itemList" :key="item.id" :value="item.id">
                   {{ item.label }}
                 </option>
               </select>
@@ -216,6 +216,34 @@ export default defineComponent({
       // wledUrl: "192.168.84.43", // remote
       // messageCoun
     };
+  },
+
+  watch: {
+    selectedEffect(newVal) {
+      // Trigger effect change when a new effect is selected from the dropdown
+      if (newVal == null || newVal === "") return;
+      try {
+        let item = null;
+        if (typeof newVal === "object") {
+          item = newVal;
+        } else {
+          // treat as id (string or number)
+          const id = typeof newVal === "string" ? parseInt(newVal, 10) : newVal;
+          item = this.itemList.find((it) => it.id === id) || null;
+        }
+        if (!item) return;
+
+        if (item.effectId != null) {
+          this.setEffect(item.effectId);
+        } else if (item.effectName === "allWhite") {
+          this.setColor([255, 255, 255]);
+        }
+        // set selectedItem for consistency with MAIN’s highlighting logic
+        this.selectedItem = item.id ?? null;
+      } catch (e) {
+        console.error("Error applying selected effect:", e);
+      }
+    },
   },
 
   mounted() {
