@@ -25,6 +25,35 @@
     <!-- Scrollable Content Area -->
     <div class="content-area-settings">
       <div class="content-padding">
+        <!-- IP Address (from MAIN) -->
+        <div class="settings-section">
+          <div class="setting-item">
+            <div class="setting-label">IP Address:</div>
+            <div class="ip-row">
+              <span class="ip-prefix">http://</span>
+              <q-input
+                id="ipAddress"
+                v-model="ipAddress"
+                type="text"
+                filled
+                style="width: 100%"
+                @update:model-value="validateIpAddress"
+              />
+            </div>
+          </div>
+          <div class="setting-item" style="margin-top: 8px;">
+            <q-btn
+              flat
+              dark
+              :ripple="false"
+              class="custom-btn"
+              :style="{ backgroundColor: '#5e5e5e', color: '#fff' }"
+              label="Save"
+              @click="saveIpAddress"
+            />
+          </div>
+        </div>
+
         <!-- Wi-Fi / Network Settings -->
         <div class="settings-section">
           <div class="section-header">
@@ -595,5 +624,16 @@ export default {
 :deep(.q-field__native),
 :deep(.q-field__label) {
   color: var(--controls-label-color) !important;
+}
+
+.ip-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ip-prefix {
+  font-size: 14px;
+  color: var(--controls-label-color);
 }
 </style>

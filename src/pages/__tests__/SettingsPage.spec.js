@@ -35,8 +35,15 @@ describe('SettingsPage', () => {
           QIcon: { template: '<i />' },
           QBtn: { template: '<button><slot /></button>' },
           QInput: {
-            template: '<input />',
-            props: ['modelValue'],
+            name: 'QInput',
+            template: '<div class="stub-q-input"></div>',
+            props: ['modelValue', 'prefix'],
+            emits: ['update:modelValue']
+          },
+          'q-input': {
+            name: 'q-input',
+            template: '<div class="stub-q-input"></div>',
+            props: ['modelValue', 'prefix'],
             emits: ['update:modelValue']
           },
         },
@@ -97,8 +104,15 @@ describe('SettingsPage', () => {
           QIcon: { template: '<i />' },
           QBtn: { template: '<button><slot /></button>' },
           QInput: {
-            template: '<input />',
-            props: ['modelValue'],
+            name: 'QInput',
+            template: '<div class="stub-q-input"></div>',
+            props: ['modelValue', 'prefix'],
+            emits: ['update:modelValue']
+          },
+          'q-input': {
+            name: 'q-input',
+            template: '<div class="stub-q-input"></div>',
+            props: ['modelValue', 'prefix'],
             emits: ['update:modelValue']
           },
         },
@@ -134,8 +148,9 @@ describe('SettingsPage', () => {
     const sections = wrapper.findAll('.settings-section')
     expect(sections.length).toBeGreaterThan(0)
 
-    const networkSection = sections[0]
-    expect(networkSection.text()).toContain('Wi-Fi / Network Settings')
+    // Find a section that contains the Wi‑Fi header
+    const wifiSection = sections.find(s => s.text().includes('Wi-Fi / Network Settings'))
+    expect(wifiSection).toBeTruthy()
   })
 
   it('should display firmware information', () => {
