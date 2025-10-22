@@ -454,16 +454,18 @@ export default {
 .q-page {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 90px);
-  overflow: hidden;
+  min-height: 100vh; /* allow natural page height */
+  overflow: visible; /* avoid clipping inner content */
   position: relative;
 }
 
 .content-area-settings {
-  margin-top: 100px;
-  margin-bottom: 10px;
-  height: calc(100vh - 90px);
-  overflow-y: auto;
+  /* Provide clearance for fixed header and footer */
+  padding-top: 110px; /* approx header offset (55) + header height (40) + spacing */
+  padding-bottom: 80px; /* space for bottom nav/footer */
+  margin: 0;
+  min-height: calc(100vh - 130px);
+  overflow: visible; /* let child sections size naturally */
 }
 
 .content-padding {
@@ -583,5 +585,16 @@ export default {
   display: flex;
   gap: 8px;
   align-items: center;
+}
+
+/* Ensure Quasar inputs are readable on light theme */
+:deep(.q-field__control) {
+  background-color: var(--controls-input-field-bg-color) !important;
+  border-radius: 6px;
+}
+
+:deep(.q-field__native),
+:deep(.q-field__label) {
+  color: var(--controls-label-color) !important;
 }
 </style>

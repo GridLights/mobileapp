@@ -218,16 +218,16 @@ export default {
         console.log("Sequencer: running step", index, entry, cmd);
 
         // Schedule next
-        this._sequenceTimeout = setTimeout(() => runStep(index + 1), timeSec * 1000);
+        this.sequenceTimeout = setTimeout(() => runStep(index + 1), timeSec * 1000);
       };
 
       runStep(0);
     },
 
     stopSequence() {
-      if (this._sequenceTimeout) {
-        clearTimeout(this._sequenceTimeout);
-        this._sequenceTimeout = null;
+      if (this.sequenceTimeout) {
+        clearTimeout(this.sequenceTimeout);
+        this.sequenceTimeout = null;
       }
       this.sequenceRunning = false;
       console.log("Sequence stopped");
@@ -274,14 +274,14 @@ export default {
     ]);
 
     const sequenceRunning = ref(false);
-    const _sequenceTimeout = ref(null);
+    const sequenceTimeout = ref(null);
 
     return {
       selectedItemId,
       effectQueue,
       availableEffects,
       sequenceRunning,
-      _sequenceTimeout,
+      sequenceTimeout,
     };
   },
 };

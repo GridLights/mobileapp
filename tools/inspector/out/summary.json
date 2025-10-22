@@ -1,0 +1,60 @@
+{
+  "url": "http://localhost:9090/#/settings",
+  "elementsCaptured": 23,
+  "added": 23,
+  "removed": 0,
+  "changedCount": 0,
+  "firstChanges": [],
+  "firstItems": [
+    {
+      "selector": ".q-page",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 1280,
+        "height": 848
+      },
+      "text": "arrow_backSETTINGSwifiWi-Fi / Network SettingsCurrent Network Statuscheck_circle"
+    },
+    {
+      "selector": ".header-container",
+      "rect": {
+        "x": 64,
+        "y": 55,
+        "width": 1152,
+        "height": 40
+      },
+      "text": "arrow_backSETTINGS"
+    },
+    {
+      "selector": ".header-title",
+      "rect": {
+        "x": 593,
+        "y": 62,
+        "width": 93,
+        "height": 27
+      },
+      "text": "SETTINGS"
+    },
+    {
+      "selector": ".content-area-settings",
+      "rect": {
+        "x": 0,
+        "y": 100,
+        "width": 1280,
+        "height": 738
+      },
+      "text": "wifiWi-Fi / Network SettingsCurrent Network Statuscheck_circleConnected to: Home"
+    },
+    {
+      "selector": ".settings-section",
+      "rect": {
+        "x": 20,
+        "y": 110,
+        "width": 1240,
+        "height": 323
+      },
+      "text": "wifiWi-Fi / Network SettingsCurrent Network Statuscheck_circleConnected to: Home"
+    }
+  ]
+}

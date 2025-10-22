@@ -20,6 +20,16 @@
           </transition>
         </router-view>
       </div>
+
+      <!-- Preload all pages (hidden, but inside layout/page-container to satisfy QPage requirement) -->
+      <div v-show="false" class="preload-container">
+        <component
+          v-for="route in preloadRoutes"
+          :key="route.path"
+          :is="route.component"
+          @preload-mounted="onComponentLoaded(route.path)"
+        />
+      </div>
     </q-page-container>
 
     <!-- Bottom navigation as a footer -->
@@ -32,16 +42,6 @@
       <q-spinner size="50px" color="primary" />
       <div class="loading-text">Loading...</div>
     </div>
-  </div>
-
-  <!-- Preload all pages (hidden) -->
-  <div v-show="false" class="preload-container">
-    <component
-      v-for="route in preloadRoutes"
-      :key="route.path"
-      :is="route.component"
-      @preload-mounted="onComponentLoaded(route.path)"
-    />
   </div>
 </template>
 
@@ -207,7 +207,8 @@ export default defineComponent({
     );
 
     onMounted(() => {
-      $q.dark.set(true);
+      // Use light theme to match app’s light backgrounds
+      $q.dark.set(false);
 
       // Fallback: if components don't trigger mounted events, show after timeout
       fallbackTimer = setTimeout(() => {
