@@ -4,10 +4,13 @@ module.exports = {
   // Remove this if you have an higher level ESLint config file (it usually happens into a monorepos)
   root: true,
 
+  // Use Vue parser globally; it delegates to parserOptions.parser for scripts
+  parser: 'vue-eslint-parser',
+
   parserOptions: {
-    parser: '@babel/eslint-parser',
-    ecmaVersion: 2018, // Allows for the parsing of modern ECMAScript features
-    sourceType: 'module' // Allows for the use of imports
+    parser: '@typescript-eslint/parser',
+    ecmaVersion: 2020,
+    sourceType: 'module',
   },
 
   env: {
@@ -35,11 +38,11 @@ module.exports = {
     // https://eslint.vuejs.org/user-guide/#why-doesn-t-it-work-on-vue-files
     // required to lint *.vue files
     'vue',
-    
+
     // https://github.com/typescript-eslint/typescript-eslint/issues/389#issuecomment-509292674
     // Prettier has not been included as plugin to avoid performance impact
     // add it as an extension for your IDE
-    
+    '@typescript-eslint'
   ],
 
   globals: {
@@ -57,10 +60,18 @@ module.exports = {
 
   // add your custom rules here
   rules: {
-    
     'prefer-promise-reject-errors': 'off',
 
     // allow debugger during development only
     'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off'
-  }
+  },
+
+  overrides: [
+    {
+      files: ['src/models/**/*.ts'],
+      rules: {
+        '@typescript-eslint/no-unused-vars': 'off'
+      }
+    }
+  ]
 }
