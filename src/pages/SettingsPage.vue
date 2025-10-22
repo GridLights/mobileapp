@@ -454,18 +454,17 @@ export default {
 .q-page {
   display: flex;
   flex-direction: column;
-  min-height: 100vh; /* allow natural page height */
-  overflow: visible; /* avoid clipping inner content */
+  height: calc(100vh - 90px); /* match SolSpektrum to enable internal scroll */
+  overflow: hidden; /* prevent outer scroll; let inner content-area handle it */
   position: relative;
 }
 
 .content-area-settings {
   /* Provide clearance for fixed header and footer */
-  padding-top: 110px; /* approx header offset (55) + header height (40) + spacing */
-  padding-bottom: 80px; /* space for bottom nav/footer */
-  margin: 0;
-  min-height: calc(100vh - 130px);
-  overflow: visible; /* let child sections size naturally */
+  margin-top: 100px; /* header height clearance */
+  margin-bottom: 10px; /* small gap above bottom nav */
+  height: calc(100vh - 90px); /* fixed viewport height for inner scroller */
+  overflow-y: auto; /* enable scrolling within content area */
 }
 
 .content-padding {
