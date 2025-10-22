@@ -125,7 +125,7 @@
                 :max="100"
                 color="black"
                 track-color="grey-1"
-                @input="onSliderUpdate"
+                @update:model-value="onSliderUpdate"
               />
             </div>
           </div>
@@ -249,8 +249,8 @@ export default defineComponent({
   },
 
   beforeUnmount() {
-    //webservices.unsubscribeFromLiveStream();
-    //webservices.closeWebSocket();
+    webservices.unsubscribeFromLiveStream();
+    webservices.closeWebSocket();
   },
 
   methods: {
@@ -334,7 +334,10 @@ export default defineComponent({
       if (data?.state != undefined) {
         // State message incoming
         this.wledState = data.state;
-        this.sliderValue = data.bri - 255;
+        // Map WLED brightness (0-255) to UI percent (0-100)
+        if (typeof data.bri === 'number') {
+          this.sliderValue = Math.round((data.bri / 255) * 100);
+        }
       }
     },
 
@@ -405,12 +408,12 @@ export default defineComponent({
     },
 
     setBrightness(bri) {
-      const absBri = Math.abs(bri - 255);
-      // var level = Math.floor(((100 - this.sliderValue) / 100) * 255);
+      // `bri` is a UI percent value (0-100). Convert to WLED 0-255 range.
+      const wledBri = Math.round((bri / 100) * 255);
       const data = {
-        on: true,
-        bri: absBri,
-        seg: { bri: absBri },
+        on: wledBri > 0,
+        bri: wledBri,
+        seg: { bri: wledBri },
       };
 
       webservices.sendCommandToWebSocket(data);

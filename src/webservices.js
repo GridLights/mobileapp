@@ -66,13 +66,10 @@ export const webservices = {
               // Array to hold the hex color values
               const leds = [];
 
-              // Assuming each LED is represented by 3 bytes (RGB)
+              // Assuming each LED is represented by 3 bytes (RGB) and using
+              // the original MAIN behavior (thresholded values and indexing).
               for (let i = 1; i < ledData.length; i += 3) {
-                // Extract RGB values (make sure there are enough bytes)
-                // const r = ledData[i];
-                // const g = ledData[i + 1];
-                // const b = ledData[i + 2];
-
+                // Threshold to 0/255 as in MAIN's working version
                 const r = ledData[i] == 0 ? 0 : 255;
                 const g = ledData[i + 1] == 0 ? 0 : 255;
                 const b = ledData[i + 2] == 0 ? 0 : 255;
