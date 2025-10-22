@@ -61,7 +61,7 @@
                 :max="60"
                 color="black"
                 track-color="grey-1"
-                @input="onFreqInput"
+                @update:model-value="onFreqInput"
               />
             </div>
           </div>
@@ -79,6 +79,7 @@
                 :max="100"
                 color="black"
                 track-color="grey-1"
+                @update:model-value="onSpeedUpdate"
               />
             </div>
           </div>
@@ -211,6 +212,7 @@ export default defineComponent({
       intervalId: null,
       frequencyDebounceTimer: null, // Timer for debouncing
       brightnessDebounceTimer: null,
+      speedDebounceTimer: null,
       currentCustomEffect: null, // Track the current custom effect
       wledUrl: "4.3.2.1", // local
       // wledUrl: "192.168.84.43", // remote
@@ -519,6 +521,18 @@ export default defineComponent({
       }, 1000); // Delay of 1 second
     },
 
+    onSpeedUpdate() {
+      // clamp
+      if (this.speedValue > 100) this.speedValue = 100;
+      if (this.speedValue < 0) this.speedValue = 0;
+
+      clearTimeout(this.speedDebounceTimer);
+      this.speedDebounceTimer = setTimeout(() => {
+        console.log("Speed Value: " + this.speedValue);
+        this.setSpeed(this.speedValue);
+      }, 500); // small debounce
+    },
+
     // Calculate ms value based on freqValue
     calculateMs(freqValue) {
       const minFreq = 0; // Min frequency value
@@ -589,6 +603,13 @@ export default defineComponent({
     setEffect(effectId) {
       const scaledFreqValue = Math.round((this.freqValue / 50) * 255);
       const data = { seg: { fx: effectId, ix: scaledFreqValue } };
+      webservices.sendCommandToWebSocket(data);
+    },
+
+    setSpeed(speedVal) {
+      // Map 0-100% speed to 0-255 WLED scale
+      const sx = Math.round((speedVal / 100) * 255);
+      const data = { seg: { sx } };
       webservices.sendCommandToWebSocket(data);
     },
 
