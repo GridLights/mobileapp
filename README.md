@@ -1,3 +1,7 @@
+##
+'''git clone https://github.com/GridLights/mobileapp
+'''cd mobileapp
+
 ## Install the dependencies
 
 ```bash
