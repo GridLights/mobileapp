@@ -1,0 +1,155 @@
+/**
+ * SOL3M BRANCH - COPILOT RULES
+ *
+ * PURPOSE: Temporary branch to enable demo functionality
+ * Created: October 22, 2025
+ *
+ * CORE OBJECTIVE:
+ * Make SettingsPage2.vue capture device IP and store it in localStorage.
+ * Rest of app reads from localStorage and connects ONLY to real devices (no simulation).
+ *
+ * ============================================================================
+ * CRITICAL CONSTRAINT: SCOPE IS STRICTLY LIMITED
+ * ============================================================================
+ *
+ * This branch has ONE and ONLY ONE goal:
+ * - SettingsPage2.vue: Capture device IP from user input and store in localStorage
+ * - Rest of app: Read IP from localStorage and connect ONLY to real devices (never simulate)
+ * - Make minimal, surgical changes to achieve this
+ * - NO refactoring, NO improvements, NO feature additions, NO code cleanup
+ *
+ * ============================================================================
+ * BRANCHING STRATEGY & FILE CHANGES
+ * ============================================================================
+ *
+ * SOURCE OF TRUTH FOR DEVICE CONNECTION:
+ * - SettingsPage2.vue (from MAIN branch) is the integration point
+ * - This file captures the device IP and stores it in localStorage
+ * - The rest of the app relies on this localStorage value for all connections
+ *
+ * CRITICAL ARCHITECTURE:
+ * - SettingsPage2.vue's ONLY job: Capture device IP → Store in localStorage
+ * - All other pages/components: Read IP from localStorage → Connect ONLY to real device
+ * - NO simulation, NO fake data: Only when localStorage has valid IP
+ *
+ * FILES TO MODIFY:
+ * 1. src/pages/SettingsPage2.vue (ONLY THIS SETTINGS FILE)
+ *    → Integrate IP capture logic from MAIN branch
+ *    → Store IP in localStorage (key: 'ipAddress')
+ *    → Add console.log() for debugging IP capture
+ *    → Minimal changes, surgical integration only
+ *
+ * 2. src/webservices.js or device connectivity modules
+ *    → ONLY if required: Read deviceIP from localStorage
+ *    → ONLY if required: Check for valid IP before any connection
+ *    → Do NOT make changes unless pages fail without them
+ *    → Add console.log() for debugging connection attempts
+ *
+ * FILES TO NOT TOUCH:
+ * - src/pages/SettingsPage.vue (LEAVE AS-IS - do not modify)
+ * - Layouts (leave as-is unless they fail due to missing localStorage IP)
+ * - Components (leave as-is unless they fail due to missing localStorage IP)
+ * - Styling, effects, utils (NEVER touch)
+ * - Any other code
+ *
+ * ============================================================================
+ * REFERENCE FILES (NOT USED IN APP)
+ * ============================================================================
+ *
+ * The following files are created purely for functional reference and comparison.
+ * They are NOT integrated into the app routing and should NOT be modified.
+ *
+ * IndexPageMain.vue:
+ * - Copy of IndexPage.vue from MAIN branch (functional reference)
+ * - Contains the working device connection logic from MAIN
+ * - Has outdated UI/grid layout (not the SolSpektrum design we want)
+ * - Purpose: Compare working behavior with SolSpektrum's new graphics
+ * - Reason we can't use it: Uses old UI with grid containers, lacks SolSpektrum's
+ *   modern design with LED Grid, sliders, effects dropdown, and bottom tab bar
+ * - How to use: Reference the methods and device communication patterns
+ *   when debugging IndexPage.vue functionality
+ *
+ * ============================================================================
+ * DECISION FRAMEWORK: BEFORE MAKING ANY CHANGE
+ * ============================================================================
+ *
+ * Ask yourself:
+ * 1. Does this change enable the app to connect to a REAL device IP?
+ * 2. Is this the MINIMUM change required to make that work?
+ * 3. Does this remove dependency on fake simulation?
+ * 4. Are there any other changes I want to make? → STOP. Don't do them.
+ * 5. Is there a better way to do this? → Use the simpler way, not the better way.
+ *
+ * If ANY of these are false/no, DO NOT MAKE THE CHANGE.
+ *
+ * ============================================================================
+ * WHAT TO AVOID AT ALL COSTS
+ * ============================================================================
+ *
+ * - Refactoring code structure
+ * - Improving variable names or code organization
+ * - Updating dependencies or package versions
+ * - Adding new features or pages
+ * - Improving UI/UX design
+ * - Fixing bugs unrelated to device connection
+ * - Optimizing performance
+ * - Adding comments or documentation (beyond what's necessary)
+ * - Cleaning up or removing unused code
+ * - Modernizing syntax or patterns
+ *
+ * ONLY accept changes that directly enable real device IP connection.
+ *
+ * ============================================================================
+ * REFERENCE POINTS
+ * ============================================================================
+ *
+ * WORKING VERSION: MAIN branch
+ * - Device IP capture: Works correctly
+ * - Device connection: Stable
+ * - Demo capability: Fully functional with real devices
+ *
+ * CURRENT BRANCH: SolSpektrum
+ * - UI/UX design: Preferred for demo
+ * - Device connection: NON-FUNCTIONAL (uses fake simulation)
+ *
+ * SOL3M GOAL: Merge these two
+ * - Keep SolSpektrum's UI/UX
+ * - Replace device connection with MAIN's working logic
+ * - Nothing else
+ *
+ * ============================================================================
+ * GIT COMPARISON COMMAND
+ * ============================================================================
+ *
+ * To see what differs between branches:
+ * git diff main...SolSpektrum src/layouts/MainLayout.vue
+ * git diff main...SolSpektrum src/webservices.js
+ *
+ * Only adopt MAIN's changes that affect device connectivity.
+ * Ignore everything else.
+ *
+ * ============================================================================
+ * SUCCESS CRITERIA
+ * ============================================================================
+ *
+ * The Sol3m branch is complete when:
+ * ✓ App connects to REAL device IP (not fake simulation)
+ * ✓ All demo pages work with real device
+ * ✓ No other code has been changed
+ * ✓ No new files have been added
+ * ✓ No refactoring has occurred
+ * ✓ SolSpektrum's UI/UX design is preserved
+ *
+ * ============================================================================
+ * FINAL REMINDER
+ * ============================================================================
+ *
+ * RESIST THE URGE TO IMPROVE ANYTHING.
+ *
+ * This is a temporary demo branch. It will eventually be merged back or abandoned.
+ * Make ONLY the bare minimum changes to enable real device connectivity.
+ * Every other improvement can wait for a different branch or PR.
+ *
+ * Focus. Discipline. Minimal scope.
+ */
+

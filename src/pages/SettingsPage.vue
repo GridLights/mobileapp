@@ -1,9 +1,6 @@
 //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-// SettingsPage.vue
-//
-// Application settings page
-//
-// Author: Tavis Hord - tavis@sideburn.com
+// SettingsPage.vue // // Application settings page // // Author: Tavis Hord -
+tavis@sideburn.com
 //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 <template>
@@ -25,56 +22,23 @@
     <!-- Scrollable Content Area -->
     <div class="content-area-settings">
       <div class="content-padding">
-        <!-- Wi-Fi / Network Settings -->
+        <!-- Network Connection Status -->
         <div class="settings-section">
           <div class="section-header">
             <q-icon name="wifi" size="20px" />
-            <span>Wi-Fi / Network Settings</span>
+            <span>Network Connection</span>
           </div>
 
           <div class="setting-item">
             <div class="setting-label">Current Network Status</div>
             <div class="network-status">
               <div class="status-row">
-                <q-icon name="check_circle" size="16px" color="green" />
-                <span class="status-text">Connected to: Home WiFi_5G</span>
-                <q-btn
-                  flat
-                  dense
-                  size="sm"
-                  label="Disconnect"
-                  class="disconnect-btn"
+                <q-icon
+                  :name="connectionIcon"
+                  size="16px"
+                  :color="connectionStatus === 'online' ? 'green' : 'orange'"
                 />
-              </div>
-            </div>
-          </div>
-
-          <div class="setting-item">
-            <div class="setting-label">Available Networks</div>
-            <q-btn
-              flat
-              dense
-              size="sm"
-              icon="search"
-              label="Scan Network"
-              class="scan-btn"
-            />
-            <div class="networks-list">
-              <div
-                class="network-item"
-                v-for="network in availableNetworks"
-                :key="network.name"
-              >
-                <q-icon name="wifi" size="16px" />
-                <span class="network-name">{{ network.name }}</span>
-                <span class="network-type">{{ network.type }}</span>
-                <q-btn
-                  flat
-                  dense
-                  size="sm"
-                  label="Connect"
-                  class="connect-btn"
-                />
+                <span class="status-text">{{ connectionStatusText }}</span>
               </div>
             </div>
           </div>
@@ -200,7 +164,7 @@
 </template>
 
 <script>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 
 export default {
   name: "SettingsPage",
@@ -210,10 +174,9 @@ export default {
     const deviceMac = ref("IP: 192.168.1.101");
     const fileStatus = ref("No File Chosen");
 
-    const availableNetworks = ref([
-      { name: "Home WiFi_5G", type: "WPA2" },
-      { name: "Neighbor WiFi_5G", type: "WPA2" },
-    ]);
+    const connectionType = ref("unknown");
+    const connectionStatus = ref("unknown");
+    const effectiveType = ref("");
 
     const wledDevices = ref([
       { name: "Living Room Grid", ip: "192.168.1.101", selected: true },
@@ -221,12 +184,151 @@ export default {
       { name: "Main Area Grid", ip: "192.168.1.101", selected: false },
     ]);
 
+    // Detect network connection type
+    const detectConnectionType = () => {
+      // Check if online
+      connectionStatus.value = navigator.onLine ? "online" : "offline";
+
+      // Try to get Network Information API (different browsers use different names)
+      const connection =
+        navigator.connection ||
+        navigator.mozConnection ||
+        navigator.webkitConnection ||
+        null;
+
+      if (connection) {
+        // Get connection type - prefer 'type' over 'effectiveType'
+        // 'type' can be: "wifi", "cellular", "ethernet", "none", "unknown"
+        // 'effectiveType' indicates speed: "4g", "3g", "slow-2g", "2g" (NOT connection type!)
+        if (connection.type) {
+          // Use the type directly if available
+          connectionType.value = connection.type;
+        } else {
+          // If type is not available, we need to infer from other properties
+          const isMobile =
+            /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+              navigator.userAgent
+            );
+
+          if (connection.effectiveType) {
+            const effType = connection.effectiveType.toLowerCase();
+            // Only infer cellular if we're on mobile AND effectiveType suggests it
+            if (
+              isMobile &&
+              (effType.includes("4g") ||
+                effType.includes("3g") ||
+                effType.includes("2g"))
+            ) {
+              connectionType.value = "cellular";
+              effectiveType.value = connection.effectiveType;
+            } else if (
+              !isMobile &&
+              connection.downlink &&
+              connection.downlink > 10
+            ) {
+              // Desktop with fast connection likely means Ethernet
+              connectionType.value = "ethernet";
+              effectiveType.value = connection.effectiveType;
+            } else {
+              // Default to unknown if we can't determine
+              connectionType.value = "unknown";
+              effectiveType.value = connection.effectiveType;
+            }
+          } else {
+            // No type or effectiveType - default to unknown
+            connectionType.value = "unknown";
+          }
+        }
+
+        // Store effectiveType if available
+        if (connection.effectiveType) {
+          effectiveType.value = connection.effectiveType;
+        }
+
+        // Listen for connection changes
+        connection.addEventListener("change", () => {
+          if (connection.type) {
+            connectionType.value = connection.type;
+          } else {
+            // Re-run detection logic
+            const isMobile =
+              /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+                navigator.userAgent
+              );
+
+            if (connection.effectiveType) {
+              const effType = connection.effectiveType.toLowerCase();
+              if (
+                isMobile &&
+                (effType.includes("4g") ||
+                  effType.includes("3g") ||
+                  effType.includes("2g"))
+              ) {
+                connectionType.value = "cellular";
+              } else if (
+                !isMobile &&
+                connection.downlink &&
+                connection.downlink > 10
+              ) {
+                connectionType.value = "ethernet";
+              } else {
+                connectionType.value = "unknown";
+              }
+            }
+          }
+
+          if (connection.effectiveType) {
+            effectiveType.value = connection.effectiveType;
+          }
+          connectionStatus.value = navigator.onLine ? "online" : "offline";
+        });
+      } else {
+        // Fallback: try to detect based on online status and user agent
+        const isMobile =
+          /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+            navigator.userAgent
+          );
+
+        if (!navigator.onLine) {
+          connectionType.value = "none";
+        } else {
+          // If no API available, guess based on device type
+          connectionType.value = isMobile ? "unknown" : "ethernet";
+        }
+      }
+
+      // Listen for online/offline events
+      const handleOnline = () => {
+        connectionStatus.value = "online";
+        // Re-detect connection type when coming back online
+        const conn =
+          navigator.connection ||
+          navigator.mozConnection ||
+          navigator.webkitConnection ||
+          null;
+        if (!conn) {
+          connectionType.value = "unknown";
+        }
+      };
+
+      const handleOffline = () => {
+        connectionStatus.value = "offline";
+        connectionType.value = "none";
+      };
+
+      window.addEventListener("online", handleOnline);
+      window.addEventListener("offline", handleOffline);
+    };
+
     // Load IP Address from local storage on page reload
     onMounted(() => {
       const savedIp = localStorage.getItem("ipAddress");
       if (savedIp) {
         ipAddress.value = savedIp;
       }
+
+      // Detect connection type on mount
+      detectConnectionType();
     });
 
     const saveIpAddress = () => {
@@ -255,18 +357,53 @@ export default {
       // This would trigger a file picker
     };
 
+    // Computed properties for connection display
+    const connectionStatusText = computed(() => {
+      if (connectionStatus.value === "offline") {
+        return "No internet connection";
+      }
+
+      const typeMap = {
+        wifi: "Connected via WiFi",
+        cellular: `Connected via Cellular${
+          effectiveType.value ? ` (${effectiveType.value})` : ""
+        }`,
+        ethernet: "Connected via Ethernet",
+        none: "No network connection",
+        unknown: "Connected (connection type unknown)",
+      };
+
+      return (
+        typeMap[connectionType.value] || `Connected via ${connectionType.value}`
+      );
+    });
+
+    const connectionIcon = computed(() => {
+      const iconMap = {
+        wifi: "wifi",
+        cellular: "signal_cellular_alt",
+        ethernet: "cable",
+        none: "signal_wifi_off",
+        unknown: "cloud",
+      };
+      return iconMap[connectionType.value] || "cloud";
+    });
+
     return {
       ipAddress,
       deviceName,
       deviceMac,
       fileStatus,
-      availableNetworks,
       wledDevices,
       saveIpAddress,
       validateIpAddress,
       selectDevice,
       checkForUpdates,
       chooseFile,
+      connectionType,
+      connectionStatus,
+      connectionStatusText,
+      connectionIcon,
     };
   },
   methods: {

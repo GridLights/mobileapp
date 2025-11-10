@@ -17,19 +17,6 @@
           <span class="ip-prefix">http://</span>
         </template>
       </q-input>
-
-      <div style="height:12px"></div>
-
-      <p class="label-font">LED Color Order:</p>
-      <q-select
-        v-model="colorOrder"
-        :options="colorOptions"
-        filled
-        style="width: 100%"
-        class="color-order-select"
-        emit-value
-        map-options
-      />
     </div>
     <!-- Save Button -->
     <div class="q-pl-md mt-4">
@@ -53,11 +40,6 @@ export default {
   name: "SettingsPage",
   setup() {
     const ipAddress = ref("4.3.2.1");
-    const colorOrder = ref("RGB");
-    const colorOptions = [
-      { label: "RGB", value: "RGB" },
-      { label: "BRG", value: "BRG" },
-    ];
 
     // Load settings from local storage on page reload
     onMounted(() => {
@@ -65,18 +47,11 @@ export default {
       if (savedIp) {
         ipAddress.value = savedIp;
       }
-
-      const savedOrder = localStorage.getItem("ledColorOrder");
-      if (savedOrder) {
-        colorOrder.value = savedOrder;
-      }
     });
 
     const saveIpAddress = () => {
       console.log("Saved IP Address: http://" + ipAddress.value);
       localStorage.setItem("ipAddress", ipAddress.value);
-      console.log("Saved LED color order:", colorOrder.value);
-      localStorage.setItem("ledColorOrder", colorOrder.value);
     };
 
     const validateIpAddress = (value) => {
@@ -90,8 +65,6 @@ export default {
       ipAddress,
       saveIpAddress,
       validateIpAddress,
-      colorOrder,
-      colorOptions,
     };
   },
 };
@@ -206,14 +179,5 @@ p {
 .button-container {
   display: flex;
   justify-content: center;
-}
-
-/* Color order select should match the input styling */
-.color-order-select ::v-deep .q-field__input {
-  color: #000000 !important;
-}
-
-.color-order-select ::v-deep .q-field__native {
-  color: #000000 !important;
 }
 </style>
