@@ -1,5 +1,5 @@
 <template>
-  <q-page class="no-text-select">
+  <q-page class="no-text-select journeys-page">
     <!-- Fixed Header Container -->
     <div class="header-container">
       <!-- Left Icon -->
@@ -375,73 +375,4 @@ export default {
 };
 </script>
 
-<style scoped>
-.q-page {
-  display: flex;
-  flex-direction: column;
-  height: calc(100vh - 90px); /* Account for bottom nav */
-  overflow: hidden;
-  position: relative;
-}
-
-.content-padding {
-  margin-top: 10px;
-  padding: 0 20px 0px 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.journey-item {
-  margin-bottom: 1rem;
-  width: 300px;
-}
-
-.journey-line {
-  padding: 12px;
-  background-color: #f5f5f5;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
-  font-size: 14px;
-  white-space: pre-wrap;
-  -webkit-font-smoothing: antialiased;
-}
-
-.journey-line:hover {
-  background-color: #e0e0e0;
-}
-
-.selected-item {
-  background-color: rgba(0, 0, 0, 0.1);
-}
-
-.selected-journey-details {
-  margin-top: 20px;
-  padding: 20px;
-  background-color: #f9f9f9;
-  border-radius: 8px;
-  width: 300px;
-}
-
-.step-item {
-  padding: 8px 0;
-  border-bottom: 1px solid #e0e0e0;
-}
-
-.start-button {
-  margin-top: 15px;
-  padding: 10px 20px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.start-button:hover {
-  background-color: #0056b3;
-}
-</style>
+<!-- Styles moved to src/css/pages/JourneysPage.scss -->
