@@ -33,8 +33,8 @@
         align="center"
         narrow-indicator
       >
-        <q-tab name="network" label="Network" />
-        <q-tab name="device" label="Device" />
+        <q-tab name="network" label="Device" />
+        <q-tab name="device" label="Browser" />
       </q-tabs>
     </div>
 
@@ -228,18 +228,30 @@
 
               <div class="setting-item">
                 <div class="setting-label">IP Address</div>
-                <q-input
-                  v-model="ipAddress"
-                  type="text"
-                  outlined
-                  dense
-                  class="device-input"
-                  @update:model-value="validateIpAddress"
-                >
-                  <template v-slot:prepend>
-                    <span class="ip-prefix">http://</span>
-                  </template>
-                </q-input>
+                <div class="ip-input-row">
+                  <div class="connection-indicator" :title="getConnectionLabel()">
+                    <q-icon
+                      :name="getConnectionIcon()"
+                      :color="getConnectionColor()"
+                      size="24px"
+                    />
+                    <span class="connection-label" :style="{ color: getConnectionColor() }">
+                      {{ getConnectionLabel() }}
+                    </span>
+                  </div>
+                  <q-input
+                    v-model="ipAddress"
+                    type="text"
+                    outlined
+                    dense
+                    class="device-input"
+                    @update:model-value="validateIpAddress"
+                  >
+                    <template v-slot:prepend>
+                      <span class="ip-prefix">http://</span>
+                    </template>
+                  </q-input>
+                </div>
               </div>
             </div>
 
@@ -262,16 +274,18 @@
 </template>
 
 <script>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
+import webservices, { ConnectionState } from "../webservices";
 
 export default {
   name: "SettingsPage",
   setup() {
-    const activeTab = ref("network");
+    const activeTab = ref("device");
     const ipAddress = ref("4.3.2.1");
     const deviceName = ref("Living Room Led Strip");
     const deviceMac = ref("IP: 192.168.1.101");
     const fileStatus = ref("No File Chosen");
+    const connectionState = ref(webservices.getConnectionState());
 
     const availableNetworks = ref([
       { name: "Home WiFi_5G", type: "WPA2" },
@@ -290,7 +304,67 @@ export default {
       if (savedIp) {
         ipAddress.value = savedIp;
       }
+
+      // Set up connection state listener
+      connectionState.value = webservices.getConnectionState();
+      webservices.onConnectionStateChange = (state) => {
+        connectionState.value = state;
+      };
     });
+
+    onUnmounted(() => {
+      // Clean up listener
+      webservices.onConnectionStateChange = null;
+    });
+
+    // Get color for connection state indicator
+    const getConnectionColor = () => {
+      switch (connectionState.value) {
+        case ConnectionState.CONNECTED:
+          return "green";
+        case ConnectionState.CONNECTING:
+        case ConnectionState.RECONNECTING:
+          return "orange";
+        case ConnectionState.FAILED:
+          return "red";
+        case ConnectionState.DISCONNECTED:
+        default:
+          return "grey";
+      }
+    };
+
+    // Get icon for connection state
+    const getConnectionIcon = () => {
+      switch (connectionState.value) {
+        case ConnectionState.CONNECTED:
+          return "check_circle";
+        case ConnectionState.CONNECTING:
+        case ConnectionState.RECONNECTING:
+          return "sync";
+        case ConnectionState.FAILED:
+          return "error";
+        case ConnectionState.DISCONNECTED:
+        default:
+          return "cancel";
+      }
+    };
+
+    // Get label for connection state
+    const getConnectionLabel = () => {
+      switch (connectionState.value) {
+        case ConnectionState.CONNECTED:
+          return "Connected";
+        case ConnectionState.CONNECTING:
+          return "Connecting...";
+        case ConnectionState.RECONNECTING:
+          return "Reconnecting...";
+        case ConnectionState.FAILED:
+          return "Failed";
+        case ConnectionState.DISCONNECTED:
+        default:
+          return "Disconnected";
+      }
+    };
 
     const saveIpAddress = () => {
       console.log("Saved IP Address: http://" + ipAddress.value);
@@ -326,11 +400,15 @@ export default {
       fileStatus,
       availableNetworks,
       wledDevices,
+      connectionState,
       saveIpAddress,
       validateIpAddress,
       selectDevice,
       checkForUpdates,
       chooseFile,
+      getConnectionColor,
+      getConnectionIcon,
+      getConnectionLabel,
     };
   },
   methods: {

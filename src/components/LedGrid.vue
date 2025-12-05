@@ -17,6 +17,7 @@
       v-model="powerState"
       class="power-button-overlay"
       :size="32"
+      :connectionState="connectionState"
       @toggle="handlePowerToggle"
     />
 
@@ -302,6 +303,7 @@
 
 <script>
 import PowerSwitch from "./PowerSwitch.vue";
+import webservices from "../webservices";
 
 export default {
   components: {
@@ -328,6 +330,7 @@ export default {
   data() {
     return {
       powerState: this.powerOn,
+      connectionState: webservices.getConnectionState(),
       // Base positioning (for row 0, column 0)
       dotRadius: 5,
       baseX: 118,
@@ -358,6 +361,22 @@ export default {
       row6XOffset: 0,
       row6YOffset: 108,
     };
+  },
+  mounted() {
+    // Set up connection state listener
+    this.connectionState = webservices.getConnectionState();
+    this._prevOnConnectionStateChange = webservices.onConnectionStateChange;
+    webservices.onConnectionStateChange = (state) => {
+      this.connectionState = state;
+      // Call any previously registered handler
+      if (this._prevOnConnectionStateChange) {
+        this._prevOnConnectionStateChange(state);
+      }
+    };
+  },
+  beforeUnmount() {
+    // Restore previous handler
+    webservices.onConnectionStateChange = this._prevOnConnectionStateChange || null;
   },
   watch: {
     powerOn(newVal) {

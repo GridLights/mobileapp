@@ -1,6 +1,16 @@
 // webservices.js
+import gconsole from './utils/gconsole.js';
 
 let ws = null; // WebSocket instance
+
+// Connection state constants
+export const ConnectionState = {
+  DISCONNECTED: 'disconnected',
+  CONNECTING: 'connecting',
+  CONNECTED: 'connected',
+  RECONNECTING: 'reconnecting',
+  FAILED: 'failed',
+};
 
 export const webservices = {
   reconnectTimeout: 3000, // Initial timeout for reconnect attempts (in milliseconds)
@@ -8,6 +18,36 @@ export const webservices = {
   reconnectAttempts: 0, // Counter for reconnection attempts
   lastProcessedTime: 0,
   commandQueue: [], // Queue for commands
+  connectionState: ConnectionState.DISCONNECTED, // Current connection state
+  onConnectionStateChange: null, // Callback for state changes
+
+  /**
+   * Set the connection state and notify listeners.
+   * @param {string} state - The new connection state.
+   */
+  setConnectionState(state) {
+    this.connectionState = state;
+    gconsole.log(`Connection state changed to: ${state}`, "ws-state");
+    if (this.onConnectionStateChange) {
+      this.onConnectionStateChange(state);
+    }
+  },
+
+  /**
+   * Get the current connection state.
+   * @returns {string} The current connection state.
+   */
+  getConnectionState() {
+    return this.connectionState;
+  },
+
+  /**
+   * Check if the WebSocket is currently connected.
+   * @returns {boolean} True if connected.
+   */
+  isConnected() {
+    return this.connectionState === ConnectionState.CONNECTED;
+  },
 
   /**
    * Initialize a WebSocket connection.
@@ -22,11 +62,13 @@ export const webservices = {
     const self = this; // Preserve `this` context for inner functions
 
     function connect() {
+      self.setConnectionState(ConnectionState.CONNECTING);
       ws = new WebSocket(wsUrl);
 
       ws.onopen = () => {
-        console.log("WebSocket connection established.");
+        gconsole.log("WebSocket connection established.", "ws-open");
         self.reconnectAttempts = 0; // Reset the reconnection attempts on successful connection
+        self.setConnectionState(ConnectionState.CONNECTED);
 
         // Process queued commands
         while (self.commandQueue.length > 0) {
@@ -46,10 +88,10 @@ export const webservices = {
           const now = Date.now();
           // from the live stream, only process every X ms
           const processTime = 50;
-          console.log("here");
+          // gconsole.log("here", "ws-general");
 
           if (now - self.lastProcessedTime >= processTime) {
-            console.log("not here");
+            // gconsole.log("not here", "ws-general");
             self.lastProcessedTime = now;
 
             const reader = new FileReader();
@@ -61,7 +103,7 @@ export const webservices = {
               // Skip the first byte (header byte 'L')
               const ledData = byteArray.slice(1);
 
-              console.log(ledData);
+              // console.log(ledData);
 
               // Helper: build color array from a given offset
               const buildColorsFromOffset = (offset) => {
@@ -112,7 +154,8 @@ export const webservices = {
                 n: 1,
               };
 
-              console.log("Decoded LED Data:", response);
+              // gconsole.log("Decoded LED Data:", "ws-general");
+              // console.log(response);
 
               // Use the correct callback for live stream data
               if (onLiveStreamDataCallback) {
@@ -161,24 +204,26 @@ export const webservices = {
           // If it's already text or another valid format
           try {
             const parsedData = JSON.parse(messageData);
-            console.log("Parsed data:", parsedData);
+            // console.info("Parsed data:", parsedData);
             if (onMessageCallback) {
               onMessageCallback(parsedData);
             }
           } catch (e) {
-            console.error("Error parsing JSON:", e);
+            gconsole.error("Error parsing JSON:" + e, "error");
           }
         }
       };
 
       ws.onclose = () => {
-        console.log("WebSocket connection closed.");
+        gconsole.log("WebSocket connection closed.","ws-closed");
+        self.setConnectionState(ConnectionState.DISCONNECTED);
         ws = null; // Reset WebSocket instance on close
         self.handleReconnect(wsUrl, onMessageCallback, onLiveStreamDataCallback, onConnectedCallback);
       };
 
       ws.onerror = (error) => {
-        console.error("WebSocket error:", error);
+        gconsole.error("!!! WebSocket error: " , "ws-error");
+        console.error(error);
         ws.close(); // Explicitly close the socket on error
       };
     }
@@ -196,8 +241,9 @@ export const webservices = {
   handleReconnect(wsUrl, onMessageCallback, onLiveStreamDataCallback, onConnectedCallback) {
     if (this.reconnectAttempts < this.maxReconnectAttempts) {
       this.reconnectAttempts++;
+      this.setConnectionState(ConnectionState.RECONNECTING);
       const delay = this.reconnectTimeout * this.reconnectAttempts; // Exponential backoff
-      console.log(`Attempting to reconnect in ${delay / 1000} seconds...`);
+      gconsole.log(`Attempting to reconnect in ${delay / 1000} seconds...`, "ws-reconnect");
 
       setTimeout(() => {
         this.initWebSocket(
@@ -208,9 +254,8 @@ export const webservices = {
         );
       }, delay);
     } else {
-      console.error(
-        "Max reconnection attempts reached. Could not reconnect to WebSocket."
-      );
+      this.setConnectionState(ConnectionState.FAILED);
+      gconsole.error("Max reconnection attempts reached. Could not reconnect to WebSocket.", "ws-error");
     }
   },
 
@@ -220,9 +265,9 @@ export const webservices = {
   subscribeToLiveStream() {
     if (ws && ws.readyState === WebSocket.OPEN) {
       ws.send(JSON.stringify({ lv: true }));
-      console.log("Subscribed to live LED stream.");
+      gconsole.log("Subscribed to live LED stream.", "ws-open");
     } else {
-      console.error("WebSocket is not open. Cannot subscribe to live stream.");
+      gconsole.error("WebSocket is not open. Cannot subscribe to live stream..", "ws-error");
     }
     // console.log("nothing");
   },
@@ -241,11 +286,9 @@ export const webservices = {
   unsubscribeFromLiveStream() {
     if (ws && ws.readyState === WebSocket.OPEN) {
       ws.send(JSON.stringify({ lv: false }));
-      console.log("Unsubscribed from live LED stream.");
+      gconsole.log("Unsubscribed from live LED stream.", "ws-closed");
     } else {
-      console.error(
-        "WebSocket is not open. Cannot unsubscribe from live stream."
-      );
+      gconsole.error("WebSocket is not open. Cannot unsubscribe from live stream.", "ws-error");
     }
   },
 
@@ -256,9 +299,10 @@ export const webservices = {
   sendCommandToWebSocket(command) {
     if (ws && ws.readyState === WebSocket.OPEN) {
       ws.send(JSON.stringify(command));
-      console.log("Command sent via WebSocket:", command);
+      gconsole.log("Command sent via WebSocket:  ", "ws-open");
+      console.log(command);
     } else {
-      console.warn("WebSocket is not open. Queuing command:", command);
+      gconsole.warn("WebSocket is not open. Queuing command:" + command, "ws-closed");
       this.commandQueue.push(command);
     }
   },

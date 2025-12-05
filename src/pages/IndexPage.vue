@@ -140,6 +140,7 @@
 import { defineComponent } from "vue";
 import LedGrid from "src/components/LedGrid.vue";
 import webservices from "../webservices";
+import gconsole from "../utils/gconsole";
 
 export default defineComponent({
   name: "IndexPage",
@@ -242,8 +243,11 @@ export default defineComponent({
         // set selectedItem for consistency with MAIN’s highlighting logic
         this.selectedItem = item.id ?? null;
       } catch (e) {
-        console.error("Error applying selected effect:", e);
+        gconsole.error("Error applying selected effect: " + (e && e.message ? e.message : e), 'index-page');
       }
+    },
+    currentCustomEffect(newVal, oldVal) {
+      gconsole.log(`*******  currentCustomEffect changed from ${oldVal} to ${newVal}`, 'index-page');
     },
   },
 
@@ -291,7 +295,7 @@ export default defineComponent({
 
     // Handle power button toggle from LedGrid
     handlePowerChange(newState) {
-      console.log("Power state changed:", newState);
+      gconsole.log("Power state changed: " + JSON.stringify(newState), 'index-page');
       this.setPower(newState);
     },
 
@@ -343,8 +347,7 @@ export default defineComponent({
 
     // called when websocket receives an inbound message
     handleWebSocketMessage(data) {
-      console.log("web socket dat");
-      console.log(data);
+      gconsole.log("web socket dat: " + JSON.stringify(data), 'index-page');
       if (data?.state !== undefined) {
         this.wledState = data.state;
         if (typeof data.state.bri === "number") {
@@ -409,11 +412,11 @@ export default defineComponent({
     },
 
     logSliderValue() {
-      console.log("slider: " + this.sliderValue);
+      gconsole.log("slider: " + this.sliderValue, 'index-page');
     },
 
     setStrobe() {
-      console.log("strobing: ");
+      gconsole.log("strobing: ", 'index-page');
 
       const data = {
         tt: 0,
@@ -450,7 +453,7 @@ export default defineComponent({
 
       // Set a new debounce timer
       this.brightnessDebounceTimer = setTimeout(() => {
-        console.log("Slider Value: " + this.sliderValue);
+        gconsole.log("Slider Value: " + this.sliderValue, 'index-page');
 
         this.setBrightness(this.sliderValue);
       }, 1000); // Delay of 1 second
@@ -458,7 +461,7 @@ export default defineComponent({
 
     // Temporary mapping of list item click to action/effect
     onListItemClick(itemNumber, effectName, effectId) {
-      console.log("Clicked on item:", itemNumber);
+      gconsole.log("Clicked on item: " + JSON.stringify(itemNumber), 'index-page');
 
       // If an interval is already running, clear it first
       if (this.intervalId !== null) {
@@ -487,7 +490,7 @@ export default defineComponent({
       if (this.timerValue < 0) {
         this.timerValue = 0;
       }
-      console.log("Timer Value: " + this.timerValue);
+      gconsole.log("Timer Value: " + this.timerValue, 'index-page');
     },
 
     //frequency input field handler
@@ -503,7 +506,7 @@ export default defineComponent({
 
       // Set a new debounce timer
       this.frequencyDebounceTimer = setTimeout(() => {
-        console.log("Frequency Value: " + this.freqValue);
+        gconsole.log("Frequency Value: " + this.freqValue, 'index-page');
 
         this.setFrequency(this.freqValue);
 
@@ -521,7 +524,7 @@ export default defineComponent({
 
       clearTimeout(this.speedDebounceTimer);
       this.speedDebounceTimer = setTimeout(() => {
-        console.log("Speed Value: " + this.speedValue);
+        gconsole.log("Speed Value: " + this.speedValue, 'index-page');
         this.setSpeed(this.speedValue);
       }, 500); // small debounce
     },

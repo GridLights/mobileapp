@@ -7,7 +7,7 @@
 ## Little Meat 🥩
 
 - [x] ~~Frequency slider should be 0-60, not 0-100~~ - **IGNORE** (Already is 0-60)
-- [ ] Little indicator LED next to the IP type-in to indicate websocket status
+- [x] Little indicator LED next to the IP type-in to indicate websocket status
 - [x] ~~Change the white circle background (BUG2.png) to a white hexagon~~ - **DONE**
 
 ## Little Bugs 🐛
