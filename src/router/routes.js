@@ -18,7 +18,7 @@ const routes = [
       },
       {
         path: "/settings",
-        component: () => import("src/pages/SettingsPage2.vue"),
+        component: () => import("src/pages/SettingsPage.vue"),
       },
     ],
   },

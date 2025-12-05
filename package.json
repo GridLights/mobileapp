@@ -8,7 +8,10 @@
   "scripts": {
     "lint": "eslint --ext .js,.vue ./",
     "format": "prettier --write \"**/*.{js,vue,scss,html,md,json}\" --ignore-path .gitignore",
-    "test": "echo \"No test specified\" && exit 0"
+    "test": "npx playwright test",
+    "test:ui": "npx playwright test --ui",
+    "test:headed": "npx playwright test --headed",
+    "test:debug": "npx playwright test --debug"
   },
   "dependencies": {
     "@capacitor/assets": "^3.0.5",
@@ -22,6 +25,7 @@
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.13.14",
+    "@playwright/test": "^1.57.0",
     "@quasar/app-webpack": "^3.0.0",
     "eslint": "^8.10.0",
     "eslint-config-prettier": "^8.1.0",

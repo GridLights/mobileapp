@@ -1,4 +1,12 @@
 // app global css in SCSS form
+
+// Import page-specific styles
+@import './pages/IndexPage.scss';
+@import './pages/JourneysPage.scss';
+@import './pages/RandomizerPage.scss';
+@import './pages/SequencerPage.scss';
+@import './pages/SettingsPage.scss';
+
 :root {
   --controls-bg-color: #e5e5e5;
   --controls-icon-color: #555;

@@ -37,3 +37,4 @@ yarn-error.log*
 *.ntvs*
 *.njsproj
 *.sln
+/.quasar-ide-helper/

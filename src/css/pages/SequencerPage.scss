@@ -1,0 +1,249 @@
+/* SequencerPage.scss - Styles for the Sequencer page */
+
+.sequencer-page {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 90px);
+  overflow: hidden;
+  position: relative;
+}
+
+.sequencer-page .content-area-sequencer {
+  margin-top: 130px;
+  margin-bottom: 10px;
+  height: calc(100vh - 112px);
+  overflow-y: auto;
+}
+
+.sequencer-page .content-padding {
+  margin-top: 10px;
+  padding: 0 20px 0px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.sequencer-page .description-bar {
+  font-size: 12px;
+  color: var(--header-text-color);
+  padding: 20px 20px;
+  text-align: center;
+  position: fixed;
+  top: 80px;
+  left: 0;
+  right: 0;
+  z-index: 10;
+}
+
+.sequencer-page .effect-queue-card {
+  width: 100%;
+  max-width: 600px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.sequencer-page .queue-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e0e0e0;
+  background: #f5f5f5;
+}
+
+.sequencer-page .queue-title {
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--controls-icon-color);
+}
+
+.sequencer-page .queue-icon {
+  margin-right: 8px;
+}
+
+.sequencer-page .start-btn {
+  background-color: var(--controls-button--color);
+  border-radius: 4px;
+  font-size: 10px;
+}
+
+.sequencer-page .stop-btn {
+  background-color: var(--controls-button--color);
+  border-radius: 4px;
+  font-size: 10px;
+  margin-left: 4px;
+}
+
+.sequencer-page .queue-content {
+  min-height: 200px;
+  padding: 20px;
+}
+
+.sequencer-page .empty-queue {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 160px;
+  color: #999;
+}
+
+.sequencer-page .empty-message {
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.sequencer-page .empty-subtitle {
+  font-size: 14px;
+  color: #bbb;
+}
+
+.sequencer-page .effect-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sequencer-page .effect-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-radius: 6px;
+  border: 1px solid #e0e0e0;
+  color: var(--controls-label-color);
+  background-color: var(--controls-bg-color);
+}
+
+.sequencer-page .effect-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.sequencer-page .effect-name {
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.sequencer-page .effect-duration {
+  font-size: 12px;
+  color: #666;
+}
+
+.sequencer-page .remove-btn {
+  color: #999;
+}
+
+.sequencer-page .remove-btn:hover {
+  color: #f44336;
+}
+
+.sequencer-page .available-effects-section {
+  width: 100%;
+  max-width: 600px;
+  margin-top: 30px;
+}
+
+.sequencer-page .section-header {
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  font-size: 18px;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.sequencer-page .section-icon {
+  margin-right: 8px;
+}
+
+.sequencer-page .effects-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sequencer-page .effect-card {
+  background: #e8e8e8;
+  border-radius: 8px;
+  padding: 16px;
+  border: 1px solid #d0d0d0;
+}
+
+.sequencer-page .effect-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.sequencer-page .effect-card-title {
+  font-weight: 600;
+  font-size: 16px;
+  color: #333;
+}
+
+.sequencer-page .add-to-queue-btn {
+  background-color: var(--controls-button--color);
+  color: white;
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.sequencer-page .effect-parameters {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sequencer-page .parameter-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sequencer-page .parameter-row:not(.brightness-row) {
+  justify-content: space-between;
+}
+
+.sequencer-page .parameter-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  color: var(--controls-label-color);
+  font-weight: 500;
+  min-width: 80px;
+}
+
+.sequencer-page .parameter-input {
+  width: 120px;
+}
+
+.sequencer-page .parameter-input :deep(.q-field__control) {
+  background-color: var(--controls-input-field-bg-color) !important;
+  border-radius: 4px;
+}
+
+.sequencer-page .parameter-input :deep(.q-field__native) {
+  color: var(--controls-label-color) !important;
+}
+
+.sequencer-page .brightness-row {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.sequencer-page .brightness-slider {
+  width: 100%;
+  --q-primary: var(--controls-slider-bar--color);
+  --q-track-color: var(--controls-slider-bar--color);
+}
