@@ -1,0 +1,48 @@
+# GridLights Mobile App - Development Instructions
+
+## UI Verification After Changes
+
+**IMPORTANT:** After making any UI-related changes to Vue components, always verify the changes visually:
+
+1. **Use the browser_action tool** to launch the app at `http://localhost:8080` and visually inspect the changes
+2. **Run Playwright tests** to ensure UI functionality works correctly:
+   - `npm test` - Run all tests headlessly
+   - `npm run test:headed` - Run tests with visible browser
+   - `npm run test:ui` - Run tests with Playwright UI mode
+   - `npm run test:debug` - Debug tests step by step
+
+## Development Workflow
+
+1. Make code changes to Vue components
+2. **Always check the UI** using browser_action or Playwright tests
+3. Fix any visual or functional issues discovered
+4. Verify the fix visually before completing the task
+
+## Test Files Location
+
+- Tests are located in the `tests/` directory
+- Use `*.spec.js` naming convention for test files
+- Configuration is in `playwright.config.js`
+
+## Common Test Commands
+
+```bash
+# Run all tests
+npm test
+
+# Run tests with visible browser
+npm run test:headed
+
+# Run specific test file
+npx playwright test tests/settings.spec.js
+
+# Run tests in UI mode (interactive)
+npm run test:ui
+```
+
+## Project-Specific Notes
+
+- The app runs on `http://localhost:8080` with hash-based routing (`/#/`)
+- Pages use Quasar Framework components
+- Header styling is defined globally in `src/css/app.scss`
+- CSS variables are defined in `:root` in `app.scss`

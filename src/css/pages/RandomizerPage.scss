@@ -1,0 +1,218 @@
+/* RandomizerPage.scss - Styles for the Randomizer page */
+
+.randomizer-page {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 90px);
+  overflow: hidden;
+  position: relative;
+}
+
+.randomizer-page .content-area-randomizer {
+  margin-top: 80px;
+  margin-bottom: 10px;
+  height: calc(100vh - 90px);
+  overflow-y: auto;
+}
+
+.randomizer-page .content-padding {
+  margin-top: 10px;
+  padding: 0 20px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.randomizer-page .start-timer-section {
+  width: 100%;
+  text-align: center;
+  padding-top: 3px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e0e0e0;
+  margin-bottom: 20px;
+}
+
+.randomizer-page .tap-to-start {
+  font-size: 16px;
+  color: #666;
+  cursor: pointer;
+  user-select: none;
+}
+
+.randomizer-page .timer-display {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+.randomizer-page .wave-sliders-section {
+  width: 100%;
+  margin-bottom: 15px;
+  touch-action: none;
+}
+
+.randomizer-page .wave-sliders-background {
+  background-color: var(--controls-bg-color);
+  border-radius: 8px;
+  padding: 20px 15px;
+  margin: 0 0px;
+}
+
+.randomizer-page .wave-slider-container {
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-end;
+  height: 200px;
+  touch-action: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.randomizer-page .wave-slider {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  width: 60px;
+}
+
+.randomizer-page .wave-slider-track {
+  position: relative;
+  width: 100%;
+  height: 120px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: flex-end;
+  padding-right: 5px;
+}
+
+.randomizer-page .vertical-slider {
+  height: 120px;
+  width: 40px;
+  --q-primary: #333;
+  --q-track-color: #e0e0e0;
+}
+
+.randomizer-page .wave-label {
+  text-align: center;
+  font-size: 12px;
+  width: 100%;
+}
+
+.randomizer-page .wave-symbol {
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 2px;
+}
+
+.randomizer-page .wave-name {
+  color: #666;
+  margin-bottom: 2px;
+}
+
+.randomizer-page .wave-freq {
+  color: #999;
+  font-size: 11px;
+}
+
+.randomizer-page .horizontal-sliders-section {
+  width: 100%;
+  margin-bottom: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.randomizer-page .slider-control-section {
+  background-color: var(--controls-bg-color);
+  border-radius: 8px;
+  padding: 8px 16px;
+}
+
+.randomizer-page .slider-row {
+  margin-bottom: 0;
+}
+
+.randomizer-page .slider-label {
+  font-size: 14px;
+  color: #333;
+  margin-bottom: -8px;
+  font-weight: 500;
+}
+
+.randomizer-page .slider-value {
+  font-size: 12px;
+  color: #666;
+  text-align: right;
+  margin-bottom: 0px;
+}
+
+.randomizer-page .slider-container {
+  position: relative;
+}
+
+.randomizer-page .custom-slider {
+  --q-primary: #333;
+  --q-track-color: #e0e0e0;
+}
+
+.randomizer-page .slider-scale {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 5px;
+  font-size: 10px;
+  color: #999;
+}
+
+.randomizer-page .effects-library-section {
+  width: 100%;
+}
+
+.randomizer-page .section-header {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 15px;
+}
+
+.randomizer-page .effects-list {
+  background-color: var(--controls-bg-color);
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.randomizer-page .effect-item {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  margin-bottom: 8px;
+  background-color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.randomizer-page .effect-item:hover {
+  background-color: #f8f8f8;
+}
+
+.randomizer-page .effect-item.active {
+  background-color: #f0f0f0;
+}
+
+.randomizer-page .effect-checkbox {
+  margin-right: 12px;
+}
+
+.randomizer-page .effect-name {
+  flex: 1;
+  font-size: 14px;
+  color: #333;
+}
+
+.randomizer-page .effect-add-btn {
+  margin-left: 12px;
+}

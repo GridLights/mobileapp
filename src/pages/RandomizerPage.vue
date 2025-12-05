@@ -1,292 +1,275 @@
+//:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+// RandomizerPage.vue
+//
+// Randomizer effects page
+//
+// Author: Tavis Hord - tavis@sideburn.com
+//:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
 <template>
-  <q-page padding>
-    <div class="no-text-select q-pa-md safe-header">
-      <h1 class="text-h4 q-mb-md">Sol Spektrum</h1>
-      <q-separator class="q-mb-lg"></q-separator>
+  <q-page class="no-text-select randomizer-page">
+    <!-- Fixed Header Container -->
+    <div class="header-container">
+      <!-- Center Text -->
+      <div class="header-title">RANDOMIZER</div>
+    </div>
 
-      <!-- Master Brightness Slider -->
-      <div class="slider-container">
-        <div class="slider-label">Master Brightness</div>
-        <div class="slider-values">
-          <div>1</div>
-          <div>100</div>
-        </div>
-        <q-slider
-          v-model="masterBrightness"
-          :min="1"
-          :max="100"
-          label
-          label-always
-          color="dark"
-          dark
-        />
-      </div>
-
-      <!-- Frequency Band Sliders -->
-      <div class="frequency-sliders">
-        <div
-          v-for="(band, index) in frequencyBands"
-          :key="index"
-          class="band-slider"
-        >
-          <div class="percent-label">100 %</div>
-          <q-slider
-            v-model="band.value"
-            :min="0"
-            :max="100"
-            label
-            label-always
-            vertical
-            reverse
-            dark
-            color="dark"
-            class="band-slider-control"
-          />
-          <div class="percent-label">0%</div>
-          <div class="band-name">{{ band.name }}</div>
-          <div class="band-hz">{{ band.range }}</div>
-          <q-btn
-            round
-            flat
-            size="md"
-            color="black"
-            class="band-toggle"
-            :class="{ 'active-band': band.active }"
-            @click="toggleBand(index)"
-          />
-        </div>
-      </div>
-
-      <!-- Range Controls -->
-      <div class="range-controls">
-        <div class="range-control">
-          <div class="range-label">
-            <span>1 %</span>
-            <span>Brightness range</span>
-            <span>100 %</span>
+    <!-- Scrollable Content Area -->
+    <div class="content-area-randomizer">
+      <!-- content goes here wrapped in content-padding divs -->
+      <div class="content-padding">
+        <!-- Tap to Start / Timer Section -->
+        <div class="start-timer-section">
+          <div v-if="!isRunning" class="tap-to-start" @click="startRandomizer">
+            Tap To Start
           </div>
-          <q-slider
-            v-model="brightnessRange"
-            :min="1"
-            :max="100"
-            label
-            label-always
-            range
-            color="dark"
-            dark
-          />
-        </div>
-
-        <div class="range-control">
-          <div class="range-label">
-            <span>1 s</span>
-            <span>Frequency time</span>
-            <span>90 s</span>
+          <div v-else class="timer-display">
+            {{ formatTime(currentTime) }}
           </div>
-          <q-slider
-            v-model="frequencyTime"
-            :min="1"
-            :max="90"
-            label
-            label-always
-            range
-            color="dark"
-            dark
-          />
         </div>
 
-        <div class="range-control">
-          <div class="range-label">
-            <span>1 min</span>
-            <span>Sequence time</span>
-            <span>60 min</span>
+        <!-- Wave Type Sliders -->
+        <div class="wave-sliders-section">
+          <div class="wave-sliders-background">
+            <div
+              class="wave-slider-container"
+              @touchmove.prevent
+              @touchstart.prevent
+            >
+              <div class="wave-slider" v-for="wave in waveTypes" :key="wave.id">
+                <div class="wave-slider-track">
+                  <q-slider
+                    v-model="wave.value"
+                    vertical
+                    reverse
+                    :min="0"
+                    :max="100"
+                    color="black"
+                    track-color="grey-3"
+                    class="vertical-slider"
+                  />
+                </div>
+                <div class="wave-label">
+                  <div class="wave-symbol">{{ wave.symbol }}</div>
+                  <div class="wave-name">{{ wave.name }}</div>
+                  <div class="wave-freq">{{ wave.frequency }}</div>
+                </div>
+              </div>
+            </div>
           </div>
-          <q-slider
-            v-model="sequenceTime"
-            :min="1"
-            :max="60"
-            label
-            label-always
-            range
-            color="dark"
-            dark
-          />
         </div>
-      </div>
 
-      <!-- Control Buttons -->
-      <div class="control-buttons">
-        <q-btn flat dense size="lg" icon="play_arrow" class="control-btn" />
-        <q-btn
-          flat
-          dense
-          size="lg"
-          label="00:00"
-          class="control-btn timer-btn"
-        />
-        <q-btn flat dense size="lg" icon="stop" class="control-btn" />
-      </div>
+        <!-- Horizontal Sliders -->
+        <div class="horizontal-sliders-section">
+          <!-- Brightness Slider -->
+          <div class="slider-control-section">
+            <div class="slider-row">
+              <div class="slider-label">Brightness</div>
+              <div class="slider-value">{{ brightness }}</div>
+              <div class="slider-container">
+                <q-slider
+                  v-model="brightness"
+                  :min="0"
+                  :max="100"
+                  color="black"
+                  track-color="grey-3"
+                  class="custom-slider"
+                />
+                <div class="slider-scale">
+                  <span>0</span>
+                  <span>25</span>
+                  <span>50</span>
+                  <span>75</span>
+                  <span>100</span>
+                </div>
+              </div>
+            </div>
+          </div>
 
-      <!-- Bottom Menu -->
-      <div class="bottom-menu">
-        <q-btn
-          flat
-          dense
-          size="md"
-          icon="person"
-          label="Select subject"
-          class="bottom-btn"
-        />
-        <q-btn
-          flat
-          dense
-          size="md"
-          icon="image"
-          label="Remove background"
-          class="bottom-btn"
-        />
-        <q-btn flat dense size="md" icon="grid_view" class="bottom-btn" />
-        <q-btn flat dense size="md" icon="brush" class="bottom-btn" />
-        <q-btn flat dense size="md" icon="more_horiz" class="bottom-btn" />
+          <!-- Frequency Time Slider -->
+          <div class="slider-control-section">
+            <div class="slider-row">
+              <div class="slider-label">Frequence Time</div>
+              <div class="slider-value">{{ frequencyTime }} s</div>
+              <div class="slider-container">
+                <q-slider
+                  v-model="frequencyTime"
+                  :min="0"
+                  :max="100"
+                  color="black"
+                  track-color="grey-3"
+                  class="custom-slider"
+                />
+                <div class="slider-scale">
+                  <span>0</span>
+                  <span>25</span>
+                  <span>50</span>
+                  <span>75</span>
+                  <span>100</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Time Slider -->
+          <div class="slider-control-section">
+            <div class="slider-row">
+              <div class="slider-label">Time</div>
+              <div class="slider-value">{{ time }} Min</div>
+              <div class="slider-container">
+                <q-slider
+                  v-model="time"
+                  :min="0"
+                  :max="100"
+                  color="black"
+                  track-color="grey-3"
+                  class="custom-slider"
+                />
+                <div class="slider-scale">
+                  <span>0</span>
+                  <span>25</span>
+                  <span>50</span>
+                  <span>75</span>
+                  <span>100</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Effects Library -->
+        <div class="effects-library-section">
+          <div class="section-header">Effects Library</div>
+          <div class="effects-list">
+            <div
+              v-for="effect in effects"
+              :key="effect.id"
+              class="effect-item"
+              :class="{ active: effect.active }"
+              @click="toggleEffect(effect.id)"
+            >
+              <div class="effect-checkbox">
+                <q-icon
+                  :name="
+                    effect.active
+                      ? 'radio_button_checked'
+                      : 'radio_button_unchecked'
+                  "
+                  size="20px"
+                  :color="effect.active ? 'black' : 'grey-5'"
+                />
+              </div>
+              <div class="effect-name">{{ effect.name }}</div>
+              <div class="effect-add-btn">
+                <q-icon name="add" size="20px" color="grey-7" />
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </q-page>
 </template>
 
 <script>
-import { ref } from "vue";
+import { ref, computed, onMounted, onUnmounted } from "vue";
+
+import setEffect from "../utils/utils";
+import webservices from "../webservices";
 
 export default {
-  name: "SolSpektrumPage",
-  setup() {
-    const masterBrightness = ref(50);
-    const frequencyBands = ref([
-      { name: "Delta", range: "1-4 hz", value: 40, active: false },
-      { name: "Theta", range: "4-8 hz", value: 20, active: false },
-      { name: "Alpha", range: "8-12 hz", value: 35, active: false },
-      { name: "Beta", range: "12-24 hz", value: 45, active: false },
-      { name: "Gamma", range: "24-60 hz", value: 70, active: false },
-    ]);
-    const brightnessRange = ref(40);
-    const frequencyTime = ref(30);
-    const sequenceTime = ref(25);
+  name: "RandomizerPage",
 
-    const toggleBand = (index) => {
-      frequencyBands.value[index].active = !frequencyBands.value[index].active;
-    };
+  components: {},
+
+  methods: {
+    startRandomizer() {
+      this.isRunning = true;
+      this.currentTime = this.time * 60; // Convert minutes to seconds
+      this.startTimer();
+    },
+
+    startTimer() {
+      this.timerInterval = setInterval(() => {
+        if (this.currentTime > 0) {
+          this.currentTime--;
+        } else {
+          this.stopRandomizer();
+        }
+      }, 1000);
+    },
+
+    stopRandomizer() {
+      this.isRunning = false;
+      if (this.timerInterval) {
+        clearInterval(this.timerInterval);
+        this.timerInterval = null;
+      }
+    },
+
+    formatTime(seconds) {
+      const hours = Math.floor(seconds / 3600);
+      const minutes = Math.floor((seconds % 3600) / 60);
+      const secs = seconds % 60;
+      return `${hours.toString().padStart(2, "0")}:${minutes
+        .toString()
+        .padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+    },
+
+    toggleEffect(effectId) {
+      const effect = this.effects.find((e) => e.id === effectId);
+      if (effect) {
+        effect.active = !effect.active;
+      }
+    },
+  },
+
+  setup() {
+    const selectedItemId = ref(null);
+    const isRunning = ref(false);
+    const currentTime = ref(0);
+    const timerInterval = ref(null);
+
+    // Slider values
+    const brightness = ref(25);
+    const frequencyTime = ref(25);
+    const time = ref(25);
+
+    // Wave types with circular sliders
+    const waveTypes = ref([
+      { id: 1, symbol: "δ", name: "Delta", frequency: "0.5Hz", value: 20 },
+      { id: 2, symbol: "θ", name: "Theta", frequency: "4.8Hz", value: 40 },
+      { id: 3, symbol: "α", name: "Alpha", frequency: "9.12Hz", value: 60 },
+      { id: 4, symbol: "β", name: "Beta", frequency: "9.12Hz", value: 30 },
+      { id: 5, symbol: "γ", name: "Gamma", frequency: "9.12Hz", value: 50 },
+    ]);
+
+    // Effects library
+    const effects = ref([
+      { id: 1, name: "Rainbow Cycle", active: false },
+      { id: 2, name: "Breathing", active: false },
+      { id: 3, name: "Strobe", active: false },
+    ]);
 
     return {
-      masterBrightness,
-      frequencyBands,
-      brightnessRange,
+      selectedItemId,
+      isRunning,
+      currentTime,
+      timerInterval,
+      brightness,
       frequencyTime,
-      sequenceTime,
-      toggleBand,
+      time,
+      waveTypes,
+      effects,
     };
+  },
+
+  beforeUnmount() {
+    if (this.timerInterval) {
+      clearInterval(this.timerInterval);
+    }
   },
 };
 </script>
 
-<style scoped>
-.slider-container {
-  margin-bottom: 2rem;
-}
-
-.slider-label {
-  font-size: 1.5rem;
-  margin-bottom: 0.5rem;
-}
-
-.slider-values {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 0.5rem;
-}
-
-.frequency-sliders {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 2rem;
-  height: 300px;
-}
-
-.band-slider {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  flex: 1;
-}
-
-.band-slider-control {
-  height: 200px;
-  margin: 0.5rem 0;
-}
-
-.percent-label {
-  font-size: 0.9rem;
-}
-
-.band-name {
-  font-size: 1.2rem;
-  margin-top: 0.5rem;
-}
-
-.band-hz {
-  font-size: 0.9rem;
-  color: #666;
-}
-
-.band-toggle {
-  margin-top: 0.5rem;
-  border: 2px solid #000;
-}
-
-.active-band {
-  background-color: #e0e0e0;
-}
-
-.range-controls {
-  margin-bottom: 2rem;
-}
-
-.range-control {
-  margin-bottom: 1rem;
-}
-
-.range-label {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 0.5rem;
-}
-
-.control-buttons {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 2rem;
-}
-
-.control-btn {
-  width: 100px;
-  height: 100px;
-  border: 1px solid #ccc;
-  font-size: 2rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.timer-btn {
-  font-size: 1.5rem;
-}
-
-.bottom-menu {
-  display: flex;
-  justify-content: space-between;
-  border-top: 1px solid #ccc;
-  padding-top: 1rem;
-}
-
-.bottom-btn {
-  font-size: 0.8rem;
-}
-</style>
+<!-- Styles moved to src/css/pages/RandomizerPage.scss -->
