@@ -106,7 +106,7 @@ export const webservices = {
               // console.log(ledData);
 
               // Helper: build color array from a given offset
-              const buildColorsFromOffset = (offset) => {
+              const buildColors = () => {
                 const out = [];
                 for (let i = 0; i + 2 < ledData.length; i += 3) {
                   const r = ledData[i] === 0 ? 0 : 255;
