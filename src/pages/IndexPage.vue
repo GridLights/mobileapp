@@ -347,7 +347,8 @@ export default defineComponent({
 
     // called when websocket receives an inbound message
     handleWebSocketMessage(data) {
-      gconsole.log("web socket dat: " + JSON.stringify(data), 'index-page');
+      gconsole.log("web state socket data: " + JSON.stringify(data.state), 'index-page');
+      gconsole.log("web info socket data: " + JSON.stringify(data.info), 'index2-page');
       if (data?.state !== undefined) {
         this.wledState = data.state;
         if (typeof data.state.bri === "number") {

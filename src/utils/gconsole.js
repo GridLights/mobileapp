@@ -1,8 +1,9 @@
 // gconsole.js - Styled console logging utility
 
 const styles = {
-  'index-page': 'color: white; font-style: bold; background-color: purple; padding: 3px',
-  'ws-general': 'color: green; font-style: bold; background-color: darkblue; padding: 2px',
+  'index-page': 'color: white; font-style: bold; background-color: purple; padding: 3px; padding-right:200px;',
+  'index2-page': 'color: yellow; font-style: bold; background-color: purple; padding: 3px',
+  'ws-general': 'color: green; font-style: bold; background-color: darkblue; padding: 2px; padding-right:200px;',
   'ws-closed': 'color: yellow; font-style: italic; background-color: darkred; padding: 2px',
   'ws-open': 'color: white; font-style: bold; background-color: green; padding: 2px',
   'ws-error': 'color: white; font-style: bold; background-color: red; padding: 2px',
@@ -12,6 +13,7 @@ const styles = {
   'warning': 'color: black; background-color: yellow; padding: 2px',
   'info': 'color: white; background-color: #2196F3; padding: 2px',
   'debug': 'color: white; background-color: #9E9E9E; padding: 2px',
+  'ws-pattern': 'color: white; background-color: darkgreen; padding: 2px; margin-right: 200px;',
 };
 
 export const gconsole = {
@@ -82,6 +84,31 @@ export const gconsole = {
    */
   getAvailableStyles() {
     return Object.keys(styles);
+  },
+
+  /**
+   * Log WebSocket error event details
+   * @param {Event} errorEvent - The WebSocket error event
+   * @param {string} context - Optional context message
+   */
+  logWebSocketError(errorEvent, context = '') {
+    const eventDetails = {
+      type: errorEvent?.type || 'unknown',
+      isTrusted: errorEvent?.isTrusted || false,
+      timeStamp: errorEvent?.timeStamp || Date.now(),
+      target: errorEvent?.target?.url || 'unknown',
+      readyState: errorEvent?.target?.readyState,
+      bufferedAmount: errorEvent?.target?.bufferedAmount,
+    };
+
+    const message = context
+      ? `WebSocket Error (${context}): ${JSON.stringify(eventDetails)}`
+      : `WebSocket Error: ${JSON.stringify(eventDetails)}`;
+
+    this.error(message, 'ws-error');
+
+    // Also log the raw event to console for full inspection
+    console.error('Full WebSocket error event:', errorEvent);
   },
 };
 
