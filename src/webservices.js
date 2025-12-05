@@ -100,15 +100,15 @@ export const webservices = {
               const arrayBuffer = reader.result;
               const byteArray = new Uint8Array(arrayBuffer);
 
-              // Skip the first byte (header byte 'L')
-              const ledData = byteArray.slice(1);
+              // Skip 2-byte header: byte 0 = 'L' (0x4C), byte 1 = frame counter/flags
+              const ledData = byteArray.slice(2);
 
               // console.log(ledData);
 
               // Helper: build color array from a given offset
               const buildColorsFromOffset = (offset) => {
                 const out = [];
-                for (let i = offset; i + 2 < ledData.length; i += 3) {
+                for (let i = 0; i + 2 < ledData.length; i += 3) {
                   const r = ledData[i] === 0 ? 0 : 255;
                   const g = ledData[i + 1] === 0 ? 0 : 255;
                   const b = ledData[i + 2] === 0 ? 0 : 255;
@@ -121,32 +121,7 @@ export const webservices = {
                 return out;
               };
 
-              const candidates = [
-                buildColorsFromOffset(0),
-                buildColorsFromOffset(1),
-                buildColorsFromOffset(2),
-              ];
-
-              // Score: prefer the one with most non-black; tie-breaker: longest
-              const score = (arr) => ({
-                nonBlack: arr.reduce((n, c) => n + (c !== "000000" ? 1 : 0), 0),
-                len: arr.length,
-              });
-
-              let best = candidates[0];
-              let bestScore = score(best);
-              for (let k = 1; k < candidates.length; k++) {
-                const s = score(candidates[k]);
-                if (
-                  s.nonBlack > bestScore.nonBlack ||
-                  (s.nonBlack === bestScore.nonBlack && s.len > bestScore.len)
-                ) {
-                  best = candidates[k];
-                  bestScore = s;
-                }
-              }
-
-              const leds = best;
+              const leds = buildColors();
 
               // Output the result in the desired format
               const response = {
