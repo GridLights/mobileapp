@@ -12,6 +12,189 @@ export const ConnectionState = {
   FAILED: 'failed',
 };
 
+// Default WLED effects list (WLED v0.14.4 - 188 effects)
+export const DEFAULT_WLED_EFFECTS = [
+  "Solid",
+  "Blink",
+  "Breathe",
+  "Wipe",
+  "Wipe Random",
+  "Random Colors",
+  "Sweep",
+  "Dynamic",
+  "Colorloop",
+  "Rainbow",
+  "Scan",
+  "Scan Dual",
+  "Fade",
+  "Theater",
+  "Theater Rainbow",
+  "Running",
+  "Saw",
+  "Twinkle",
+  "Dissolve",
+  "Dissolve Rnd",
+  "Sparkle",
+  "Sparkle Dark",
+  "Sparkle+",
+  "Strobe",
+  "Strobe Rainbow",
+  "Strobe Mega",
+  "Blink Rainbow",
+  "Android",
+  "Chase",
+  "Chase Random",
+  "Chase Rainbow",
+  "Chase Flash",
+  "Chase Flash Rnd",
+  "Rainbow Runner",
+  "Colorful",
+  "Traffic Light",
+  "Sweep Random",
+  "Chase 2",
+  "Aurora",
+  "Stream",
+  "Scanner",
+  "Lighthouse",
+  "Fireworks",
+  "Rain",
+  "Tetrix",
+  "Fire Flicker",
+  "Gradient",
+  "Loading",
+  "Rolling Balls",
+  "Fairy",
+  "Two Dots",
+  "Fairytwinkle",
+  "Running Dual",
+  "Chase 3",
+  "Tri Wipe",
+  "Tri Fade",
+  "Lightning",
+  "ICU",
+  "Multi Comet",
+  "Scanner Dual",
+  "Stream 2",
+  "Oscillate",
+  "Pride 2015",
+  "Juggle",
+  "Palette",
+  "Fire 2012",
+  "Colorwaves",
+  "Bpm",
+  "Fill Noise",
+  "Noise 1",
+  "Noise 2",
+  "Noise 3",
+  "Noise 4",
+  "Colortwinkles",
+  "Lake",
+  "Meteor",
+  "Meteor Smooth",
+  "Railway",
+  "Ripple",
+  "Twinklefox",
+  "Twinklecat",
+  "Halloween Eyes",
+  "Solid Pattern",
+  "Solid Pattern Tri",
+  "Spots",
+  "Spots Fade",
+  "Glitter",
+  "Candle",
+  "Fireworks Starburst",
+  "Fireworks 1D",
+  "Bouncing Balls",
+  "Sinelon",
+  "Sinelon Dual",
+  "Sinelon Rainbow",
+  "Popcorn",
+  "Drip",
+  "Plasma",
+  "Percent",
+  "Ripple Rainbow",
+  "Heartbeat",
+  "Pacifica",
+  "Candle Multi",
+  "Solid Glitter",
+  "Sunrise",
+  "Phased",
+  "Twinkleup",
+  "Noise Pal",
+  "Sine",
+  "Phased Noise",
+  "Flow",
+  "Chunchun",
+  "Dancing Shadows",
+  "Washing Machine",
+  "Blends",
+  "TV Simulator",
+  "Dynamic Smooth",
+  "Pixels",
+  "Pixelwave",
+  "Juggles",
+  "Matripix",
+  "Gravimeter",
+  "Plasmoid",
+  "Puddles",
+  "Midnoise",
+  "Noisemeter",
+  "Freqwave",
+  "Freqmatrix",
+  "Waterfall",
+  "Freqpixels",
+  "Noisefire",
+  "Puddlepeak",
+  "Noisemove",
+  "Perlin Move",
+  "Ripple Peak",
+  "Freqmap",
+  "Gravcenter",
+  "Gravcentric",
+  "Gravfreq",
+  "DJ Light",
+  "Blurz",
+  "Flow Stripe",
+  "Wavesins",
+  "Rocktaves",
+  "Spaceships",
+  "Crazy Bees",
+  "Ghost Rider",
+  "Blobs",
+  "Scrolling Text",
+  "Drift Rose",
+  "Distortion Waves",
+  "GEQ",
+  "Noise2D",
+  "Firenoise",
+  "Squared Swirl",
+  "DNA",
+  "Matrix",
+  "Metaballs",
+  "Funky Plank",
+  "Pulser",
+  "Drift",
+  "Waverly",
+  "Sun Radiation",
+  "Colored Bursts",
+  "Julia",
+  "Game Of Life",
+  "Tartan",
+  "Polar Lights",
+  "Swirl",
+  "Lissajous",
+  "Frizzles",
+  "Plasma Ball",
+  "Hiphotic",
+  "Sindots",
+  "DNA Spiral",
+  "Black Hole",
+  "Soap",
+  "Octopus",
+  "Waving Cell",
+  "Akemi"
+];
+
 export const webservices = {
   reconnectTimeout: 3000, // Initial timeout for reconnect attempts (in milliseconds)
   maxReconnectAttempts: 10, // Maximum number of reconnection attempts
@@ -302,6 +485,262 @@ export const webservices = {
       ],
     };
     this.sendCommandToWebSocket(command);
+  },
+
+  /**
+   * Fetch the effects list from a WLED instance
+   * @param {string} ipAddress - The IP address of the WLED instance
+   * @returns {Promise<Array>} Array of effect names
+   */
+  async fetchWledEffects(ipAddress) {
+    try {
+      const url = `http://${ipAddress}/json/eff`;
+      gconsole.log(`Fetching effects from: ${url}`, "wled-api");
+      
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const effects = await response.json();
+      gconsole.log(`Fetched ${effects.length} effects from WLED`, "wled-api");
+      return effects;
+    } catch (error) {
+      gconsole.error(`Error fetching WLED effects: ${error.message}`, "wled-api-error");
+      throw error;
+    }
+  },
+
+  /**
+   * Fetch device information from a WLED instance
+   * @param {string} ipAddress - The IP address of the WLED instance
+   * @returns {Promise<Object>} Device info object
+   */
+  async fetchWledInfo(ipAddress) {
+    try {
+      const url = `http://${ipAddress}/json/info`;
+      gconsole.log(`Fetching device info from: ${url}`, "wled-api");
+      
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const info = await response.json();
+      gconsole.log(`Fetched device info from WLED`, "wled-api");
+      return info;
+    } catch (error) {
+      gconsole.error(`Error fetching WLED info: ${error.message}`, "wled-api-error");
+      throw error;
+    }
+  },
+
+  /**
+   * Analyze WLED instance and identify custom effects
+   * @param {string} ipAddress - The IP address of the WLED instance
+   * @returns {Promise<Object>} Object containing all effects, custom effects, and device info
+   */
+  async analyzeWledInstance(ipAddress) {
+    try {
+      gconsole.log(`Analyzing WLED instance at: ${ipAddress}`, "wled-analysis");
+      
+      // Fetch both effects and device info in parallel
+      const [effects, info] = await Promise.all([
+        this.fetchWledEffects(ipAddress),
+        this.fetchWledInfo(ipAddress)
+      ]);
+
+      // Identify custom effects (those not in the default list)
+      const customEffects = effects
+        .map((effect, index) => ({ name: effect, id: index }))
+        .filter(effect => !DEFAULT_WLED_EFFECTS.includes(effect.name));
+
+      const analysisResult = {
+        ipAddress,
+        deviceInfo: {
+          name: info.name || 'Unknown',
+          version: info.ver || 'Unknown',
+          brand: info.brand || 'WLED',
+          mac: info.mac || 'Unknown',
+          ledCount: info.leds?.count || 0,
+        },
+        effects: {
+          all: effects,
+          custom: customEffects,
+          total: effects.length,
+          customCount: customEffects.length,
+        },
+        timestamp: new Date().toISOString(),
+      };
+
+      gconsole.log(`Analysis complete: Found ${customEffects.length} custom effects`, "wled-analysis");
+      
+      // Store custom effects in localStorage
+      this.storeCustomEffects(ipAddress, analysisResult);
+
+      return analysisResult;
+    } catch (error) {
+      gconsole.error(`Error analyzing WLED instance: ${error.message}`, "wled-analysis-error");
+      throw error;
+    }
+  },
+
+  /**
+   * Store custom effects analysis in localStorage
+   * @param {string} ipAddress - The IP address of the WLED instance
+   * @param {Object} analysisResult - The analysis result object
+   */
+  storeCustomEffects(ipAddress, analysisResult) {
+    try {
+      // Store the complete analysis result
+      const storageKey = `wled_analysis_${ipAddress.replace(/\./g, '_')}`;
+      localStorage.setItem(storageKey, JSON.stringify(analysisResult));
+      
+      // Also store a reference in a master list of analyzed devices
+      const analyzedDevices = this.getAnalyzedDevices();
+      const existingIndex = analyzedDevices.findIndex(d => d.ipAddress === ipAddress);
+      
+      const deviceSummary = {
+        ipAddress,
+        deviceName: analysisResult.deviceInfo.name,
+        customEffectCount: analysisResult.effects.customCount,
+        lastAnalyzed: analysisResult.timestamp,
+      };
+
+      if (existingIndex !== -1) {
+        analyzedDevices[existingIndex] = deviceSummary;
+      } else {
+        analyzedDevices.push(deviceSummary);
+      }
+
+      localStorage.setItem('wled_analyzed_devices', JSON.stringify(analyzedDevices));
+      
+      gconsole.log(`Stored analysis for ${ipAddress}`, "wled-storage");
+    } catch (error) {
+      gconsole.error(`Error storing custom effects: ${error.message}`, "wled-storage-error");
+    }
+  },
+
+  /**
+   * Get analysis result for a specific WLED instance
+   * @param {string} ipAddress - The IP address of the WLED instance
+   * @returns {Object|null} Analysis result or null if not found
+   */
+  getStoredAnalysis(ipAddress) {
+    try {
+      const storageKey = `wled_analysis_${ipAddress.replace(/\./g, '_')}`;
+      const stored = localStorage.getItem(storageKey);
+      return stored ? JSON.parse(stored) : null;
+    } catch (error) {
+      gconsole.error(`Error retrieving stored analysis: ${error.message}`, "wled-storage-error");
+      return null;
+    }
+  },
+
+  /**
+   * Get list of all analyzed devices
+   * @returns {Array} Array of analyzed device summaries
+   */
+  getAnalyzedDevices() {
+    try {
+      const stored = localStorage.getItem('wled_analyzed_devices');
+      return stored ? JSON.parse(stored) : [];
+    } catch (error) {
+      gconsole.error(`Error retrieving analyzed devices: ${error.message}`, "wled-storage-error");
+      return [];
+    }
+  },
+
+  /**
+   * Clear stored analysis for a specific device
+   * @param {string} ipAddress - The IP address of the WLED instance
+   */
+  clearStoredAnalysis(ipAddress) {
+    try {
+      const storageKey = `wled_analysis_${ipAddress.replace(/\./g, '_')}`;
+      localStorage.removeItem(storageKey);
+      
+      // Remove from master list
+      const analyzedDevices = this.getAnalyzedDevices();
+      const filtered = analyzedDevices.filter(d => d.ipAddress !== ipAddress);
+      localStorage.setItem('wled_analyzed_devices', JSON.stringify(filtered));
+      
+      gconsole.log(`Cleared analysis for ${ipAddress}`, "wled-storage");
+    } catch (error) {
+      gconsole.error(`Error clearing stored analysis: ${error.message}`, "wled-storage-error");
+    }
+  },
+
+  /**
+   * Initialize a newly connected WLED device
+   * - Analyzes the device for custom effects
+   * - Sets device to "All White" to override startup presets
+   * @param {string} ipAddress - The IP address of the WLED instance
+   * @returns {Promise<Object>} Analysis result
+   */
+  async initializeNewDevice(ipAddress) {
+    try {
+      gconsole.log(`Initializing device at ${ipAddress}`, "wled-init");
+      
+      // Step 1: Analyze device for custom effects
+      const analysis = await this.analyzeWledInstance(ipAddress);
+      gconsole.log(`Device analyzed: ${analysis.effects.customCount} custom effects found`, "wled-init");
+      
+      // Step 2: Set device to "All White" to override any crazy startup presets
+      // Wait a moment for analysis to settle
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      const allWhiteCommand = {
+        on: true,
+        seg: [
+          {
+            col: [[255, 255, 255]],
+            fx: 0, // Solid effect
+          },
+        ],
+      };
+      
+      this.sendCommandToWebSocket(allWhiteCommand);
+      gconsole.log("Device initialized with All White preset", "wled-init");
+      
+      return {
+        success: true,
+        analysis,
+        initialized: true
+      };
+    } catch (error) {
+      gconsole.error(`Error initializing device: ${error.message}`, "wled-init-error");
+      
+      // Even if analysis fails, try to set All White
+      try {
+        const allWhiteCommand = {
+          on: true,
+          seg: [
+            {
+              col: [[255, 255, 255]],
+              fx: 0,
+            },
+          ],
+        };
+        this.sendCommandToWebSocket(allWhiteCommand);
+      } catch (fallbackError) {
+        gconsole.error(`Fallback All White failed: ${fallbackError.message}`, "wled-init-error");
+      }
+      
+      throw error;
+    }
   },
 };
 

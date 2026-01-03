@@ -1,9 +1,6 @@
 //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-// SettingsPage.vue
-//
-// Application settings page
-//
-// Author: Tavis Hord - tavis@sideburn.com
+// SettingsPage.vue // // Application settings page // // Author: Tavis Hord -
+tavis@sideburn.com
 //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 <template>
@@ -123,15 +120,29 @@
                     class="wled-device-item"
                     v-for="device in wledDevices"
                     :key="device.ip"
-                    :class="{ selected: device.selected }"
+                    :class="{
+                      selected: device.selected,
+                      analyzing: device.analyzing,
+                    }"
                     @click="selectDevice(device)"
                   >
                     <div class="device-info">
                       <div class="device-name">{{ device.name }}</div>
                       <div class="device-ip">IP: {{ device.ip }}</div>
+                      <div
+                        v-if="device.customEffectCount > 0"
+                        class="device-custom-effects"
+                      >
+                        {{ device.customEffectCount }} custom effect(s)
+                      </div>
                     </div>
+                    <q-spinner
+                      v-if="device.analyzing"
+                      color="primary"
+                      size="20px"
+                    />
                     <q-icon
-                      v-if="device.selected"
+                      v-else-if="device.selected"
                       name="radio_button_checked"
                       size="20px"
                       color="black"
@@ -229,13 +240,19 @@
               <div class="setting-item">
                 <div class="setting-label">IP Address</div>
                 <div class="ip-input-row">
-                  <div class="connection-indicator" :title="getConnectionLabel()">
+                  <div
+                    class="connection-indicator"
+                    :title="getConnectionLabel()"
+                  >
                     <q-icon
                       :name="getConnectionIcon()"
                       :color="getConnectionColor()"
                       size="24px"
                     />
-                    <span class="connection-label" :style="{ color: getConnectionColor() }">
+                    <span
+                      class="connection-label"
+                      :style="{ color: getConnectionColor() }"
+                    >
                       {{ getConnectionLabel() }}
                     </span>
                   </div>
@@ -293,9 +310,27 @@ export default {
     ]);
 
     const wledDevices = ref([
-      { name: "Living Room Grid", ip: "192.168.1.101", selected: true },
-      { name: "Kitchen Grid", ip: "192.168.1.101", selected: false },
-      { name: "Main Area Grid", ip: "192.168.1.101", selected: false },
+      {
+        name: "Living Room Grid",
+        ip: "192.168.1.101",
+        selected: true,
+        analyzing: false,
+        customEffectCount: 0,
+      },
+      {
+        name: "Kitchen Grid",
+        ip: "192.168.1.102",
+        selected: false,
+        analyzing: false,
+        customEffectCount: 0,
+      },
+      {
+        name: "Main Area Grid",
+        ip: "192.168.1.103",
+        selected: false,
+        analyzing: false,
+        customEffectCount: 0,
+      },
     ]);
 
     // Load settings from local storage on page reload
@@ -310,6 +345,20 @@ export default {
       webservices.onConnectionStateChange = (state) => {
         connectionState.value = state;
       };
+
+      // Load any existing analysis data for devices
+      wledDevices.value.forEach((device) => {
+        const analysis = webservices.getStoredAnalysis(device.ip);
+        if (analysis) {
+          device.customEffectCount = analysis.effects.customCount;
+          if (
+            analysis.deviceInfo.name &&
+            analysis.deviceInfo.name !== "Unknown"
+          ) {
+            device.name = analysis.deviceInfo.name;
+          }
+        }
+      });
     });
 
     onUnmounted(() => {
@@ -378,9 +427,47 @@ export default {
       }
     };
 
-    const selectDevice = (device) => {
+    const selectDevice = async (device) => {
+      // Don't allow selection while analyzing
+      if (device.analyzing) {
+        return;
+      }
+
+      // Deselect all devices
       wledDevices.value.forEach((d) => (d.selected = false));
       device.selected = true;
+
+      // Start analysis
+      device.analyzing = true;
+
+      try {
+        console.log(`Initializing WLED device at ${device.ip}...`);
+
+        // Use the initialization routine which analyzes AND sets All White
+        const result = await webservices.initializeNewDevice(device.ip);
+
+        // Update device with custom effect count
+        device.customEffectCount = result.analysis.effects.customCount;
+
+        // Update device name if available from device info
+        if (
+          result.analysis.deviceInfo.name &&
+          result.analysis.deviceInfo.name !== "Unknown"
+        ) {
+          device.name = result.analysis.deviceInfo.name;
+        }
+
+        console.log("Device initialized:", result);
+
+        // Show success notification
+        // You can add Quasar notification here if desired
+      } catch (error) {
+        console.error("Error initializing WLED device:", error);
+        // Show error notification
+        // You can add Quasar notification here if desired
+      } finally {
+        device.analyzing = false;
+      }
     };
 
     const checkForUpdates = () => {

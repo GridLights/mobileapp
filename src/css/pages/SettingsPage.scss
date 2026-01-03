@@ -223,6 +223,31 @@
 .settings-page .device-ip {
   font-size: 12px;
   color: var(--controls-icon-color);
+  margin-top: 2px;
+}
+
+.settings-page .device-custom-effects {
+  font-size: 11px;
+  color: #4CAF50;
+  font-weight: 500;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.settings-page .device-custom-effects::before {
+  content: "✓";
+  font-weight: bold;
+}
+
+.settings-page .wled-device-item.analyzing {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+.settings-page .wled-device-item.analyzing:hover {
+  background-color: var(--controls-dropdown-menu--color);
 }
 
 .settings-page .device-input {

@@ -178,31 +178,7 @@ export default defineComponent({
       ], // need this initial shape definition
       selectedItem: null,
       itemList: [
-        { id: 1, label: "Ben", effectName: "ben", effectId: 191 },
-        {
-          id: 2,
-          label: "Diamond Spin",
-          effectName: "diamondSpin",
-          effectId: 189,
-        },
-        {
-          id: 3,
-          label: "Drunk Diamond Spin",
-          effectName: "drunkDiamondSpin",
-          effectId: 190,
-        },
-        {
-          id: 4,
-          label: "Square Spin",
-          effectName: "squareSpin",
-          effectId: 187,
-        },
-        { id: 5, label: "Crazy Spin", effectName: "crazySpin", effectId: 188 },
-        { id: 6, label: "All White", effectName: "allWhite", effectId: null },
-        { id: 7, label: "All White", effectName: "allWhite", effectId: null },
-        { id: 8, label: "All White", effectName: "allWhite", effectId: null },
-        { id: 9, label: "All White", effectName: "allWhite", effectId: null },
-        { id: 10, label: "All White", effectName: "allWhite", effectId: null },
+        { id: 1, label: "All White", effectName: "allWhite", effectId: null }
       ],
       ws: null, // Store the WebSocket connection
       wledState: {}, // Store the current WLED state
@@ -268,14 +244,18 @@ export default defineComponent({
     const savedIp = localStorage.getItem("ipAddress");
     if (savedIp) {
       wsUrl = `ws://${savedIp}:80/ws`;
+      this.wledUrl = savedIp;
     }
+
+    // Load custom effects for the current device
+    this.loadCustomEffects();
 
     // Do not auto-subscribe on connect; we'll manage subscription based on power state
     webservices.initWebSocket(
       wsUrl,
       this.handleWebSocketMessage,
       this.handleLiveStreamData,
-      null
+      this.onWebSocketConnected
     );
 
     // Subscribes to /live endpoint
@@ -288,6 +268,76 @@ export default defineComponent({
   },
 
   methods: {
+    // Load custom effects from localStorage and populate the itemList
+    loadCustomEffects() {
+      try {
+        const analysis = webservices.getStoredAnalysis(this.wledUrl);
+        
+        if (analysis && analysis.effects.custom && analysis.effects.custom.length > 0) {
+          console.log(`Loading ${analysis.effects.custom.length} custom effects`);
+          
+          // Map custom effects from WLED analysis
+          let currentId = 1;
+          const customEffectItems = analysis.effects.custom.map(effect => ({
+            id: currentId++,
+            label: effect.name,
+            effectName: effect.name,
+            effectId: effect.id,
+            isCustom: true
+          }));
+          
+          // Add one "All White" entry at the end
+          const allWhiteItem = { 
+            id: currentId, 
+            label: "All White", 
+            effectName: "allWhite", 
+            effectId: null 
+          };
+          
+          // Combine: custom effects + All White
+          const combinedList = [...customEffectItems, allWhiteItem];
+          
+          // Sort alphabetically by label
+          this.itemList = combinedList.sort((a, b) => 
+            a.label.localeCompare(b.label, undefined, { sensitivity: 'base' })
+          );
+          
+          console.log(`Effect list populated with ${this.itemList.length} total effects (${customEffectItems.length} custom + 1 All White)`);
+        } else {
+          // No custom effects found - only show All White
+          this.itemList = [
+            { id: 1, label: "All White", effectName: "allWhite", effectId: null }
+          ];
+          console.log("No custom effects found, showing All White only");
+        }
+      } catch (error) {
+        console.error("Error loading custom effects:", error);
+      }
+    },
+
+    // Called when WebSocket connection is established
+    async onWebSocketConnected() {
+      console.log("WebSocket connected, initializing device...");
+      
+      try {
+        // Initialize device: analyze for custom effects and set All White
+        const result = await webservices.initializeNewDevice(this.wledUrl);
+        
+        if (result.success) {
+          console.log("Device initialized successfully");
+          
+          // Reload custom effects if new ones were found
+          if (result.analysis.effects.customCount > 0) {
+            this.loadCustomEffects();
+          }
+        }
+      } catch (error) {
+        console.error("Error during device initialization:", error);
+      }
+      
+      // Note: We don't auto-subscribe here, subscription is managed by power state
+    },
+
     // Navigate to settings page
     goToSettings() {
       this.$router.push("/settings");
