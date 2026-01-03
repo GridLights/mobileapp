@@ -563,9 +563,16 @@ export const webservices = {
       ]);
 
       // Identify custom effects (those not in the default list)
+      // Filter out RSVD (reserved) effects and empty/null effects
       const customEffects = effects
         .map((effect, index) => ({ name: effect, id: index }))
-        .filter(effect => !DEFAULT_WLED_EFFECTS.includes(effect.name));
+        .filter(effect => {
+          const name = effect.name || '';
+          // Exclude default effects, RSVD/reserved effects, and empty names
+          return !DEFAULT_WLED_EFFECTS.includes(effect.name) &&
+                 !name.toUpperCase().includes('RSVD') &&
+                 name.trim().length > 0;
+        });
 
       const analysisResult = {
         ipAddress,

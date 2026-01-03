@@ -277,14 +277,20 @@ export default defineComponent({
           console.log(`Loading ${analysis.effects.custom.length} custom effects`);
           
           // Map custom effects from WLED analysis
+          // Filter out RSVD (reserved) effects
           let currentId = 1;
-          const customEffectItems = analysis.effects.custom.map(effect => ({
-            id: currentId++,
-            label: effect.name,
-            effectName: effect.name,
-            effectId: effect.id,
-            isCustom: true
-          }));
+          const customEffectItems = analysis.effects.custom
+            .filter(effect => {
+              const name = effect.name || '';
+              return !name.toUpperCase().includes('RSVD') && name.trim().length > 0;
+            })
+            .map(effect => ({
+              id: currentId++,
+              label: effect.name,
+              effectName: effect.name,
+              effectId: effect.id,
+              isCustom: true
+            }));
           
           // Add one "All White" entry at the end
           const allWhiteItem = { 
