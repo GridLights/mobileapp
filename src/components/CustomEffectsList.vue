@@ -1,6 +1,6 @@
 <!--
   CustomEffectsList.vue
-  
+
   Example component demonstrating how to use custom WLED effects
   This can be integrated into any page to display and use custom effects
 -->
@@ -32,9 +32,7 @@
     <div v-else-if="!hasCustomEffects" class="no-effects">
       <q-icon name="info" size="32px" />
       <p>No custom effects found</p>
-      <p class="sublabel">
-        This device only has the default WLED effects
-      </p>
+      <p class="sublabel">This device only has the default WLED effects</p>
     </div>
 
     <q-list v-else class="effects-list" bordered separator>
@@ -80,13 +78,13 @@
 </template>
 
 <script>
-import { ref } from 'vue';
-import { useCurrentDeviceEffects } from '../utils/useWledEffects';
-import webservices from '../webservices';
+import { ref } from "vue";
+import { useCurrentDeviceEffects } from "../utils/useWledEffects";
+import webservices from "../webservices";
 
 export default {
-  name: 'CustomEffectsList',
-  
+  name: "CustomEffectsList",
+
   setup() {
     const {
       customEffects,
@@ -105,13 +103,22 @@ export default {
      * Apply an effect to the WLED device
      */
     const applyEffect = (effect) => {
+      // Use effect.id for UI selection (sequential ID)
       selectedEffectId.value = effect.id;
-      
-      console.log(`Applying custom effect: ${effect.name} (ID: ${effect.id})`);
-      
+
+      // Use effect.effectId (or effect.id if effectId doesn't exist) for the actual WLED effect ID
+      const wledEffectId =
+        effect.effectId !== undefined ? effect.effectId : effect.id;
+
+      console.log(
+        `Applying custom effect: ${effect.name} (WLED Effect ID: ${wledEffectId})`
+      );
+
       // Send command to WLED via WebSocket
+      // seg must be an array containing segment objects
+      // Use the actual WLED device effect ID
       webservices.sendCommandToWebSocket({
-        seg: { fx: effect.id }
+        seg: [{ fx: wledEffectId }],
       });
     };
 
@@ -119,12 +126,12 @@ export default {
      * Re-analyze the current device
      */
     const reanalyze = async () => {
-      const savedIp = localStorage.getItem('ipAddress') || '4.3.2.1';
+      const savedIp = localStorage.getItem("ipAddress") || "4.3.2.1";
       try {
         await analyzeDevice(savedIp);
-        console.log('Re-analysis complete');
+        console.log("Re-analysis complete");
       } catch (err) {
-        console.error('Error during re-analysis:', err);
+        console.error("Error during re-analysis:", err);
       }
     };
 
@@ -257,4 +264,3 @@ export default {
   font-weight: 600;
 }
 </style>
-
