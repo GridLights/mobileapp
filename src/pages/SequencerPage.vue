@@ -15,15 +15,15 @@
 
     <!-- Tab Navigation -->
     <div class="tab-navigation">
-      <button 
-        :class="['tab-btn', { active: activeTab === 'presets' }]" 
+      <button
+        :class="['tab-btn', { active: activeTab === 'presets' }]"
         @click="activeTab = 'presets'"
       >
         <q-icon name="save" size="18px" />
         Presets
       </button>
-      <button 
-        :class="['tab-btn', { active: activeTab === 'playlist' }]" 
+      <button
+        :class="['tab-btn', { active: activeTab === 'playlist' }]"
         @click="activeTab = 'playlist'"
       >
         <q-icon name="playlist_play" size="18px" />
@@ -37,24 +37,24 @@
       <!-- PRESETS TAB -->
       <!-- ============================================ -->
       <div v-if="activeTab === 'presets'" class="content-padding">
-        
+
         <!-- Presets Section -->
         <div class="section-card">
           <div class="section-header">
             <q-icon name="bookmark" size="20px" class="section-icon" />
             <span>Presets</span>
-            <q-btn 
-              icon="refresh" 
-              flat 
-              round 
-              size="sm" 
-              @click="loadPresets" 
+            <q-btn
+              icon="refresh"
+              flat
+              round
+              size="sm"
+              @click="loadPresets"
               :loading="isLoadingPresets"
             />
           </div>
-          
+
           <!-- Add New Preset Button -->
-          <div 
+          <div
             class="add-preset-row"
             :class="{ expanded: isAddingNew }"
             @click="toggleAddNew"
@@ -62,13 +62,13 @@
             <div class="preset-row-header">
               <q-icon :name="isAddingNew ? 'remove' : 'add'" size="20px" />
               <span class="add-preset-label">Add New Preset</span>
-              <q-icon 
-                :name="isAddingNew ? 'expand_less' : 'expand_more'" 
-                size="20px" 
+              <q-icon
+                :name="isAddingNew ? 'expand_less' : 'expand_more'"
+                size="20px"
                 class="expand-icon"
               />
             </div>
-            
+
             <!-- Expandable Configuration Panel -->
             <div v-if="isAddingNew" class="preset-config-panel" @click.stop>
               <div class="config-content">
@@ -78,9 +78,9 @@
                     <q-icon name="label" size="16px" />
                     Preset Name
                   </label>
-                  <input 
-                    v-model="newPresetName" 
-                    type="text" 
+                  <input
+                    v-model="newPresetName"
+                    type="text"
                     class="text-input"
                     placeholder="Enter preset name..."
                   />
@@ -94,9 +94,9 @@
                   </label>
                   <select v-model="selectedEffectId" class="effect-select" @change="onEffectChange">
                     <option value="">Select Effect</option>
-                    <option 
-                      v-for="effect in effectsList" 
-                      :key="effect.id" 
+                    <option
+                      v-for="effect in effectsList"
+                      :key="effect.id"
                       :value="effect.effectId"
                     >
                       {{ effect.label }}
@@ -196,8 +196,8 @@
 
           <!-- Saved Presets List -->
           <div class="presets-list" v-if="Object.keys(savedPresets).length > 0">
-            <div 
-              v-for="(preset, id) in savedPresets" 
+            <div
+              v-for="(preset, id) in savedPresets"
               :key="id"
               class="preset-row"
               :class="{ expanded: expandedPresetId === parseInt(id), active: currentPresetId === parseInt(id) }"
@@ -213,25 +213,25 @@
                   </div>
                 </div>
                 <div class="preset-actions" @click.stop>
-                  <q-btn 
-                    icon="play_arrow" 
-                    flat 
-                    round 
-                    size="sm" 
+                  <q-btn
+                    icon="play_arrow"
+                    flat
+                    round
+                    size="sm"
                     @click="applyPreset(parseInt(id))"
                     title="Play preset"
                   />
-                  <q-btn 
-                    icon="playlist_add" 
-                    flat 
-                    round 
-                    size="sm" 
+                  <q-btn
+                    icon="playlist_add"
+                    flat
+                    round
+                    size="sm"
                     @click="addPresetToPlaylist(parseInt(id), preset.n || `Preset ${id}`)"
                     title="Add to playlist"
                   />
-                  <q-icon 
-                    :name="expandedPresetId === parseInt(id) ? 'expand_less' : 'expand_more'" 
-                    size="20px" 
+                  <q-icon
+                    :name="expandedPresetId === parseInt(id) ? 'expand_less' : 'expand_more'"
+                    size="20px"
                     class="expand-icon"
                   />
                 </div>
@@ -253,9 +253,9 @@
                     </label>
                     <select v-model="editEffectId" class="effect-select" @change="onEditEffectChange">
                       <option value="">Select Effect</option>
-                      <option 
-                        v-for="effect in effectsList" 
-                        :key="effect.id" 
+                      <option
+                        v-for="effect in effectsList"
+                        :key="effect.id"
                         :value="effect.effectId"
                       >
                         {{ effect.label }}
@@ -378,7 +378,7 @@
       <!-- PLAYLIST TAB -->
       <!-- ============================================ -->
       <div v-if="activeTab === 'playlist'" class="content-padding">
-        
+
         <!-- Playlist Builder -->
         <div class="section-card">
           <div class="section-header">
@@ -449,9 +449,9 @@
               <span class="col-duration">Duration</span>
               <span class="col-actions"></span>
             </div>
-            
-            <draggable 
-              v-model="playlistItems" 
+
+            <draggable
+              v-model="playlistItems"
               item-key="id"
               handle=".drag-handle"
               class="playlist-draggable"
@@ -475,19 +475,19 @@
                     />
                   </span>
                   <span class="col-actions">
-                    <q-btn 
-                      icon="play_arrow" 
-                      flat 
-                      round 
-                      size="sm" 
+                    <q-btn
+                      icon="play_arrow"
+                      flat
+                      round
+                      size="sm"
                       @click="applyPreset(element.presetId)"
                       title="Preview"
                     />
-                    <q-btn 
-                      icon="close" 
-                      flat 
-                      round 
-                      size="sm" 
+                    <q-btn
+                      icon="close"
+                      flat
+                      round
+                      size="sm"
                       color="negative"
                       @click="removeFromPlaylist(index)"
                     />
@@ -552,7 +552,7 @@ export default {
     // Presets data
     const savedPresets = ref({});
     const currentPresetId = ref(null);
-    
+
     // Expand/collapse state
     const isAddingNew = ref(false);
     const expandedPresetId = ref(null);
@@ -562,7 +562,7 @@ export default {
       { id: 1, label: "All White", effectName: "allWhite", effectId: null }
     ]);
     const palettes = ref([]);
-    
+
     // New preset form state
     const newPresetName = ref("");
     const selectedEffectId = ref("");
@@ -637,7 +637,7 @@ export default {
       try {
         const wledUrl = getIpAddress();
         const analysis = webservices.getStoredAnalysis(wledUrl);
-        
+
         if (analysis && analysis.effects.custom && analysis.effects.custom.length > 0) {
           let currentId = 1;
           const customEffectItems = analysis.effects.custom
@@ -652,16 +652,16 @@ export default {
               effectId: effect.id,
               isCustom: true
             }));
-          
-          const allWhiteItem = { 
-            id: currentId, 
-            label: "All White", 
-            effectName: "allWhite", 
-            effectId: null 
+
+          const allWhiteItem = {
+            id: currentId,
+            label: "All White",
+            effectName: "allWhite",
+            effectId: null
           };
-          
+
           const combinedList = [...customEffectItems, allWhiteItem];
-          effectsList.value = combinedList.sort((a, b) => 
+          effectsList.value = combinedList.sort((a, b) =>
             a.label.localeCompare(b.label, undefined, { sensitivity: 'base' })
           );
         } else {
@@ -719,22 +719,22 @@ export default {
       const seg = preset.seg;
       if (seg && Array.isArray(seg) && seg.length > 0) {
         const firstSeg = seg[0];
-        
+
         // Effect ID
         if (firstSeg.fx !== undefined) {
           settings.effectId = firstSeg.fx;
         }
-        
+
         // Palette ID
         if (firstSeg.pal !== undefined) {
           settings.paletteId = firstSeg.pal;
         }
-        
+
         // Speed
         if (firstSeg.sx !== undefined) {
           settings.speed = firstSeg.sx;
         }
-        
+
         // Intensity
         if (firstSeg.ix !== undefined) {
           settings.intensity = firstSeg.ix;
@@ -751,7 +751,7 @@ export default {
       } else {
         expandedPresetId.value = presetId;
         isAddingNew.value = false; // Close add new panel
-        
+
         // Populate edit form with preset's actual data
         const settings = extractPresetSettings(preset);
         editEffectId.value = settings.effectId;
@@ -762,12 +762,9 @@ export default {
         editSpeed.value = settings.speed;
         editIntensity.value = settings.intensity;
         editBrightness.value = settings.brightness;
-        
+
         // Load stored duration or use default
         editDuration.value = getPresetDuration(presetId) || 10;
-        
-        // Apply the preset to preview it
-        applyPreset(presetId);
       }
     };
 
@@ -841,7 +838,7 @@ export default {
     // Preview effect (for new preset)
     const previewEffect = () => {
       const selectedItem = effectsList.value.find(e => e.effectId === selectedEffectId.value);
-      
+
       if (selectedItem && selectedItem.effectName === "allWhite") {
         webservices.sendCommandToWebSocket({
           on: true,
@@ -866,7 +863,7 @@ export default {
     // Preview effect (for edit)
     const previewEditEffect = () => {
       const selectedItem = effectsList.value.find(e => e.effectId === editEffectId.value);
-      
+
       if (selectedItem && selectedItem.effectName === "allWhite") {
         webservices.sendCommandToWebSocket({
           on: true,
@@ -917,8 +914,8 @@ export default {
     const saveNewPreset = async () => {
       try {
         previewEffect();
-        await new Promise(resolve => setTimeout(resolve, 200));
-        
+        await new Promise(resolve => setTimeout(resolve, 500));
+
         const presetId = getNextPresetId();
         await webservices.savePreset(
           getIpAddress(),
@@ -926,10 +923,10 @@ export default {
           newPresetName.value,
           { includeBrightness: true, saveSegmentBounds: true }
         );
-        
+
         // Save the duration locally
         setPresetDuration(presetId, newPresetDuration.value);
-        
+
         isAddingNew.value = false;
         resetNewPresetForm();
         await loadPresets();
@@ -942,18 +939,18 @@ export default {
     const updateExistingPreset = async (presetId, presetName) => {
       try {
         previewEditEffect();
-        await new Promise(resolve => setTimeout(resolve, 200));
-        
+        await new Promise(resolve => setTimeout(resolve, 500));
+
         await webservices.savePreset(
           getIpAddress(),
           presetId,
           presetName,
           { includeBrightness: true, saveSegmentBounds: true }
         );
-        
+
         // Update the duration locally
         setPresetDuration(presetId, editDuration.value);
-        
+
         expandedPresetId.value = null;
         await loadPresets();
       } catch (error) {
@@ -1057,27 +1054,27 @@ export default {
     return {
       // Tab state
       activeTab,
-      
+
       // Loading states
       isLoadingPresets,
-      
+
       // Presets
       savedPresets,
       currentPresetId,
       loadPresets,
       applyPreset,
       deletePreset,
-      
+
       // Expand/collapse
       isAddingNew,
       expandedPresetId,
       toggleAddNew,
       togglePresetExpand,
-      
+
       // Effects
       effectsList,
       palettes,
-      
+
       // New preset form
       newPresetName,
       selectedEffectId,
@@ -1092,7 +1089,7 @@ export default {
       previewEffect,
       onEffectChange,
       saveNewPreset,
-      
+
       // Edit preset form
       editEffectId,
       editPaletteId,
@@ -1105,11 +1102,11 @@ export default {
       editDuration,
       previewEditEffect,
       onEditEffectChange,
-      
+
       // Preset durations
       getPresetDuration,
       updateExistingPreset,
-      
+
       // Playlist
       playlistItems,
       playlistRepeat,

@@ -943,7 +943,7 @@ export const webservices = {
 
     const command = {
       on: true,
-      seg: segConfig,
+      seg: [segConfig],
     };
 
     if (brightness !== undefined) {
