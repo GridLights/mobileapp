@@ -690,6 +690,269 @@ export const webservices = {
     }
   },
 
+  // =========================================================================
+  // PRESETS API
+  // =========================================================================
+
+  /**
+   * Fetch all presets from a WLED instance
+   * @param {string} ipAddress - The IP address of the WLED instance
+   * @returns {Promise<Object>} Object containing all presets
+   */
+  async fetchWledPresets(ipAddress) {
+    try {
+      const url = `http://${ipAddress}/presets.json`;
+      gconsole.log(`Fetching presets from: ${url}`, "wled-api");
+      
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const presets = await response.json();
+      gconsole.log(`Fetched presets from WLED`, "wled-api");
+      return presets;
+    } catch (error) {
+      gconsole.error(`Error fetching WLED presets: ${error.message}`, "wled-api-error");
+      throw error;
+    }
+  },
+
+  /**
+   * Fetch palettes list from a WLED instance
+   * @param {string} ipAddress - The IP address of the WLED instance
+   * @returns {Promise<Array>} Array of palette names
+   */
+  async fetchWledPalettes(ipAddress) {
+    try {
+      const url = `http://${ipAddress}/json/pal`;
+      gconsole.log(`Fetching palettes from: ${url}`, "wled-api");
+      
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const palettes = await response.json();
+      gconsole.log(`Fetched ${palettes.length} palettes from WLED`, "wled-api");
+      return palettes;
+    } catch (error) {
+      gconsole.error(`Error fetching WLED palettes: ${error.message}`, "wled-api-error");
+      throw error;
+    }
+  },
+
+  /**
+   * Fetch current WLED state
+   * @param {string} ipAddress - The IP address of the WLED instance
+   * @returns {Promise<Object>} Current state object
+   */
+  async fetchWledState(ipAddress) {
+    try {
+      const url = `http://${ipAddress}/json/state`;
+      gconsole.log(`Fetching state from: ${url}`, "wled-api");
+      
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const state = await response.json();
+      gconsole.log(`Fetched state from WLED`, "wled-api");
+      return state;
+    } catch (error) {
+      gconsole.error(`Error fetching WLED state: ${error.message}`, "wled-api-error");
+      throw error;
+    }
+  },
+
+  /**
+   * Save a preset to the WLED device
+   * @param {string} ipAddress - The IP address of the WLED instance
+   * @param {number} presetId - Preset slot ID (1-250)
+   * @param {string} name - Preset name
+   * @param {Object} options - Additional options
+   * @param {boolean} options.includeBrightness - Include brightness in preset
+   * @param {boolean} options.saveSegmentBounds - Save segment start/stop bounds
+   * @param {Object} options.segmentConfig - Optional custom segment configuration
+   * @returns {Promise<boolean>} True if successful
+   */
+  async savePreset(ipAddress, presetId, name, options = {}) {
+    try {
+      const { 
+        includeBrightness = true, 
+        saveSegmentBounds = true,
+        segmentConfig = null 
+      } = options;
+
+      gconsole.log(`Saving preset ${presetId} to ${ipAddress}`, "wled-preset");
+
+      // Build the save command
+      const command = {
+        psave: presetId,
+        n: name,
+        ib: includeBrightness,
+        sb: saveSegmentBounds,
+      };
+
+      // If custom segment config is provided, include it
+      if (segmentConfig) {
+        command.seg = segmentConfig;
+      }
+
+      this.sendCommandToWebSocket(command);
+      
+      gconsole.log(`Preset ${presetId} saved successfully`, "wled-preset");
+      return true;
+    } catch (error) {
+      gconsole.error(`Error saving preset: ${error.message}`, "wled-preset-error");
+      throw error;
+    }
+  },
+
+  /**
+   * Delete a preset from the WLED device
+   * @param {string} ipAddress - The IP address of the WLED instance
+   * @param {number} presetId - Preset ID to delete
+   * @returns {Promise<boolean>} True if successful
+   */
+  async deletePreset(ipAddress, presetId) {
+    try {
+      gconsole.log(`Deleting preset ${presetId} from ${ipAddress}`, "wled-preset");
+
+      const command = {
+        pdel: presetId
+      };
+
+      this.sendCommandToWebSocket(command);
+      
+      gconsole.log(`Preset ${presetId} deleted successfully`, "wled-preset");
+      return true;
+    } catch (error) {
+      gconsole.error(`Error deleting preset: ${error.message}`, "wled-preset-error");
+      throw error;
+    }
+  },
+
+  /**
+   * Apply a preset by ID
+   * @param {number} presetId - Preset ID to apply
+   */
+  applyPreset(presetId) {
+    gconsole.log(`Applying preset ${presetId}`, "wled-preset");
+    const command = { ps: presetId };
+    this.sendCommandToWebSocket(command);
+  },
+
+  /**
+   * Start a playlist
+   * @param {Object} playlist - Playlist configuration
+   * @param {Array<number>} playlist.presets - Array of preset IDs
+   * @param {Array<number>} playlist.durations - Array of durations in tenths of seconds
+   * @param {number|Array<number>} playlist.transition - Transition time(s) in tenths of seconds
+   * @param {number} playlist.repeat - Number of repeats (0 = indefinite)
+   * @param {number} playlist.endPreset - Preset to apply when playlist ends
+   */
+  startPlaylist(playlist) {
+    const { presets, durations, transition = 7, repeat = 0, endPreset = null } = playlist;
+    
+    gconsole.log(`Starting playlist with ${presets.length} presets`, "wled-playlist");
+
+    const command = {
+      playlist: {
+        ps: presets,
+        dur: durations,
+        transition: transition,
+        repeat: repeat,
+      }
+    };
+
+    if (endPreset !== null) {
+      command.playlist.end = endPreset;
+    }
+
+    this.sendCommandToWebSocket(command);
+  },
+
+  /**
+   * Stop the current playlist
+   */
+  stopPlaylist() {
+    gconsole.log("Stopping playlist", "wled-playlist");
+    // Setting pl to -1 stops the playlist
+    const command = { pl: -1 };
+    this.sendCommandToWebSocket(command);
+  },
+
+  /**
+   * Advance to the next preset in a playlist
+   */
+  nextPlaylistPreset() {
+    gconsole.log("Advancing to next playlist preset", "wled-playlist");
+    const command = { np: true };
+    this.sendCommandToWebSocket(command);
+  },
+
+  /**
+   * Apply effect with full parameters
+   * @param {Object} config - Effect configuration
+   * @param {number} config.effectId - Effect ID (fx)
+   * @param {number} config.speed - Speed 0-255 (sx)
+   * @param {number} config.intensity - Intensity 0-255 (ix)
+   * @param {number} config.palette - Palette ID (pal)
+   * @param {Array} config.colors - Array of up to 3 colors [[r,g,b], [r,g,b], [r,g,b]]
+   * @param {number} config.brightness - Brightness 0-255 (bri)
+   * @param {number} config.custom1 - Custom slider 1 (c1)
+   * @param {number} config.custom2 - Custom slider 2 (c2)
+   * @param {number} config.custom3 - Custom slider 3 (c3)
+   */
+  applyEffect(config) {
+    const { effectId, speed, intensity, palette, colors, brightness, custom1, custom2, custom3 } = config;
+    
+    gconsole.log(`Applying effect ${effectId}`, "wled-effect");
+
+    const segConfig = {
+      fx: effectId,
+    };
+
+    if (speed !== undefined) segConfig.sx = speed;
+    if (intensity !== undefined) segConfig.ix = intensity;
+    if (palette !== undefined) segConfig.pal = palette;
+    if (colors !== undefined) segConfig.col = colors;
+    if (custom1 !== undefined) segConfig.c1 = custom1;
+    if (custom2 !== undefined) segConfig.c2 = custom2;
+    if (custom3 !== undefined) segConfig.c3 = custom3;
+
+    const command = {
+      on: true,
+      seg: segConfig,
+    };
+
+    if (brightness !== undefined) {
+      command.bri = brightness;
+    }
+
+    this.sendCommandToWebSocket(command);
+  },
+
   /**
    * Initialize a newly connected WLED device
    * - Analyzes the device for custom effects

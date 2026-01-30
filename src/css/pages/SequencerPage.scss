@@ -8,242 +8,610 @@
   position: relative;
 }
 
+/* ============================================
+   TAB NAVIGATION
+   ============================================ */
+.sequencer-page .tab-navigation {
+  display: flex;
+  gap: 0;
+  padding: 0 20px;
+  margin-top: 60px;
+  position: fixed;
+  top: 20px;
+  left: 0;
+  right: 0;
+  z-index: 15;
+  background: #eee;
+  padding-bottom: 12px;
+}
+
+.sequencer-page .tab-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border: 1px solid #d0d0d0;
+  background: #fff;
+  color: #666;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+
+  &:first-child {
+    border-radius: 8px 0 0 8px;
+    border-right: none;
+  }
+
+  &:last-child {
+    border-radius: 0 8px 8px 0;
+  }
+
+  &.active {
+    background: #333;
+    color: #fff;
+    border-color: #333;
+  }
+
+  &:not(.active):hover {
+    background: #f5f5f5;
+  }
+}
+
+/* ============================================
+   CONTENT AREA
+   ============================================ */
 .sequencer-page .content-area-sequencer {
-  margin-top: 130px;
-  margin-bottom: 10px;
-  height: calc(100vh - 112px);
+  flex: 1;
   overflow-y: auto;
+  padding-top: 145px;
+  padding-bottom: 20px;
+  -webkit-overflow-scrolling: touch;
 }
 
 .sequencer-page .content-padding {
-  margin-top: 10px;
-  padding: 0 20px 0px 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  padding: 0 20px;
 }
 
-.sequencer-page .description-bar {
-  font-size: 12px;
-  color: var(--header-text-color);
-  padding: 20px 20px;
-  text-align: center;
-  position: fixed;
-  top: 80px;
-  left: 0;
-  right: 0;
-  z-index: 10;
-}
-
-.sequencer-page .effect-queue-card {
-  width: 100%;
-  max-width: 600px;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+/* ============================================
+   SECTION CARDS
+   ============================================ */
+.sequencer-page .section-card {
+  background: #f8f8f8;
+  border-radius: 12px;
+  margin-bottom: 16px;
   overflow: hidden;
-}
-
-.sequencer-page .queue-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px 20px;
-  border-bottom: 1px solid #e0e0e0;
-  background: #f5f5f5;
-}
-
-.sequencer-page .queue-title {
-  display: flex;
-  align-items: center;
-  font-weight: 600;
-  font-size: 13px;
-  color: var(--controls-icon-color);
-}
-
-.sequencer-page .queue-icon {
-  margin-right: 8px;
-}
-
-.sequencer-page .start-btn {
-  background-color: var(--controls-button--color);
-  border-radius: 4px;
-  font-size: 10px;
-}
-
-.sequencer-page .stop-btn {
-  background-color: var(--controls-button--color);
-  border-radius: 4px;
-  font-size: 10px;
-  margin-left: 4px;
-}
-
-.sequencer-page .queue-content {
-  min-height: 200px;
-  padding: 20px;
-}
-
-.sequencer-page .empty-queue {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 160px;
-  color: #999;
-}
-
-.sequencer-page .empty-message {
-  font-size: 16px;
-  font-weight: 500;
-  margin-bottom: 8px;
-}
-
-.sequencer-page .empty-subtitle {
-  font-size: 14px;
-  color: #bbb;
-}
-
-.sequencer-page .effect-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.sequencer-page .effect-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 16px;
-  border-radius: 6px;
   border: 1px solid #e0e0e0;
-  color: var(--controls-label-color);
-  background-color: var(--controls-bg-color);
-}
-
-.sequencer-page .effect-info {
-  display: flex;
-  flex-direction: column;
-}
-
-.sequencer-page .effect-name {
-  font-weight: 500;
-  font-size: 14px;
-}
-
-.sequencer-page .effect-duration {
-  font-size: 12px;
-  color: #666;
-}
-
-.sequencer-page .remove-btn {
-  color: #999;
-}
-
-.sequencer-page .remove-btn:hover {
-  color: #f44336;
-}
-
-.sequencer-page .available-effects-section {
-  width: 100%;
-  max-width: 600px;
-  margin-top: 30px;
 }
 
 .sequencer-page .section-header {
   display: flex;
   align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  background: #fff;
+  border-bottom: 1px solid #e8e8e8;
   font-weight: 600;
-  font-size: 18px;
-  margin-bottom: 20px;
   color: #333;
-}
-
-.sequencer-page .section-icon {
-  margin-right: 8px;
-}
-
-.sequencer-page .effects-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.sequencer-page .effect-card {
-  background: #e8e8e8;
-  border-radius: 8px;
-  padding: 16px;
-  border: 1px solid #d0d0d0;
-}
-
-.sequencer-page .effect-card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-}
-
-.sequencer-page .effect-card-title {
-  font-weight: 600;
-  font-size: 16px;
-  color: #333;
-}
-
-.sequencer-page .add-to-queue-btn {
-  background-color: var(--controls-button--color);
-  color: white;
-  border-radius: 4px;
-  padding: 6px 12px;
-  font-size: 12px;
-  font-weight: 500;
-}
-
-.sequencer-page .effect-parameters {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.sequencer-page .parameter-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.sequencer-page .parameter-row:not(.brightness-row) {
-  justify-content: space-between;
-}
-
-.sequencer-page .parameter-label {
-  display: flex;
-  align-items: center;
-  gap: 4px;
   font-size: 14px;
-  color: var(--controls-label-color);
-  font-weight: 500;
-  min-width: 80px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+
+  .section-icon {
+    color: #666;
+  }
 }
 
-.sequencer-page .parameter-input {
-  width: 120px;
+/* ============================================
+   ADD NEW PRESET ROW
+   ============================================ */
+.sequencer-page .add-preset-row {
+  background: #fff;
+  border-bottom: 1px solid #e8e8e8;
+  cursor: pointer;
+  transition: background 0.2s ease;
+
+  &:hover:not(.expanded) {
+    background: #f5f5f5;
+  }
+
+  &.expanded {
+    background: #fafafa;
+  }
+
+  .preset-row-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+  }
+
+  .add-preset-label {
+    flex: 1;
+    font-weight: 500;
+    color: #333;
+    font-size: 14px;
+  }
+
+  .expand-icon {
+    color: #999;
+  }
 }
 
-.sequencer-page .parameter-input :deep(.q-field__control) {
-  background-color: var(--controls-input-field-bg-color) !important;
-  border-radius: 4px;
-}
-
-.sequencer-page .parameter-input :deep(.q-field__native) {
-  color: var(--controls-label-color) !important;
-}
-
-.sequencer-page .brightness-row {
+/* ============================================
+   PRESET ROW (Expandable)
+   ============================================ */
+.sequencer-page .presets-list {
+  display: flex;
   flex-direction: column;
-  align-items: flex-start;
+}
+
+.sequencer-page .preset-row {
+  background: #fff;
+  border-bottom: 1px solid #e8e8e8;
+  transition: background 0.2s ease;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &.active .preset-row-header {
+    background: rgba(0, 128, 0, 0.05);
+    
+    .preset-icon {
+      color: #28a745;
+    }
+  }
+
+  &.expanded {
+    background: #fafafa;
+  }
+
+  .preset-row-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+
+    &:hover {
+      background: #f5f5f5;
+    }
+  }
+
+  .preset-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .preset-icon {
+    color: #666;
+    flex-shrink: 0;
+  }
+
+  .preset-name {
+    font-weight: 500;
+    color: #333;
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .preset-duration {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    background: #e8e8e8;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #666;
+    white-space: nowrap;
+    flex-shrink: 0;
+
+    .q-icon {
+      font-size: 12px;
+    }
+  }
+
+  .preset-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+
+    .q-btn {
+      color: #666;
+
+      &:hover {
+        color: #333;
+      }
+    }
+
+    .expand-icon {
+      color: #999;
+      margin-left: 4px;
+    }
+  }
+}
+
+/* ============================================
+   PRESET CONFIG PANEL (Expandable)
+   ============================================ */
+.sequencer-page .preset-config-panel {
+  border-top: 1px solid #e8e8e8;
+  background: #fafafa;
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    max-height: 1000px;
+  }
+}
+
+.sequencer-page .config-content {
+  padding: 16px;
+}
+
+.sequencer-page .preset-id-display {
+  margin-bottom: 16px;
+  padding: 8px 12px;
+  background: #e8e8e8;
+  border-radius: 6px;
+  display: inline-block;
+
+  .id-label {
+    font-size: 12px;
+    color: #666;
+    font-weight: 500;
+  }
+}
+
+/* ============================================
+   CONTROL GROUPS
+   ============================================ */
+.sequencer-page .control-group {
+  margin-bottom: 16px;
+
+  &:last-of-type {
+    margin-bottom: 20px;
+  }
+}
+
+.sequencer-page .control-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #555;
+  font-size: 13px;
+
+  .q-icon {
+    color: #888;
+  }
+}
+
+.sequencer-page .value-badge {
+  margin-left: auto;
+  background: #e8e8e8;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  color: #666;
+  font-weight: 600;
+}
+
+/* Text Input */
+.sequencer-page .text-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d0d0d0;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #333;
+  background: #fff;
+  transition: border-color 0.2s ease;
+
+  &:focus {
+    outline: none;
+    border-color: #666;
+  }
+
+  &::placeholder {
+    color: #aaa;
+  }
+}
+
+/* Effect Select */
+.sequencer-page .effect-select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d0d0d0;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #333;
+  background: #fff;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 32px;
+
+  &:focus {
+    outline: none;
+    border-color: #666;
+  }
+}
+
+/* Colors Group */
+.sequencer-page .colors-group .color-pickers {
+  display: flex;
+  gap: 12px;
+}
+
+.sequencer-page .color-picker-item {
+  flex: 1;
+  text-align: center;
+
+  label {
+    display: block;
+    font-size: 11px;
+    color: #888;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+  }
+
+  .color-input {
+    width: 100%;
+    height: 40px;
+    border: 1px solid #d0d0d0;
+    border-radius: 8px;
+    cursor: pointer;
+    padding: 2px;
+    background: #fff;
+
+    &::-webkit-color-swatch-wrapper {
+      padding: 2px;
+    }
+
+    &::-webkit-color-swatch {
+      border: none;
+      border-radius: 5px;
+    }
+  }
+}
+
+/* Slider Group */
+.sequencer-page .slider-group {
+  .q-slider {
+    margin-top: 4px;
+  }
+}
+
+/* ============================================
+   ACTION BUTTONS
+   ============================================ */
+.sequencer-page .action-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.sequencer-page .preview-btn {
+  flex: 1;
+  background: #f0f0f0 !important;
+  color: #333 !important;
+  font-weight: 600;
+  padding: 12px 16px;
+}
+
+.sequencer-page .save-btn {
+  flex: 1;
+  background: #333 !important;
+  color: #fff !important;
+  font-weight: 600;
+  padding: 12px 16px;
+}
+
+.sequencer-page .delete-section {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e8e8e8;
+  text-align: center;
+}
+
+.sequencer-page .delete-btn {
+  color: #dc3545 !important;
+  font-weight: 500;
+}
+
+/* ============================================
+   EMPTY STATE
+   ============================================ */
+.sequencer-page .empty-state {
+  padding: 40px 20px;
+  text-align: center;
+  color: #888;
+  font-size: 14px;
+
+  .q-icon {
+    margin-bottom: 12px;
+  }
+
+  .empty-subtitle {
+    margin-top: 6px;
+    font-size: 12px;
+    color: #aaa;
+  }
+}
+
+/* ============================================
+   PLAYLIST TAB STYLES
+   ============================================ */
+.sequencer-page .playlist-controls {
+  display: flex;
+  gap: 8px;
+  padding: 16px;
+  background: #fff;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.sequencer-page .start-btn {
+  flex: 1;
+  background: #28a745 !important;
+  color: #fff !important;
+  font-weight: 600;
+}
+
+.sequencer-page .next-btn {
+  flex: 1;
+  background: #f0f0f0 !important;
+  color: #333 !important;
+  font-weight: 600;
+}
+
+.sequencer-page .stop-btn {
+  flex: 1;
+  background: #dc3545 !important;
+  color: #fff !important;
+  font-weight: 600;
+}
+
+.sequencer-page .playlist-settings {
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+  background: #fff;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.sequencer-page .setting-item {
+  flex: 1;
+
+  label {
+    display: block;
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+
+  .setting-input {
+    width: 100%;
+  }
+}
+
+/* Playlist Items */
+.sequencer-page .playlist-items {
+  background: #fff;
+}
+
+.sequencer-page .playlist-header-row {
+  display: flex;
+  align-items: center;
+  padding: 10px 16px;
+  background: #f5f5f5;
+  font-size: 11px;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
   gap: 8px;
 }
 
-.sequencer-page .brightness-slider {
-  width: 100%;
-  --q-primary: var(--controls-slider-bar--color);
-  --q-track-color: var(--controls-slider-bar--color);
+.sequencer-page .playlist-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid #eee;
+  gap: 8px;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.sequencer-page .drag-handle {
+  cursor: grab;
+  color: #ccc;
+  padding: 4px;
+
+  &:active {
+    cursor: grabbing;
+  }
+}
+
+.sequencer-page .col-order {
+  width: 30px;
+  text-align: center;
+  font-weight: 600;
+  color: #666;
+}
+
+.sequencer-page .col-name {
+  flex: 1;
+  font-weight: 500;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sequencer-page .col-duration {
+  width: 80px;
+
+  .duration-input {
+    font-size: 13px;
+  }
+}
+
+.sequencer-page .col-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.sequencer-page .playlist-summary {
+  padding: 12px 16px;
+  text-align: right;
+  font-size: 13px;
+  color: #666;
+  background: #f5f5f5;
+  font-weight: 500;
+}
+
+/* Quick Add Grid */
+.sequencer-page .quick-add-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 8px;
+  padding: 16px;
+}
+
+.sequencer-page .quick-add-btn {
+  background: #f0f0f0 !important;
+  color: #333 !important;
+  font-weight: 500;
+  font-size: 12px;
+  padding: 10px 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
