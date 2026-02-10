@@ -64,22 +64,63 @@ npx cap open android
 
 ## Manual Updates to Configure Android App
 
-# update src-capacitor/android/app/src/main/java/com/gridlights/app/MainActivity.java
+source ~/.zshrc 
+nvm use 20 
+quasar mode add capacitor
+use: com.gridlights.solspektrum
+appName: Sol-Spektrum
+npx cap init
+name: Sol-Spektrum
+com.gridlights.solspektrum
+webassets: www
 
-```
-package com.gridlights.app;
+# src-capacitor/capacitor.config.json
+{
+  "appId": "com.gridlights.solspektrum",
+  "appName": "Gridlights",
+  "webDir": "www",
+  "server": {
+    "hostname": "localhost",
+    "androidScheme": "http"
+  },
+  "plugins": {
+    "CapacitorHttp": {
+      "enabled": false
+    }
+  }
+}
+
+# mobileapp/src-capacitor/android/app/src/main/res/xml/network_security_config.xml
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>
+
+# src-capacitor/android/app/src/main/AndroidManifest.xml
+android:usesCleartextTraffic="true" android:networkSecurityConfig="@xml/network_security_config"
+
+
+# android/app/src/main/java/…./MainActivity.java
+package com.gridlights.solspektrum;
 
 import android.os.Bundle;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 
+
 import com.getcapacitor.BridgeActivity;
 import com.getcapacitor.Bridge;
+
 
 public class MainActivity extends BridgeActivity {
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+    WebView.setWebContentsDebuggingEnabled(true);
 
     // Access the WebView through the Capacitor bridge
     WebView webView = (WebView) this.bridge.getWebView();
@@ -89,45 +130,21 @@ public class MainActivity extends BridgeActivity {
     }
   }
 }
-```
 
-# Update src-capacitor/capacitor.config.json
+# /src-capacitor/android/gradle/wrapper/gradle-wrapper.properties
+distributionBase=GRADLE_USER_HOME
+distributionPath=wrapper/dists
+distributionUrl=https\://services.gradle.org/distributions/gradle-9.0-milestone-1-bin.zip
+zipStoreBase=GRADLE_USER_HOME
+zipStorePath=wrapper/dists
 
-add this:
 
-```
-"server": {
-    "cleartext": true,
-    "hostname": "localhost"
-  },
-```
+# android/app/build.gradle
+versionCode 2
 
-so like this:
+# android/variables.gradle
+    compileSdkVersion = 35
+    targetSdkVersion = 35
 
-```
-{
-  "appId": "com.gridlights.app",
-  "appName": "Gridlights",
-  "webDir": "www",
-  "server": {
-    "cleartext": true,
-    "hostname": "localhost"
-  },
-  "ios": {
-    "minVersion": "15.0"
-  },
-  "plugins": {
-    "@capacitor/assets": {
-      "ios": {
-        "iconBackground": "#ffffff",
-        "icon": "resources/ios/icon.png"
-      },
-      "android": {
-        "iconBackground": "#ffffff",
-        "icon": "resources/ios/icon.png",
-        "iconForeground": "resources/ios/icon.png"
-      }
-    }
-  }
-}
+to rebuild… npx quasar build -m capacitor -T android
 ```
