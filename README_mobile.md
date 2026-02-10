@@ -91,7 +91,7 @@ webassets: www
 }
 
 # mobileapp/src-capacitor/android/app/src/main/res/xml/network_security_config.xml
-<?xml version="1.0" encoding="utf-8"?>
+< ?xml version="1.0" encoding="utf-8"? >
 <network-security-config>
     <base-config cleartextTrafficPermitted="true">
         <trust-anchors>
