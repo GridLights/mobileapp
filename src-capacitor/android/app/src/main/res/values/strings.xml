@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Gridlights</string>
+    <string name="title_activity_main">Gridlights</string>
+    <string name="package_name">com.gridlights.solspektrum</string>
+    <string name="custom_url_scheme">com.gridlights.solspektrum</string>
+</resources>
