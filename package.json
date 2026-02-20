@@ -11,7 +11,11 @@
     "test": "npx playwright test",
     "test:ui": "npx playwright test --ui",
     "test:headed": "npx playwright test --headed",
-    "test:debug": "npx playwright test --debug"
+    "test:debug": "npx playwright test --debug",
+    "android:setup": "cd src-capacitor && npm install",
+    "android:dev": "npx quasar dev -m capacitor -T android",
+    "android:build": "npx quasar build -m capacitor -T android",
+    "android:open": "cd src-capacitor && npx cap open android"
   },
   "dependencies": {
     "@capacitor/assets": "^3.0.5",

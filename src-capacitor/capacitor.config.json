@@ -1,0 +1,14 @@
+{
+  "appId": "com.gridlights.solspektrum",
+  "appName": "Gridlights",
+  "webDir": "www",
+  "server": {
+    "hostname": "localhost",
+    "androidScheme": "http"
+  },
+  "plugins": {
+    "CapacitorHttp": {
+      "enabled": false
+    }
+  }
+}
