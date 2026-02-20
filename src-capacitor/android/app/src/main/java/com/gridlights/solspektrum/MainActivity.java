@@ -9,7 +9,7 @@ public class MainActivity extends BridgeActivity {
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    WebView.setWebContentsDebuggingEnabled(true);
+    WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG);
 
     // Allow mixed content (HTTP within HTTPS context) for WebSocket support
     WebView webView = (WebView) this.bridge.getWebView();
