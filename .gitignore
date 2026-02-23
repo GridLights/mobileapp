@@ -6,6 +6,7 @@ node_modules
 android-keys/gridlights.keystore
 *.keystore
 *.jks
+keystore.properties
 
 # Quasar core related directories
 .quasar
