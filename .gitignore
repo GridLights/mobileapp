@@ -38,3 +38,6 @@ yarn-error.log*
 *.njsproj
 *.sln
 /.quasar-ide-helper/
+
+# Local scripts (not for version control)
+/scripts

@@ -301,98 +301,67 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, watch, onMounted, onBeforeUnmount } from 'vue';
 import PowerSwitch from "./PowerSwitch.vue";
-import webservices from "../webservices";
+import { useConnectionState } from "../composables/useConnectionState";
 
-export default {
-  components: {
-    PowerSwitch,
+const props = defineProps({
+  rows: {
+    type: Array,
+    required: true,
   },
-  props: {
-    rows: {
-      type: Array,
-      required: true,
-    },
-    circleRadius: {
-      type: Number,
-      default: 4,
-    },
-    spacing: {
-      type: Number,
-      default: 26,
-    },
-    powerOn: {
-      type: Boolean,
-      default: false,
-    },
+  circleRadius: {
+    type: Number,
+    default: 4,
   },
-  data() {
-    return {
-      powerState: this.powerOn,
-      connectionState: webservices.getConnectionState(),
-      // Base positioning (for row 0, column 0)
-      dotRadius: 5,
-      baseX: 118,
-      baseY: 71,
-
-      // LED spacing
-      ledSpacing: 20.6,
-
-      // Row offsets from base position
-      row0XOffset: 0,
-      row0YOffset: 0,
-
-      row1XOffset: -11,
-      row1YOffset: 18,
-
-      row2XOffset: -21,
-      row2YOffset: 36,
-
-      row3XOffset: -30,
-      row3YOffset: 54,
-
-      row4XOffset: -21,
-      row4YOffset: 73,
-
-      row5XOffset: -11,
-      row5YOffset: 90,
-
-      row6XOffset: 0,
-      row6YOffset: 108,
-    };
+  spacing: {
+    type: Number,
+    default: 26,
   },
-  mounted() {
-    // Set up connection state listener
-    this.connectionState = webservices.getConnectionState();
-    this._prevOnConnectionStateChange = webservices.onConnectionStateChange;
-    webservices.onConnectionStateChange = (state) => {
-      this.connectionState = state;
-      // Call any previously registered handler
-      if (this._prevOnConnectionStateChange) {
-        this._prevOnConnectionStateChange(state);
-      }
-    };
+  powerOn: {
+    type: Boolean,
+    default: false,
   },
-  beforeUnmount() {
-    // Restore previous handler
-    webservices.onConnectionStateChange = this._prevOnConnectionStateChange || null;
-  },
-  watch: {
-    powerOn(newVal) {
-      // Keep local button state in sync with parent-provided power state
-      this.powerState = newVal;
-    },
-  },
-  methods: {
-    handlePowerToggle(newState) {
-      console.log("Power button toggled:", newState);
-      //  power toggle logic here
-      //  emit an event to parent component
-      this.$emit("power-changed", newState);
-    },
-  },
-};
+});
+
+const emit = defineEmits(['power-changed']);
+
+const { connectionState, subscribe } = useConnectionState();
+
+const powerState = ref(props.powerOn);
+
+watch(() => props.powerOn, (newVal) => {
+  powerState.value = newVal;
+});
+
+// Positioning constants
+const dotRadius = 5;
+const baseX = 118;
+const baseY = 71;
+const ledSpacing = 20.6;
+const row0XOffset = 0, row0YOffset = 0;
+const row1XOffset = -11, row1YOffset = 18;
+const row2XOffset = -21, row2YOffset = 36;
+const row3XOffset = -30, row3YOffset = 54;
+const row4XOffset = -21, row4YOffset = 73;
+const row5XOffset = -11, row5YOffset = 90;
+const row6XOffset = 0, row6YOffset = 108;
+
+function handlePowerToggle(newState) {
+  emit('power-changed', newState);
+}
+
+// Subscribe to connection state changes; automatically cleans up on unmount
+let unsubscribeFn = null;
+onMounted(() => {
+  unsubscribeFn = subscribe(() => {
+    // connectionState ref is updated automatically by the composable
+  });
+});
+onBeforeUnmount(() => {
+  if (unsubscribeFn) unsubscribeFn();
+});
 </script>
 
 <style scoped>
