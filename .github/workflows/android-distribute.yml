@@ -1,0 +1,85 @@
+name: Android Build & Distribute
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_notes:
+        description: "Release notes for testers"
+        required: false
+        default: "Bug fixes and improvements"
+      tester_groups:
+        description: "Firebase tester group(s), comma-separated"
+        required: false
+        default: "internal-users"
+
+jobs:
+  build-and-distribute:
+    name: Build APK & Upload to Firebase
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Install Quasar CLI
+        run: npm install -g @quasar/cli
+
+      - name: Install Capacitor dependencies
+        run: |
+          cd src-capacitor
+          npm ci
+
+      - name: Decode keystore
+        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > src-capacitor/android/gridlights-release.keystore
+
+      - name: Create keystore.properties
+        run: |
+          cat > src-capacitor/android/keystore.properties << EOF
+          storePassword=${{ secrets.KEYSTORE_PASSWORD }}
+          keyPassword=${{ secrets.KEY_PASSWORD }}
+          keyAlias=${{ secrets.KEY_ALIAS }}
+          storeFile=../gridlights-release.keystore
+          EOF
+
+      - name: Build Quasar for Capacitor
+        run: npx quasar build -m capacitor -T android --skip-pkg
+
+      - name: Sync Capacitor
+        run: |
+          cd src-capacitor
+          npx cap sync android
+
+      - name: Build release APK
+        working-directory: src-capacitor/android
+        run: ./gradlew assembleRelease
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release
+          path: src-capacitor/android/app/build/outputs/apk/release/app-release.apk
+          retention-days: 30
+
+      - name: Upload to Firebase App Distribution
+        uses: wzieba/Firebase-Distribution-Github-Action@v1
+        with:
+          appId: ${{ secrets.FIREBASE_APP_ID }}
+          serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          file: src-capacitor/android/app/build/outputs/apk/release/app-release.apk
+          groups: ${{ github.event.inputs.tester_groups }}
+          releaseNotes: ${{ github.event.inputs.release_notes }}
