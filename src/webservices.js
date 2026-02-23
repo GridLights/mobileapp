@@ -204,7 +204,6 @@ export const webservices = {
   commandQueue: [], // Queue for commands
   connectionState: ConnectionState.DISCONNECTED, // Current connection state
   onConnectionStateChange: null, // Callback for state changes
-  _wsUrl: null, // Last connected URL — used by reconnectWithNewUrl
   _callbacks: null, // Stored callbacks from last initWebSocket call
 
   /**
@@ -246,8 +245,7 @@ export const webservices = {
     onConnectedCallback
   ) {
     const self = this; // Preserve `this` context for inner functions
-    // Store for reconnectWithNewUrl so callers don't need to pass callbacks again
-    this._wsUrl = wsUrl;
+    // Store callbacks for reconnect operations
     this._callbacks = { onMessageCallback, onLiveStreamDataCallback, onConnectedCallback };
 
     function connect() {
@@ -297,7 +295,7 @@ export const webservices = {
               // Helper: build color array from a given offset
               const buildColors = () => {
                 const out = [];
-                for (let i = 0; i + 2 < ledData.length; i += 3) {
+                for (let i = 0; i <= ledData.length - 3; i += 3) {
                   const r = ledData[i];
                   const g = ledData[i + 1];
                   const b = ledData[i + 2];
@@ -385,7 +383,7 @@ export const webservices = {
 
       // True exponential backoff: 3s, 6s, 12s, 24s... capped at 30s, with ±1s jitter
       const base = this.reconnectTimeout * Math.pow(2, this.reconnectAttempts - 1);
-      const jitter = Math.random() * 1000;
+      const jitter = (Math.random() - 0.5) * 2000; // ±1s jitter
       const delay = Math.min(base + jitter, 30000);
 
       gconsole.log(
@@ -420,6 +418,7 @@ export const webservices = {
 
     // Close the current socket without triggering the old reconnect chain
     if (ws) {
+      ws.onopen = null;
       ws.onclose = null;
       ws.onerror = null;
       ws.close();
@@ -474,6 +473,8 @@ export const webservices = {
     }
     this.reconnectAttempts = 0;
     if (ws) {
+      ws.onopen = null;
+      ws.onmessage = null;
       ws.onclose = null; // prevent triggering handleReconnect on intentional close
       ws.onerror = null;
       ws.close();

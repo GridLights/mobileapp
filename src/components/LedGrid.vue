@@ -356,7 +356,9 @@ function handlePowerToggle(newState) {
 let unsubscribeFn = null;
 onMounted(() => {
   unsubscribeFn = subscribe(() => {
-    // connectionState ref is updated automatically by the composable
+    // Intentionally left empty: connectionState is a reactive ref that auto-updates
+    // via the useConnectionState composable's internal mechanism. The subscription
+    // itself is still required to register this component with the composable.
   });
 });
 onBeforeUnmount(() => {
