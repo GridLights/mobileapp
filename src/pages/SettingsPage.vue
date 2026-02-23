@@ -420,7 +420,7 @@ export default {
       console.log("Saved IP Address: http://" + ip);
       localStorage.setItem("ipAddress", ip);
       // Reconnect WebSocket to the new IP, reusing callbacks stored from the last initWebSocket call
-      webservices.reconnectWithNewUrl(`ws://${ip}/ws`);
+      webservices.reconnectWithNewUrl(`ws://${ip}:80/ws`);
     };
 
     const validateIpAddress = (value) => {

@@ -440,7 +440,11 @@ export const webservices = {
    * @param {string} newWsUrl - The new WebSocket URL (e.g., "ws://192.168.1.42/ws").
    */
   reconnectWithNewUrl(newWsUrl) {
-    const cb = this._callbacks || {};
+    if (!this._callbacks) {
+      gconsole.error('reconnectWithNewUrl called before initWebSocket - no callbacks stored', 'ws-error');
+      return;
+    }
+    const cb = this._callbacks;
     this.resetAndReconnect(
       newWsUrl,
       cb.onMessageCallback,

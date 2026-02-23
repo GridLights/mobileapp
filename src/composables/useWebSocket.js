@@ -55,6 +55,22 @@ export function useWebSocket() {
     initialized = false;
   }
 
+  /**
+   * Mark as initialized without performing connection (used when reconnectWithNewUrl is called externally).
+   * @internal
+   */
+  function markInitialized() {
+    initialized = true;
+  }
+
+  /**
+   * Reset the initialized guard (used when WebSocket is closed externally).
+   * @internal
+   */
+  function markUninitialized() {
+    initialized = false;
+  }
+
   function sendCommand(command) {
     webservices.sendCommandToWebSocket(command);
   }
@@ -77,6 +93,8 @@ export function useWebSocket() {
     sendCommand,
     subscribeToLiveStream,
     unsubscribeFromLiveStream,
+    markInitialized,
+    markUninitialized,
     ConnectionState,
   };
 }
