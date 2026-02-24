@@ -1,6 +1,10 @@
 name: Android Build & Distribute
 
 on:
+  push:
+    branches:
+      - main
+      - test/ci-build
   workflow_dispatch:
     inputs:
       release_notes:
@@ -42,19 +46,17 @@ jobs:
       - name: Install Capacitor dependencies
         run: |
           cd src-capacitor
-          npm ci
+          npm install
 
       - name: Decode keystore
         run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > src-capacitor/android/gridlights-release.keystore
 
       - name: Create keystore.properties
         run: |
-          cat > src-capacitor/android/keystore.properties << EOF
-          storePassword=${{ secrets.KEYSTORE_PASSWORD }}
-          keyPassword=${{ secrets.KEY_PASSWORD }}
-          keyAlias=${{ secrets.KEY_ALIAS }}
-          storeFile=../gridlights-release.keystore
-          EOF
+          echo "storePassword=${{ secrets.KEYSTORE_PASSWORD }}" > src-capacitor/android/keystore.properties
+          echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> src-capacitor/android/keystore.properties
+          echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> src-capacitor/android/keystore.properties
+          echo "storeFile=../gridlights-release.keystore" >> src-capacitor/android/keystore.properties
 
       - name: Build Quasar for Capacitor
         run: npx quasar build -m capacitor -T android --skip-pkg
@@ -67,6 +69,11 @@ jobs:
       - name: Build release APK
         working-directory: src-capacitor/android
         run: ./gradlew assembleRelease
+
+      - name: Verify APK signature
+        run: |
+          APKSIGNER=$(find $ANDROID_HOME/build-tools -name apksigner | sort -V | tail -1)
+          $APKSIGNER verify --verbose src-capacitor/android/app/build/outputs/apk/release/app-release.apk
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
@@ -81,5 +88,5 @@ jobs:
           appId: ${{ secrets.FIREBASE_APP_ID }}
           serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           file: src-capacitor/android/app/build/outputs/apk/release/app-release.apk
-          groups: ${{ github.event.inputs.tester_groups }}
-          releaseNotes: ${{ github.event.inputs.release_notes }}
+          groups: ${{ github.event.inputs.tester_groups || 'internal-users' }}
+          releaseNotes: ${{ github.event.inputs.release_notes || 'Automated build' }}
