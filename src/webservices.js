@@ -196,13 +196,15 @@ export const DEFAULT_WLED_EFFECTS = [
 ];
 
 export const webservices = {
-  reconnectTimeout: 3000, // Initial timeout for reconnect attempts (in milliseconds)
+  reconnectTimeout: 3000, // Base timeout for reconnect backoff (in milliseconds)
   maxReconnectAttempts: 10, // Maximum number of reconnection attempts
   reconnectAttempts: 0, // Counter for reconnection attempts
+  reconnectTimeoutId: null, // Tracks pending reconnect timer so it can be cancelled
   lastProcessedTime: 0,
   commandQueue: [], // Queue for commands
   connectionState: ConnectionState.DISCONNECTED, // Current connection state
   onConnectionStateChange: null, // Callback for state changes
+  _callbacks: null, // Stored callbacks from last initWebSocket call
 
   /**
    * Set the connection state and notify listeners.
@@ -243,6 +245,8 @@ export const webservices = {
     onConnectedCallback
   ) {
     const self = this; // Preserve `this` context for inner functions
+    // Store callbacks for reconnect operations
+    this._callbacks = { onMessageCallback, onLiveStreamDataCallback, onConnectedCallback };
 
     function connect() {
       self.setConnectionState(ConnectionState.CONNECTING);
@@ -291,10 +295,10 @@ export const webservices = {
               // Helper: build color array from a given offset
               const buildColors = () => {
                 const out = [];
-                for (let i = 0; i + 2 < ledData.length; i += 3) {
-                  const r = ledData[i] === 0 ? 0 : 255;
-                  const g = ledData[i + 1] === 0 ? 0 : 255;
-                  const b = ledData[i + 2] === 0 ? 0 : 255;
+                for (let i = 0; i <= ledData.length - 3; i += 3) {
+                  const r = ledData[i];
+                  const g = ledData[i + 1];
+                  const b = ledData[i + 2];
                   const hexColor = ((1 << 24) | (r << 16) | (g << 8) | b)
                     .toString(16)
                     .slice(1)
@@ -325,39 +329,6 @@ export const webservices = {
             // Read the Blob as an ArrayBuffer
             reader.readAsArrayBuffer(messageData);
           }
-          // const reader = new FileReader();
-
-          // // When reading is complete, process the data
-          // reader.onload = function () {
-          //   const result = reader.result;
-
-          //   try {
-          //     // Attempt to parse as JSON
-          //     const parsedData = JSON.parse(result);
-          //     console.log("Parsed Data:", parsedData);
-          //   } catch (error) {
-          //     console.error("Error parsing data:", error);
-          //     console.log("Raw Data:", result);
-          //   }
-          // };
-
-          // // Read the Blob as text
-          // reader.readAsText(messageData);
-
-          // Read the Blob as an ArrayBuffer
-          // const reader = new FileReader();
-          // reader.onloadend = function () {
-          //   const arrayBuffer = reader.result;
-          //   const text = new TextDecoder().decode(arrayBuffer); // Decode it as text
-          //   console.log("Decoded text:", text);
-          //   try {
-          //     const parsedData = JSON.parse(text); // Try parsing it as JSON if it's a string
-          //     console.log("Parsed JSON:", parsedData);
-          //   } catch (e) {
-          //     console.error("Failed to parse JSON:", e);
-          //   }
-          // };
-          // reader.readAsArrayBuffer(messageData); // Convert Blob to ArrayBuffer
         } else {
           // If it's already text or another valid format
           try {
@@ -382,7 +353,10 @@ export const webservices = {
       ws.onerror = (error) => {
         gconsole.error("!!! WebSocket error: " , "ws-error");
         console.error(error);
-        ws.close(); // Explicitly close the socket on error
+        if (ws) {
+          ws.onerror = null; // prevent double-firing if onclose also triggers
+          ws.close();
+        }
       };
     }
 
@@ -390,31 +364,92 @@ export const webservices = {
   },
 
   /**
-   * Handle WebSocket reconnection attempts.
+   * Handle WebSocket reconnection attempts with true exponential backoff + jitter.
    * @param {string} wsUrl - The WebSocket URL (e.g., "ws://<WLED-IP>/ws").
    * @param {function} onMessageCallback - Callback for handling incoming WebSocket messages.
    * @param {function} onLiveStreamDataCallback - Callback for handling live stream LED data.
    * @param {function} onConnectedCallback - Callback for when the WebSocket connects successfully.
    */
   handleReconnect(wsUrl, onMessageCallback, onLiveStreamDataCallback, onConnectedCallback) {
+    // Cancel any pending reconnect timer before scheduling a new one
+    if (this.reconnectTimeoutId) {
+      clearTimeout(this.reconnectTimeoutId);
+      this.reconnectTimeoutId = null;
+    }
+
     if (this.reconnectAttempts < this.maxReconnectAttempts) {
       this.reconnectAttempts++;
       this.setConnectionState(ConnectionState.RECONNECTING);
-      const delay = this.reconnectTimeout * this.reconnectAttempts; // Exponential backoff
-      gconsole.log(`Attempting to reconnect in ${delay / 1000} seconds...`, "ws-reconnect");
 
-      setTimeout(() => {
-        this.initWebSocket(
-          wsUrl,
-          onMessageCallback,
-          onLiveStreamDataCallback,
-          onConnectedCallback
-        );
+      // True exponential backoff: 3s, 6s, 12s, 24s... capped at 30s, with ±1s jitter
+      const base = this.reconnectTimeout * Math.pow(2, this.reconnectAttempts - 1);
+      const jitter = (Math.random() - 0.5) * 2000; // ±1s jitter
+      const delay = Math.min(base + jitter, 30000);
+
+      gconsole.log(
+        `Attempting to reconnect in ${(delay / 1000).toFixed(1)} seconds... (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`,
+        "ws-reconnect"
+      );
+
+      this.reconnectTimeoutId = setTimeout(() => {
+        this.reconnectTimeoutId = null;
+        this.initWebSocket(wsUrl, onMessageCallback, onLiveStreamDataCallback, onConnectedCallback);
       }, delay);
     } else {
       this.setConnectionState(ConnectionState.FAILED);
       gconsole.error("Max reconnection attempts reached. Could not reconnect to WebSocket.", "ws-error");
     }
+  },
+
+  /**
+   * Cancel any pending reconnect, close the current socket, and start fresh with a new URL.
+   * Call this when the user changes the WLED IP address.
+   * @param {string} wsUrl - The new WebSocket URL.
+   * @param {function} onMessageCallback
+   * @param {function} onLiveStreamDataCallback
+   * @param {function} onConnectedCallback
+   */
+  resetAndReconnect(wsUrl, onMessageCallback, onLiveStreamDataCallback, onConnectedCallback) {
+    // Kill any pending reconnect timer
+    if (this.reconnectTimeoutId) {
+      clearTimeout(this.reconnectTimeoutId);
+      this.reconnectTimeoutId = null;
+    }
+
+    // Close the current socket without triggering the old reconnect chain
+    if (ws) {
+      ws.onopen = null;
+      ws.onclose = null;
+      ws.onerror = null;
+      ws.close();
+      ws = null;
+    }
+
+    // Reset attempt counter so we get a full 10 attempts on the new IP
+    this.reconnectAttempts = 0;
+    this.setConnectionState(ConnectionState.DISCONNECTED);
+
+    // Connect immediately with the new URL
+    this.initWebSocket(wsUrl, onMessageCallback, onLiveStreamDataCallback, onConnectedCallback);
+  },
+
+  /**
+   * Reconnect with a new WLED IP, reusing the callbacks from the last initWebSocket call.
+   * Call this from SettingsPage when the user saves a new IP address.
+   * @param {string} newWsUrl - The new WebSocket URL (e.g., "ws://192.168.1.42/ws").
+   */
+  reconnectWithNewUrl(newWsUrl) {
+    if (!this._callbacks) {
+      gconsole.error('reconnectWithNewUrl called before initWebSocket - no callbacks stored', 'ws-error');
+      return;
+    }
+    const cb = this._callbacks;
+    this.resetAndReconnect(
+      newWsUrl,
+      cb.onMessageCallback,
+      cb.onLiveStreamDataCallback,
+      cb.onConnectedCallback
+    );
   },
 
   /**
@@ -431,8 +466,17 @@ export const webservices = {
   },
 
   closeWebSocket() {
-    // Clean up WebSocket connection when the component is destroyed
+    // Cancel any pending reconnect timer first so it can't fire after the component unmounts
+    if (this.reconnectTimeoutId) {
+      clearTimeout(this.reconnectTimeoutId);
+      this.reconnectTimeoutId = null;
+    }
+    this.reconnectAttempts = 0;
     if (ws) {
+      ws.onopen = null;
+      ws.onmessage = null;
+      ws.onclose = null; // prevent triggering handleReconnect on intentional close
+      ws.onerror = null;
       ws.close();
       ws = null;
     }
