@@ -4,6 +4,9 @@ node_modules
 
 # android code signing keys
 android-keys/gridlights.keystore
+*.keystore
+*.jks
+keystore.properties
 
 # Quasar core related directories
 .quasar

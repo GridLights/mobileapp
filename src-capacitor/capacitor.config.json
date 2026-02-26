@@ -1,6 +1,6 @@
 {
   "appId": "com.gridlights.solspektrum",
-  "appName": "Gridlights",
+  "appName": "Sol Spektrum",
   "webDir": "www",
   "server": {
     "hostname": "localhost",
