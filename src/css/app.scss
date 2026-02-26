@@ -18,6 +18,22 @@
   --controls-button--color: #000;
   --controls-input-field-bg-color: #fff;
   --q-primary: #555 !important;
+
+  /*
+   * --safe-top: the distance from the physical top edge of the screen to where
+   * content should begin.  On device this is the status-bar height reported by
+   * the OS via env(safe-area-inset-top).  In a desktop browser that value is 0,
+   * so we clamp it to 8 px so the header always has a small breathing gap.
+   */
+  --safe-top: max(env(safe-area-inset-top), 8px);
+
+  /*
+   * --header-height: the rendered height of .header-container.
+   * Keep this in sync with the min-height rule on .header-container below.
+   * All downstream margin/padding calculations reference this variable so that
+   * a single edit here propagates everywhere.
+   */
+  --header-height: 40px;
 }
 
 body {
@@ -30,14 +46,16 @@ body {
 
 .header-container {
   position: fixed;
-  top: 55px; /* Account for phone status bar */
-  left: 5%; /* Center with 90% width */
+  top: var(--safe-top);        /* at least 8px gap even in desktop browser */
+  left: 5%;
   right: 5%;
   z-index: 1000;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0px 20px;
+  min-height: var(--header-height); /* guarantees 40px height even when the
+                                       header has only text and no icon children */
+  padding: 0 20px;
   background-color: #f5f5f5;
   border-radius: 8px;
 }
@@ -64,9 +82,14 @@ body {
   letter-spacing: 1px;
 }
 .content-area {
-  margin-top: 100px; /* Same as header height */
-  margin-bottom: 10px; /* Space for bottom nav bar - adjust as needed */
-  height: calc(100vh - 112px); /* Full height minus header and nav bar */
+  /*
+   * Layout math (browser):  --safe-top(8) + header(40) + gap(20) = 68px
+   * Layout math (device):   --safe-top(44+) + header(40) + gap(20) = 104px+
+   * The 20px gap mirrors the 20px horizontal side padding for visual balance.
+   */
+  margin-top: calc(var(--safe-top) + var(--header-height) + 20px);
+  margin-bottom: 10px;
+  height: calc(100vh - var(--safe-top) - var(--header-height) - 30px);
   overflow-y: auto;
 }
 .q-layout {

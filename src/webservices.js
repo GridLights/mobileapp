@@ -2,6 +2,7 @@
 import gconsole from './utils/gconsole.js';
 
 let ws = null; // WebSocket instance
+let onGuardReset = null; // Callback to reset useWebSocket composable's guard when reconnectWithNewUrl is called
 
 // Connection state constants
 export const ConnectionState = {
@@ -11,6 +12,34 @@ export const ConnectionState = {
   RECONNECTING: 'reconnecting',
   FAILED: 'failed',
 };
+
+// WLED AP-mode default IP — only reachable when device is its own access point.
+// On a normal home network this address is unreachable; we skip retries for it.
+export const AP_IP = '4.3.2.1';
+
+/**
+ * Resolve the best IP address to use on startup.
+ *
+ * Priority:
+ *   1. User-configured IP ('ipAddress' in localStorage) — if it isn't the AP default
+ *   2. Last IP that produced a successful WS connection ('lastValidIpAddress')
+ *   3. User-configured IP even if it is the AP default (caller handles no-retry policy)
+ *   4. null — nothing configured, skip connecting
+ *
+ * @returns {string|null} IP address string, or null if there is nothing to connect to.
+ */
+export function resolveStartupIp() {
+  try {
+    const userIp = localStorage.getItem('ipAddress');
+    const lastValidIp = localStorage.getItem('lastValidIpAddress');
+    if (userIp && userIp !== AP_IP) return userIp;
+    if (lastValidIp && lastValidIp !== AP_IP) return lastValidIp;
+    if (userIp) return userIp; // may be AP_IP — caller enforces no-retry
+    return null;
+  } catch (_) {
+    return null; // localStorage unavailable (SSR, test env, etc.)
+  }
+}
 
 // Default WLED effects list (WLED v0.14.4 - 188 effects)
 export const DEFAULT_WLED_EFFECTS = [
@@ -257,6 +286,14 @@ export const webservices = {
         self.reconnectAttempts = 0; // Reset the reconnection attempts on successful connection
         self.setConnectionState(ConnectionState.CONNECTED);
 
+        // Persist this IP as last-known-good so future startups can use it as a fallback
+        try {
+          const ipMatch = wsUrl.match(/ws:\/\/([^:/]+)/);
+          if (ipMatch && ipMatch[1] !== AP_IP) {
+            localStorage.setItem('lastValidIpAddress', ipMatch[1]);
+          }
+        } catch (_) {}
+
         // Process queued commands
         while (self.commandQueue.length > 0) {
           const command = self.commandQueue.shift();
@@ -295,10 +332,18 @@ export const webservices = {
               // Helper: build color array from a given offset
               const buildColors = () => {
                 const out = [];
-                for (let i = 0; i <= ledData.length - 3; i += 3) {
-                  const r = ledData[i];
-                  const g = ledData[i + 1];
-                  const b = ledData[i + 2];
+                for (let i = 0; i + 2 < ledData.length; i += 3) {
+                  let r = ledData[i];
+                  let g = ledData[i + 1];
+                  let b = ledData[i + 2];
+                  // Normalize to full brightness so the display reflects hue only,
+                  // not WLED's dimmer setting
+                  const max = Math.max(r, g, b);
+                  if (max > 0 && max < 255) {
+                    r = Math.round((r / max) * 255);
+                    g = Math.round((g / max) * 255);
+                    b = Math.round((b / max) * 255);
+                  }
                   const hexColor = ((1 << 24) | (r << 16) | (g << 8) | b)
                     .toString(16)
                     .slice(1)
@@ -377,6 +422,14 @@ export const webservices = {
       this.reconnectTimeoutId = null;
     }
 
+    // Never retry the WLED AP default IP — it is unreachable on a home network
+    const ipMatch = wsUrl.match(/ws:\/\/([^:/]+)/);
+    if (ipMatch && ipMatch[1] === AP_IP) {
+      this.setConnectionState(ConnectionState.FAILED);
+      gconsole.log('AP default IP (4.3.2.1) is unreachable on a home network — not retrying. Go to Settings to configure the correct IP.', 'ws-reconnect');
+      return;
+    }
+
     if (this.reconnectAttempts < this.maxReconnectAttempts) {
       this.reconnectAttempts++;
       this.setConnectionState(ConnectionState.RECONNECTING);
@@ -419,6 +472,7 @@ export const webservices = {
     // Close the current socket without triggering the old reconnect chain
     if (ws) {
       ws.onopen = null;
+      ws.onmessage = null;
       ws.onclose = null;
       ws.onerror = null;
       ws.close();
@@ -428,6 +482,11 @@ export const webservices = {
     // Reset attempt counter so we get a full 10 attempts on the new IP
     this.reconnectAttempts = 0;
     this.setConnectionState(ConnectionState.DISCONNECTED);
+
+    // Reset the composable's guard so it knows the WebSocket has been closed/reset
+    if (typeof onGuardReset === 'function') {
+      onGuardReset();
+    }
 
     // Connect immediately with the new URL
     this.initWebSocket(wsUrl, onMessageCallback, onLiveStreamDataCallback, onConnectedCallback);
@@ -440,7 +499,14 @@ export const webservices = {
    */
   reconnectWithNewUrl(newWsUrl) {
     if (!this._callbacks) {
-      gconsole.error('reconnectWithNewUrl called before initWebSocket - no callbacks stored', 'ws-error');
+      gconsole.error('reconnectWithNewUrl called before initWebSocket - no callbacks stored. Initializing with default callbacks.', 'ws-error');
+      // If called before initialization, start with default callbacks instead of failing silently
+      this.initWebSocket(
+        newWsUrl,
+        null,  // onMessageCallback
+        null,  // onLiveStreamDataCallback
+        null   // onConnectedCallback
+      );
       return;
     }
     const cb = this._callbacks;
@@ -840,36 +906,37 @@ export const webservices = {
    * @returns {Promise<boolean>} True if successful
    */
   async savePreset(ipAddress, presetId, name, options = {}) {
-    try {
-      const { 
-        includeBrightness = true, 
-        saveSegmentBounds = true,
-        segmentConfig = null 
-      } = options;
+    const {
+      includeBrightness = true,
+      saveSegmentBounds = true,
+      segmentConfig = null
+    } = options;
 
-      gconsole.log(`Saving preset ${presetId} to ${ipAddress}`, "wled-preset");
+    gconsole.log(`Saving preset ${presetId} to ${ipAddress}`, "wled-preset");
 
-      // Build the save command
-      const command = {
-        psave: presetId,
-        n: name,
-        ib: includeBrightness,
-        sb: saveSegmentBounds,
-      };
+    const command = {
+      psave: presetId,
+      n: name,
+      ib: includeBrightness,
+      sb: saveSegmentBounds,
+    };
 
-      // If custom segment config is provided, include it
-      if (segmentConfig) {
-        command.seg = segmentConfig;
-      }
-
-      this.sendCommandToWebSocket(command);
-      
-      gconsole.log(`Preset ${presetId} saved successfully`, "wled-preset");
-      return true;
-    } catch (error) {
-      gconsole.error(`Error saving preset: ${error.message}`, "wled-preset-error");
-      throw error;
+    if (segmentConfig) {
+      command.seg = segmentConfig;
     }
+
+    const response = await fetch(`http://${ipAddress}/json`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(command),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Save preset failed: HTTP ${response.status}`);
+    }
+
+    gconsole.log(`Preset ${presetId} saved successfully`, "wled-preset");
+    return true;
   },
 
   /**
@@ -879,45 +946,133 @@ export const webservices = {
    * @returns {Promise<boolean>} True if successful
    */
   async deletePreset(ipAddress, presetId) {
-    try {
-      gconsole.log(`Deleting preset ${presetId} from ${ipAddress}`, "wled-preset");
+    gconsole.log(`Deleting preset ${presetId} from ${ipAddress}`, "wled-preset");
 
-      const command = {
-        pdel: presetId
-      };
+    const response = await fetch(`http://${ipAddress}/json`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pdel: presetId }),
+    });
 
-      this.sendCommandToWebSocket(command);
-      
-      gconsole.log(`Preset ${presetId} deleted successfully`, "wled-preset");
-      return true;
-    } catch (error) {
-      gconsole.error(`Error deleting preset: ${error.message}`, "wled-preset-error");
-      throw error;
+    if (!response.ok) {
+      throw new Error(`Delete preset failed: HTTP ${response.status}`);
     }
+
+    gconsole.log(`Preset ${presetId} deleted successfully`, "wled-preset");
+    return true;
   },
 
   /**
    * Apply a preset by ID
+   * @param {string} ipAddress - WLED device IP
    * @param {number} presetId - Preset ID to apply
    */
-  applyPreset(presetId) {
+  async applyPreset(ipAddress, presetId) {
     gconsole.log(`Applying preset ${presetId}`, "wled-preset");
-    const command = { ps: presetId };
-    this.sendCommandToWebSocket(command);
+    await fetch(`http://${ipAddress}/json`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ps: presetId }),
+    });
+    // Immediately suppress sync — presets may have been saved with udpn.send=true
+    // which would broadcast state to all WLED devices on the network.
+    await fetch(`http://${ipAddress}/json`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ udpn: { send: false } }),
+    });
   },
 
   /**
-   * Start a playlist
-   * @param {Object} playlist - Playlist configuration
-   * @param {Array<number>} playlist.presets - Array of preset IDs
-   * @param {Array<number>} playlist.durations - Array of durations in tenths of seconds
-   * @param {number|Array<number>} playlist.transition - Transition time(s) in tenths of seconds
-   * @param {number} playlist.repeat - Number of repeats (0 = indefinite)
-   * @param {number} playlist.endPreset - Preset to apply when playlist ends
+   * Save a playlist definition as a WLED preset (atomic single request).
+   * Uses psave + playlist together so the definition is captured before
+   * WLED transitions to the first playing effect.
+   * @param {string} ipAddress - WLED device IP
+   * @param {number} presetId - Preset slot ID to save into
+   * @param {string} name - Playlist name
+   * @param {Object} playlist - Playlist configuration (presets, durations, etc.)
+   * @returns {Promise<boolean>} True if successful
    */
-  startPlaylist(playlist) {
+  async savePlaylist(ipAddress, presetId, name, playlist) {
+    const { presets, durations, transition = 7, repeat = 0, items = [] } = playlist;
+
+    gconsole.log(`Saving playlist "${name}" to preset ${presetId}`, "wled-playlist");
+
+    const command = {
+      psave: presetId,
+      n: name,
+      ib: false,
+      playlist: {
+        ps: presets,
+        dur: durations,
+        transition,
+        repeat,
+      },
+    };
+
+    const response = await fetch(`http://${ipAddress}/json`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(command),
+    });
+
+    if (!response.ok) throw new Error(`Save playlist failed: HTTP ${response.status}`);
+
+    // WLED does not store a distinguishing key for playlist presets in presets.json.
+    // Track playlist IDs and their full definitions in localStorage so the app
+    // can correctly separate playlists from regular presets on reload.
+    this.storePlaylistMeta(ipAddress, presetId, { n: name, items, transition, repeat });
+
+    gconsole.log(`Playlist saved to preset ${presetId}`, "wled-playlist");
+    return true;
+  },
+
+  /**
+   * Store playlist metadata in localStorage (since WLED doesn't distinguish
+   * playlist presets structurally in presets.json).
+   */
+  storePlaylistMeta(ipAddress, presetId, meta) {
+    try {
+      const key = `gridlights_playlists_${ipAddress.replace(/\./g, '_')}`;
+      const stored = JSON.parse(localStorage.getItem(key) || '{}');
+      stored[presetId] = meta;
+      localStorage.setItem(key, JSON.stringify(stored));
+    } catch (_) {}
+  },
+
+  /**
+   * Remove playlist metadata from localStorage when a playlist is deleted.
+   */
+  removePlaylistMeta(ipAddress, presetId) {
+    try {
+      const key = `gridlights_playlists_${ipAddress.replace(/\./g, '_')}`;
+      const stored = JSON.parse(localStorage.getItem(key) || '{}');
+      delete stored[presetId];
+      localStorage.setItem(key, JSON.stringify(stored));
+    } catch (_) {}
+  },
+
+  /**
+   * Return the stored playlist metadata map for an IP address.
+   * Returns an object keyed by preset ID (as strings).
+   */
+  getStoredPlaylists(ipAddress) {
+    try {
+      const key = `gridlights_playlists_${ipAddress.replace(/\./g, '_')}`;
+      return JSON.parse(localStorage.getItem(key) || '{}');
+    } catch (_) {
+      return {};
+    }
+  },
+
+  /**
+   * Start a playlist via HTTP POST
+   * @param {string} ipAddress - WLED device IP
+   * @param {Object} playlist - Playlist configuration
+   */
+  async startPlaylist(ipAddress, playlist) {
     const { presets, durations, transition = 7, repeat = 0, endPreset = null } = playlist;
-    
+
     gconsole.log(`Starting playlist with ${presets.length} presets`, "wled-playlist");
 
     const command = {
@@ -933,26 +1088,52 @@ export const webservices = {
       command.playlist.end = endPreset;
     }
 
-    this.sendCommandToWebSocket(command);
+    const response = await fetch(`http://${ipAddress}/json`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(command),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Start playlist failed: HTTP ${response.status}`);
+    }
+    return true;
   },
 
   /**
-   * Stop the current playlist
+   * Stop the current playlist via HTTP POST
+   * @param {string} ipAddress - WLED device IP
    */
-  stopPlaylist() {
+  async stopPlaylist(ipAddress) {
     gconsole.log("Stopping playlist", "wled-playlist");
-    // Setting pl to -1 stops the playlist
-    const command = { pl: -1 };
-    this.sendCommandToWebSocket(command);
+    const response = await fetch(`http://${ipAddress}/json`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pl: -1 }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Stop playlist failed: HTTP ${response.status}`);
+    }
+    return true;
   },
 
   /**
-   * Advance to the next preset in a playlist
+   * Advance to the next preset in a playlist via HTTP POST
+   * @param {string} ipAddress - WLED device IP
    */
-  nextPlaylistPreset() {
+  async nextPlaylistPreset(ipAddress) {
     gconsole.log("Advancing to next playlist preset", "wled-playlist");
-    const command = { np: true };
-    this.sendCommandToWebSocket(command);
+    const response = await fetch(`http://${ipAddress}/json`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ np: true }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Next playlist preset failed: HTTP ${response.status}`);
+    }
+    return true;
   },
 
   /**
@@ -968,15 +1149,12 @@ export const webservices = {
    * @param {number} config.custom2 - Custom slider 2 (c2)
    * @param {number} config.custom3 - Custom slider 3 (c3)
    */
-  applyEffect(config) {
-    const { effectId, speed, intensity, palette, colors, brightness, custom1, custom2, custom3 } = config;
-    
+  async applyEffect(config) {
+    const { ipAddress, effectId, speed, intensity, palette, colors, brightness, custom1, custom2, custom3 } = config;
+
     gconsole.log(`Applying effect ${effectId}`, "wled-effect");
 
-    const segConfig = {
-      fx: effectId,
-    };
-
+    const segConfig = { fx: effectId };
     if (speed !== undefined) segConfig.sx = speed;
     if (intensity !== undefined) segConfig.ix = intensity;
     if (palette !== undefined) segConfig.pal = palette;
@@ -985,16 +1163,19 @@ export const webservices = {
     if (custom2 !== undefined) segConfig.c2 = custom2;
     if (custom3 !== undefined) segConfig.c3 = custom3;
 
-    const command = {
-      on: true,
-      seg: [segConfig],
-    };
+    const command = { on: true, seg: [segConfig], udpn: { send: false } };
+    if (brightness !== undefined) command.bri = brightness;
 
-    if (brightness !== undefined) {
-      command.bri = brightness;
+    if (ipAddress) {
+      const response = await fetch(`http://${ipAddress}/json`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(command),
+      });
+      if (!response.ok) throw new Error(`applyEffect failed: HTTP ${response.status}`);
+    } else {
+      this.sendCommandToWebSocket(command);
     }
-
-    this.sendCommandToWebSocket(command);
   },
 
   /**
@@ -1005,54 +1186,68 @@ export const webservices = {
    * @returns {Promise<Object>} Analysis result
    */
   async initializeNewDevice(ipAddress) {
+    // Only send All White once per device per day — reconnects on the same day
+    // should not override whatever effect the user has running.
+    const today = new Date().toISOString().slice(0, 10); // 'YYYY-MM-DD'
+    const initKey = `wledInitDate_${ipAddress}`;
+    const alreadyInitedToday = localStorage.getItem(initKey) === today;
+
     try {
       gconsole.log(`Initializing device at ${ipAddress}`, "wled-init");
-      
+
       // Step 1: Analyze device for custom effects
       const analysis = await this.analyzeWledInstance(ipAddress);
       gconsole.log(`Device analyzed: ${analysis.effects.customCount} custom effects found`, "wled-init");
-      
-      // Step 2: Set device to "All White" to override any crazy startup presets
-      // Wait a moment for analysis to settle
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      const allWhiteCommand = {
-        on: true,
-        seg: [
-          {
-            col: [[255, 255, 255]],
-            fx: 0, // Solid effect
-          },
-        ],
-      };
-      
-      this.sendCommandToWebSocket(allWhiteCommand);
-      gconsole.log("Device initialized with All White preset", "wled-init");
-      
-      return {
-        success: true,
-        analysis,
-        initialized: true
-      };
-    } catch (error) {
-      gconsole.error(`Error initializing device: ${error.message}`, "wled-init-error");
-      
-      // Even if analysis fails, try to set All White
-      try {
+
+      // Step 2: Set device to "All White" only on first connect of the day
+      // to override WLED's default yellow startup preset.
+      if (!alreadyInitedToday) {
+        await new Promise(resolve => setTimeout(resolve, 500));
+
         const allWhiteCommand = {
           on: true,
           seg: [
             {
               col: [[255, 255, 255]],
-              fx: 0,
+              fx: 0, // Solid effect
             },
           ],
         };
+
         this.sendCommandToWebSocket(allWhiteCommand);
-      } catch (fallbackError) {
-        gconsole.error(`Fallback All White failed: ${fallbackError.message}`, "wled-init-error");
+        localStorage.setItem(initKey, today);
+        gconsole.log("Device initialized with All White preset", "wled-init");
+      } else {
+        gconsole.log("Device already initialized today, skipping All White", "wled-init");
       }
-      
+
+      return {
+        success: true,
+        analysis,
+        initialized: !alreadyInitedToday
+      };
+    } catch (error) {
+      gconsole.error(`Error initializing device: ${error.message}`, "wled-init-error");
+
+      // Even if analysis fails, try to set All White (only on first connect of day)
+      if (!alreadyInitedToday) {
+        try {
+          const allWhiteCommand = {
+            on: true,
+            seg: [
+              {
+                col: [[255, 255, 255]],
+                fx: 0,
+              },
+            ],
+          };
+          this.sendCommandToWebSocket(allWhiteCommand);
+          localStorage.setItem(initKey, today);
+        } catch (fallbackError) {
+          gconsole.error(`Fallback All White failed: ${fallbackError.message}`, "wled-init-error");
+        }
+      }
+
       throw error;
     }
   },

@@ -302,7 +302,7 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted, onBeforeUnmount } from 'vue';
+import { ref, watch } from 'vue';
 import PowerSwitch from "./PowerSwitch.vue";
 import { useConnectionState } from "../composables/useConnectionState";
 
@@ -327,7 +327,7 @@ const props = defineProps({
 
 const emit = defineEmits(['power-changed']);
 
-const { connectionState, subscribe } = useConnectionState();
+const { connectionState } = useConnectionState();
 
 const powerState = ref(props.powerOn);
 
@@ -340,30 +340,21 @@ const dotRadius = 5;
 const baseX = 118;
 const baseY = 71;
 const ledSpacing = 20.6;
-const row0XOffset = 0, row0YOffset = 0;
-const row1XOffset = -11, row1YOffset = 18;
-const row2XOffset = -21, row2YOffset = 36;
+const row0XOffset = 0,   row0YOffset = 0;
+const row1XOffset = -10, row1YOffset = 18;
+const row2XOffset = -20, row2YOffset = 36;
 const row3XOffset = -30, row3YOffset = 54;
-const row4XOffset = -21, row4YOffset = 73;
-const row5XOffset = -11, row5YOffset = 90;
-const row6XOffset = 0, row6YOffset = 108;
+const row4XOffset = -20, row4YOffset = 72;
+const row5XOffset = -10, row5YOffset = 90;
+const row6XOffset = 0,   row6YOffset = 108;
 
 function handlePowerToggle(newState) {
   emit('power-changed', newState);
 }
 
-// Subscribe to connection state changes; automatically cleans up on unmount
-let unsubscribeFn = null;
-onMounted(() => {
-  unsubscribeFn = subscribe(() => {
-    // Intentionally left empty: connectionState is a reactive ref that auto-updates
-    // via the useConnectionState composable's internal mechanism. The subscription
-    // itself is still required to register this component with the composable.
-  });
-});
-onBeforeUnmount(() => {
-  if (unsubscribeFn) unsubscribeFn();
-});
+// The useConnectionState composable automatically sets up multi-listener fanout
+// when the first component imports it. The connectionState ref is reactive and
+// automatically updates when the WebSocket connection state changes.
 </script>
 
 <style scoped>

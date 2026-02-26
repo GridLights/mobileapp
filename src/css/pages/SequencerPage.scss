@@ -14,15 +14,19 @@
 .sequencer-page .tab-navigation {
   display: flex;
   gap: 0;
-  padding: 0 20px;
-  margin-top: 60px;
+  padding: 0 20px 12px 20px;
+  margin-top: 0;
   position: fixed;
-  top: 20px;
+  /*
+   * top = --safe-top + --header-height
+   * browser: 8px + 40px = 48px  (sits flush under the header with no gap)
+   * device:  44px+ + 40px = 84px+
+   */
+  top: calc(var(--safe-top) + var(--header-height));
   left: 0;
   right: 0;
   z-index: 15;
   background: #eee;
-  padding-bottom: 12px;
 }
 
 .sequencer-page .tab-btn {
@@ -68,7 +72,16 @@
 .sequencer-page .content-area-sequencer {
   flex: 1;
   overflow-y: auto;
-  padding-top: 145px;
+  /*
+   * padding-top stack (browser):
+   *   --safe-top        8px
+   *   header height    40px   (var(--header-height))
+   *   tab-nav height  ~54px   (tab buttons ≈42px + container bottom-padding 12px)
+   *   gap              20px   (matches 20px horizontal side padding)
+   *   ─────────────────────
+   *   total           122px   → safe-top + 114px
+   */
+  padding-top: calc(var(--safe-top) + 114px);
   padding-bottom: 20px;
   -webkit-overflow-scrolling: touch;
 }
@@ -104,47 +117,68 @@
   .section-icon {
     color: #666;
   }
+
+  .q-btn:last-child {
+    margin-left: auto;
+  }
 }
 
 /* ============================================
-   ADD NEW PRESET ROW
+   ADD NEW PRESET BUTTON
    ============================================ */
-.sequencer-page .add-preset-row {
+.sequencer-page .add-preset-section {
+  padding: 14px 16px;
   background: #fff;
   border-bottom: 1px solid #e8e8e8;
+}
+
+.sequencer-page .add-preset-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 13px 16px;
+  background: #222;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: background 0.15s ease;
 
-  &:hover:not(.expanded) {
-    background: #f5f5f5;
+  &:hover {
+    background: #000;
   }
 
-  &.expanded {
-    background: #fafafa;
+  &:active {
+    background: #444;
   }
 
-  .preset-row-header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 14px 16px;
-  }
-
-  .add-preset-label {
-    flex: 1;
-    font-weight: 500;
-    color: #333;
-    font-size: 14px;
-  }
-
-  .expand-icon {
-    color: #999;
+  .q-icon {
+    color: #fff;
   }
 }
 
 /* ============================================
    PRESET ROW (Expandable)
    ============================================ */
+.sequencer-page .preset-list-header {
+  display: grid;
+  grid-template-columns: 30px 20px minmax(90px, 1fr) minmax(60px, 1fr) auto;
+  gap: 0 8px;
+  padding: 8px 16px 4px;
+  font-size: 10px;
+  font-weight: 600;
+  color: #aaa;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid #e8e8e8;
+}
+
 .sequencer-page .presets-list {
   display: flex;
   flex-direction: column;
@@ -168,14 +202,15 @@
   }
 
   &.expanded {
-    background: #fafafa;
+    background: #f5f5f5;
   }
 
   .preset-row-header {
-    display: flex;
+    display: grid;
+    grid-template-columns: 30px 20px minmax(90px, 1fr) minmax(60px, 1fr) auto;
     align-items: center;
-    justify-content: space-between;
-    padding: 12px 16px;
+    gap: 0 8px;
+    padding: 10px 16px;
     cursor: pointer;
     transition: background 0.2s ease;
 
@@ -184,17 +219,8 @@
     }
   }
 
-  .preset-info {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex: 1;
-    min-width: 0;
-  }
-
   .preset-icon {
     color: #666;
-    flex-shrink: 0;
   }
 
   .preset-name {
@@ -224,10 +250,11 @@
     }
   }
 
-  .preset-actions {
+  .preset-actions,
+  .preset-row-actions {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 12px;
     flex-shrink: 0;
 
     .q-btn {
@@ -238,10 +265,31 @@
       }
     }
 
-    .expand-icon {
-      color: #999;
-      margin-left: 4px;
-    }
+  }
+
+  .expand-triangle {
+    color: #888;
+    flex-shrink: 0;
+    margin-right: -4px;
+    transition: color 0.15s ease;
+  }
+
+  &.expanded .expand-triangle {
+    color: #444;
+  }
+}
+
+.sequencer-page .preset-play-btn {
+  width: 34px;
+  height: 34px;
+  min-height: 34px;
+  border-radius: 8px !important;
+  background: #333 !important;
+  color: #fff !important;
+  padding: 0 !important;
+
+  :deep(.q-icon) {
+    font-size: 20px;
   }
 }
 
@@ -249,8 +297,8 @@
    PRESET CONFIG PANEL (Expandable)
    ============================================ */
 .sequencer-page .preset-config-panel {
-  border-top: 1px solid #e8e8e8;
-  background: #fafafa;
+  border-top: 1px solid #ddd;
+  background: #e6e6e6;
   animation: slideDown 0.2s ease-out;
 }
 
@@ -266,21 +314,15 @@
 }
 
 .sequencer-page .config-content {
-  padding: 16px;
+  padding: 16px 16px 16px 44px;
 }
 
-.sequencer-page .preset-id-display {
-  margin-bottom: 16px;
-  padding: 8px 12px;
-  background: #e8e8e8;
-  border-radius: 6px;
-  display: inline-block;
-
-  .id-label {
-    font-size: 12px;
-    color: #666;
-    font-weight: 500;
-  }
+.sequencer-page .preset-id-inline {
+  margin-left: auto;
+  font-size: 11px;
+  color: #bbb;
+  font-style: italic;
+  font-weight: 400;
 }
 
 /* ============================================
@@ -318,6 +360,72 @@
   font-weight: 600;
 }
 
+/* Name label row (label + auto-name toggle side by side) */
+.sequencer-page .name-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+
+  .control-label {
+    margin-bottom: 0;
+  }
+}
+
+.sequencer-page .auto-name-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #666;
+  font-weight: 500;
+  cursor: pointer;
+  user-select: none;
+
+  span {
+    white-space: nowrap;
+  }
+}
+
+.sequencer-page .auto-name-checkbox {
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+  accent-color: #333;
+}
+
+/* Name input + reroll button */
+.sequencer-page .name-input-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.sequencer-page .reroll-btn {
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  border: 1px solid #d0d0d0;
+  border-radius: 8px;
+  background: #f5f5f5;
+  color: #555;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease, transform 0.15s ease;
+
+  &:hover {
+    background: #e8e8e8;
+  }
+
+  &:active {
+    transform: rotate(180deg);
+    background: #ddd;
+  }
+}
+
 /* Text Input */
 .sequencer-page .text-input {
   width: 100%;
@@ -336,6 +444,12 @@
 
   &::placeholder {
     color: #aaa;
+  }
+
+  &.auto-filled {
+    background: #f5f5f5;
+    color: #555;
+    font-style: italic;
   }
 }
 
@@ -431,16 +545,10 @@
   padding: 12px 16px;
 }
 
-.sequencer-page .delete-section {
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid #e8e8e8;
-  text-align: center;
-}
-
 .sequencer-page .delete-btn {
-  color: #dc3545 !important;
-  font-weight: 500;
+  background: #dc3545 !important;
+  color: #fff !important;
+  font-weight: 600;
 }
 
 /* ============================================
@@ -479,6 +587,11 @@
   background: #28a745 !important;
   color: #fff !important;
   font-weight: 600;
+
+  &.disabled, &[disabled] {
+    background: #a8d5b5 !important;
+    opacity: 0.6;
+  }
 }
 
 .sequencer-page .next-btn {
@@ -486,6 +599,10 @@
   background: #f0f0f0 !important;
   color: #333 !important;
   font-weight: 600;
+
+  &.disabled, &[disabled] {
+    opacity: 0.5;
+  }
 }
 
 .sequencer-page .stop-btn {
@@ -493,6 +610,11 @@
   background: #dc3545 !important;
   color: #fff !important;
   font-weight: 600;
+
+  &.disabled, &[disabled] {
+    background: #e8a0a8 !important;
+    opacity: 0.6;
+  }
 }
 
 .sequencer-page .playlist-settings {
@@ -539,13 +661,21 @@
 
 .sequencer-page .playlist-item {
   display: flex;
-  align-items: center;
-  padding: 12px 16px;
+  flex-direction: column;
+  align-items: stretch;
+  position: relative;
+  overflow: hidden;
+  padding: 0;
   border-bottom: 1px solid #eee;
-  gap: 8px;
 
   &:last-child {
     border-bottom: none;
+  }
+
+  &.playing {
+    background: #e8f5e9;
+    border-left: 3px solid #27ae60;
+    animation: playing-pulse 2s ease-in-out infinite;
   }
 }
 
@@ -568,18 +698,62 @@
 
 .sequencer-page .col-name {
   flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1px;
+}
+
+.sequencer-page .col-name-primary {
   font-weight: 500;
   color: #333;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sequencer-page .col-name-effect {
+  font-size: 11px;
+  color: #999;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .sequencer-page .col-duration {
-  width: 80px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
 
   .duration-input {
+    width: 52px;
+    padding: 5px 6px;
     font-size: 13px;
+    border: 1px solid #d0d0d0;
+    border-radius: 6px;
+    text-align: center;
+    background: #fff;
+    color: #333;
+
+    &:focus {
+      outline: none;
+      border-color: #666;
+    }
+
+    /* Hide spin arrows for cleaner look */
+    &::-webkit-inner-spin-button,
+    &::-webkit-outer-spin-button {
+      opacity: 0.4;
+    }
+  }
+
+  .duration-suffix {
+    font-size: 12px;
+    color: #888;
+    font-weight: 500;
   }
 }
 
@@ -597,21 +771,103 @@
   font-weight: 500;
 }
 
-/* Quick Add Grid */
-.sequencer-page .quick-add-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: 8px;
+.sequencer-page .playlist-empty-hint {
   padding: 16px;
+  text-align: center;
+  font-size: 13px;
+  color: #aaa;
 }
 
-.sequencer-page .quick-add-btn {
-  background: #f0f0f0 !important;
-  color: #333 !important;
-  font-weight: 500;
-  font-size: 12px;
-  padding: 10px 8px;
+.sequencer-page .playlist-quick-add {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #f0f0f0;
+
+  .control-label {
+    white-space: nowrap;
+    margin-bottom: 0;
+    flex-shrink: 0;
+  }
+}
+
+.sequencer-page .quick-add-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.sequencer-page .quick-add-select {
+  flex: 1;
+  padding: 7px 10px;
+  border: 1px solid #d0d0d0;
+  border-radius: 8px;
+  font-size: 14px;
+  background: #fff;
+  color: #333;
+  appearance: auto;
+  min-width: 0;
+}
+
+.sequencer-page .quick-add-confirm-btn {
+  padding: 7px 16px;
+  background: #333;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+}
+
+/* ============================================
+   PRESET EFFECT LABEL (grid column, aligned)
+   ============================================ */
+.sequencer-page .preset-effect-label {
+  font-size: 11px;
+  color: #999;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  min-width: 0;
 }
+
+/* ============================================
+   LIVE PLAYLIST TRACKING
+   ============================================ */
+.sequencer-page .playlist-item-row {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  gap: 8px;
+  width: 100%;
+}
+
+.sequencer-page .playlist-item-progress {
+  height: 3px;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.08);
+
+  .progress-fill {
+    height: 100%;
+    background: #27ae60;
+    transition: width 0.9s linear;
+    min-width: 3px;
+  }
+}
+
+@keyframes playing-pulse {
+  0%, 100% { background-color: #e8f5e9; }
+  50% { background-color: #d0edda; }
+}
+
