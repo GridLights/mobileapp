@@ -417,7 +417,7 @@
                   size="30px"
                   class="expand-triangle"
                 />
-                <q-icon name="queue_music" size="18px" class="preset-type-icon" />
+                <q-icon name="queue_music" size="18px" class="preset-icon" />
                 <span class="preset-name">{{ playlist.n || `Playlist ${id}` }}</span>
                 <span class="preset-effect-label">{{ playlist.playlist?.ps?.length ?? 0 }} presets · {{ getSavedPlaylistDuration(playlist) }}s</span>
                 <div class="preset-actions" @click.stop>
@@ -788,7 +788,8 @@ export default {
         if (useAutoName.value) {
           newPresetName.value = generatePresetName();
         } else {
-          newPresetName.value = `Preset ${getNextPresetId()}`;
+          const nextId = getNextPresetId();
+          newPresetName.value = nextId !== null ? `Preset ${nextId}` : 'Preset';
         }
       }
     };
@@ -922,9 +923,13 @@ export default {
         let allPresets;
         try {
           allPresets = await webservices.fetchWledPresets(getIpAddress());
-        } catch (_) {
+        } catch (firstError) {
           await new Promise(r => setTimeout(r, 800));
-          allPresets = await webservices.fetchWledPresets(getIpAddress());
+          try {
+            allPresets = await webservices.fetchWledPresets(getIpAddress());
+          } catch (_) {
+            throw firstError; // rethrow original error for better diagnostics
+          }
         }
         // WLED does not distinguish playlist presets structurally — use our
         // localStorage metadata to know which preset IDs are playlists.
@@ -1053,7 +1058,8 @@ export default {
       }
     };
 
-    // Get next available preset ID (excludes both presets and playlists)
+    // Get next available preset ID (excludes both presets and playlists).
+    // Returns null when all 250 WLED preset slots are full.
     const getNextPresetId = () => {
       const usedIds = [
         ...Object.keys(savedPresets.value),
@@ -1062,16 +1068,21 @@ export default {
       for (let i = 1; i <= 250; i++) {
         if (!usedIds.includes(i)) return i;
       }
-      return 1;
+      return null;
     };
 
     // Save new preset
     const saveNewPreset = async () => {
       try {
+        const presetId = getNextPresetId();
+        if (presetId === null) {
+          console.error("All 250 WLED preset slots are full. Delete a preset before saving.");
+          return;
+        }
+
         previewEffect();
         await new Promise(resolve => setTimeout(resolve, 500));
 
-        const presetId = getNextPresetId();
         await webservices.savePreset(
           getIpAddress(),
           presetId,
@@ -1197,9 +1208,13 @@ export default {
     const saveNewPlaylist = async () => {
       if (playlistItems.value.length === 0) return;
       try {
+        const nextId = getNextPresetId();
+        if (nextId === null) {
+          console.error("All 250 WLED preset slots are full. Delete a preset before saving.");
+          return;
+        }
         const presets = playlistItems.value.map(item => item.presetId);
         const durations = playlistItems.value.map(item => item.duration * 10);
-        const nextId = getNextPresetId();
         const name = editingPlaylistName.value.trim() || `Playlist ${nextId}`;
         await webservices.savePlaylist(getIpAddress(), nextId, name, {
           presets, durations,
