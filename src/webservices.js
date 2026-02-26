@@ -4,6 +4,15 @@ import gconsole from './utils/gconsole.js';
 let ws = null; // WebSocket instance
 let onGuardReset = null; // Callback to reset useWebSocket composable's guard when reconnectWithNewUrl is called
 
+/**
+ * Register a callback to reset the useWebSocket composable's guard.
+ * Called when the WebSocket is closed/reconnected outside the composable.
+ * @param {function} fn - Callback function to invoke when guard should reset
+ */
+export function registerGuardReset(fn) {
+  onGuardReset = fn;
+}
+
 // Connection state constants
 export const ConnectionState = {
   DISCONNECTED: 'disconnected',
@@ -332,7 +341,7 @@ export const webservices = {
               // Helper: build color array from a given offset
               const buildColors = () => {
                 const out = [];
-                for (let i = 0; i + 2 < ledData.length; i += 3) {
+                for (let i = 0; i + 3 <= ledData.length; i += 3) {
                   let r = ledData[i];
                   let g = ledData[i + 1];
                   let b = ledData[i + 2];
@@ -499,14 +508,7 @@ export const webservices = {
    */
   reconnectWithNewUrl(newWsUrl) {
     if (!this._callbacks) {
-      gconsole.error('reconnectWithNewUrl called before initWebSocket - no callbacks stored. Initializing with default callbacks.', 'ws-error');
-      // If called before initialization, start with default callbacks instead of failing silently
-      this.initWebSocket(
-        newWsUrl,
-        null,  // onMessageCallback
-        null,  // onLiveStreamDataCallback
-        null   // onConnectedCallback
-      );
+      gconsole.error('reconnectWithNewUrl called before initWebSocket - no callbacks stored.', 'ws-error');
       return;
     }
     const cb = this._callbacks;
@@ -963,24 +965,27 @@ export const webservices = {
   },
 
   /**
-   * Apply a preset by ID
+   * Apply a preset by ID (atomic single request with sync suppression)
    * @param {string} ipAddress - WLED device IP
    * @param {number} presetId - Preset ID to apply
    */
   async applyPreset(ipAddress, presetId) {
     gconsole.log(`Applying preset ${presetId}`, "wled-preset");
-    await fetch(`http://${ipAddress}/json`, {
+
+    const command = {
+      ps: presetId,
+      udpn: { send: false }  // Suppress sync in single atomic request
+    };
+
+    const response = await fetch(`http://${ipAddress}/json`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ps: presetId }),
+      body: JSON.stringify(command),
     });
-    // Immediately suppress sync — presets may have been saved with udpn.send=true
-    // which would broadcast state to all WLED devices on the network.
-    await fetch(`http://${ipAddress}/json`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ udpn: { send: false } }),
-    });
+
+    if (!response.ok) {
+      throw new Error(`Apply preset failed: HTTP ${response.status}`);
+    }
   },
 
   /**

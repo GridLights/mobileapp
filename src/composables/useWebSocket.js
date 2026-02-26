@@ -7,22 +7,12 @@
 // Usage:
 //   const { isConnected, connectionState, initWebSocket, sendCommand, ... } = useWebSocket();
 
-import webservices, { ConnectionState, resolveStartupIp } from '../webservices';
+import webservices, { ConnectionState, resolveStartupIp, registerGuardReset } from '../webservices';
 import { useConnectionState } from './useConnectionState';
 import gconsole from '../utils/gconsole';
 
 // Module-level guard: track whether WS has been initialized
 let initialized = false;
-
-/**
- * Register a callback that the composable uses to reset the guard when the WebSocket
- * is closed/reconnected outside the composable (e.g., via reconnectWithNewUrl).
- */
-function registerGuardReset() {
-  webservices.onGuardReset = () => {
-    initialized = false;
-  };
-}
 
 export function useWebSocket() {
   const { connectionState, isConnected, subscribe, unsubscribe } = useConnectionState();
@@ -43,7 +33,9 @@ export function useWebSocket() {
     }
 
     // Ensure the guard reset callback is registered
-    registerGuardReset();
+    registerGuardReset(() => {
+      initialized = false;
+    });
 
     const ip = resolveStartupIp();
     if (!ip) {

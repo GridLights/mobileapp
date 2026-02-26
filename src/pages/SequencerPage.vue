@@ -80,6 +80,7 @@
                       class="text-input"
                       :class="{ 'auto-filled': useAutoName }"
                       placeholder="Enter preset name..."
+                      @input="onNameInput"
                     />
                     <button
                       class="reroll-btn"
@@ -991,7 +992,7 @@ export default {
         await fetch(`http://${ip}/json`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ on: true, seg: [{ col: [[255, 255, 255]], fx: 0 }] }),
+          body: JSON.stringify({ on: true, udpn: { send: false }, seg: [{ col: [[255, 255, 255]], fx: 0 }] }),
         });
       } else if (selectedEffectId.value !== null && selectedEffectId.value !== "") {
         await webservices.applyEffect({
@@ -1019,7 +1020,7 @@ export default {
         await fetch(`http://${ip}/json`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ on: true, seg: [{ col: [[255, 255, 255]], fx: 0 }] }),
+          body: JSON.stringify({ on: true, udpn: { send: false }, seg: [{ col: [[255, 255, 255]], fx: 0 }] }),
         });
       } else if (editEffectId.value !== null && editEffectId.value !== "") {
         await webservices.applyEffect({
@@ -1113,9 +1114,9 @@ export default {
     };
 
     // Apply a saved preset
-    const applyPreset = (presetId) => {
+    const applyPreset = async (presetId) => {
       currentPresetId.value = presetId;
-      webservices.applyPreset(getIpAddress(), presetId);
+      await webservices.applyPreset(getIpAddress(), presetId);
     };
 
     // Delete a preset
@@ -1170,21 +1171,26 @@ export default {
     };
 
     // Start a saved playlist by its preset ID — sends full playlist definition to WLED
-    const startSavedPlaylist = (id) => {
-      const playlist = savedPlaylists.value[id];
-      if (!playlist?.playlist) {
-        applyPreset(id);
+    const startSavedPlaylist = async (id) => {
+      try {
+        const playlist = savedPlaylists.value[id];
+        if (!playlist?.playlist) {
+          await applyPreset(id);
+          isPlaylistRunning.value = true;
+          return;
+        }
+        const pl = playlist.playlist;
+        await webservices.startPlaylist(getIpAddress(), {
+          presets: pl.ps,
+          durations: pl.dur,
+          transition: Array.isArray(pl.transition) ? (pl.transition[0] ?? 7) : (pl.transition ?? 7),
+          repeat: pl.repeat ?? 0,
+        });
         isPlaylistRunning.value = true;
-        return;
+      } catch (error) {
+        console.error('Error starting playlist:', error);
+        isPlaylistRunning.value = false;
       }
-      const pl = playlist.playlist;
-      webservices.startPlaylist(getIpAddress(), {
-        presets: pl.ps,
-        durations: pl.dur,
-        transition: Array.isArray(pl.transition) ? (pl.transition[0] ?? 7) : (pl.transition ?? 7),
-        repeat: pl.repeat ?? 0,
-      });
-      isPlaylistRunning.value = true;
     };
 
     // Save new playlist to WLED
