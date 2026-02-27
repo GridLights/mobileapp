@@ -7,7 +7,7 @@
 // Usage:
 //   const { isConnected, connectionState, initWebSocket, sendCommand, ... } = useWebSocket();
 
-import webservices, { ConnectionState } from '../webservices';
+import webservices, { ConnectionState, resolveStartupIp, registerGuardReset } from '../webservices';
 import { useConnectionState } from './useConnectionState';
 import gconsole from '../utils/gconsole';
 
@@ -32,8 +32,18 @@ export function useWebSocket() {
       return;
     }
 
-    const savedIp = localStorage.getItem('ipAddress');
-    const ip = savedIp || '4.3.2.1';
+    // Ensure the guard reset callback is registered
+    registerGuardReset(() => {
+      initialized = false;
+    });
+
+    const ip = resolveStartupIp();
+    if (!ip) {
+      gconsole.log('No WLED IP configured — skipping WebSocket init. Configure an IP in Settings.', 'use-ws');
+      webservices.setConnectionState(ConnectionState.FAILED);
+      return;
+    }
+
     const wsUrl = `ws://${ip}:80/ws`;
 
     initialized = true;

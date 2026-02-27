@@ -1,0 +1,37 @@
+{
+  "adjectives": [
+    "Crystal", "Mystic", "Sacred", "Cosmic", "Lunar", "Solar", "Celestial",
+    "Ethereal", "Radiant", "Golden", "Silver", "Violet", "Indigo", "Azure",
+    "Amber", "Prismatic", "Luminous", "Shimmering", "Sparkling", "Astral",
+    "Divine", "Infinite", "Timeless", "Transcendent", "Awakened", "Vibrant",
+    "Harmonic", "Resonant", "Serene", "Tranquil", "Ancient", "Eternal",
+    "Boundless", "Limitless", "Vast", "Hidden", "Blessed", "Pure", "Stellar",
+    "Galactic", "Mystical", "Magical", "Enchanted", "Dreamy", "Visionary",
+    "Intuitive", "Sovereign", "Flowing", "Rising", "Ascending", "Shifting",
+    "Dancing", "Pulsing", "Spiraling", "Dazzling", "Peaceful", "Primal",
+    "Universal", "Midnight", "Twilight", "Opalescent", "Iridescent", "Verdant",
+    "Crimson", "Emerald", "Obsidian", "Ivory", "Alabaster", "Numinous",
+    "Elemental", "Alchemical", "Shamanic", "Liminal", "Hypnotic", "Fractal",
+    "Holographic", "Gossamer", "Nebular", "Supernal", "Empyreal", "Effulgent",
+    "Auric", "Sapphire", "Onyx", "Cobalt", "Jade", "Amethyst", "Citrine",
+    "Topaz", "Opaline", "Phosphorescent", "Iridian", "Morphic", "Penumbral",
+    "Aurous", "Selenian", "Cerulean", "Vernal", "Lucent", "Umbral"
+  ],
+  "nouns": [
+    "Crystal", "Prism", "Aura", "Chakra", "Mandala", "Lotus", "Moonstone",
+    "Sunstone", "Stargate", "Portal", "Vortex", "Nexus", "Ether", "Cosmos",
+    "Galaxy", "Nebula", "Stardust", "Aurora", "Solstice", "Phoenix", "Dragon",
+    "Serpent", "Raven", "Wolf", "Eagle", "Temple", "Altar", "Oracle", "Vision",
+    "Dream", "Journey", "Quest", "Labyrinth", "Spiral", "Pulse", "Rhythm",
+    "Flow", "Current", "Wave", "Tide", "Stream", "Ocean", "Mountain", "Summit",
+    "Valley", "Forest", "Grove", "Garden", "Haven", "Sanctuary", "Realm",
+    "Horizon", "Zenith", "Apex", "Core", "Source", "Origin", "Seed", "Root",
+    "Blossom", "Bloom", "Ember", "Flame", "Spark", "Light", "Beam", "Glow",
+    "Aether", "Plasma", "Quartz", "Obsidian", "Amethyst", "Jade", "Amber",
+    "Topaz", "Citrine", "Selenite", "Labradorite", "Tourmaline", "Chalice",
+    "Sigil", "Rune", "Talisman", "Totem", "Vessel", "Mirror", "Gateway",
+    "Pathway", "Conduit", "Frequency", "Resonance", "Vibration", "Harmony",
+    "Balance", "Alignment", "Awakening", "Ascension", "Illumination",
+    "Transcendence", "Blessing"
+  ]
+}

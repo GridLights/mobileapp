@@ -46,6 +46,10 @@ function ensureHooked() {
       configurable: true,
       enumerable: true,
       get() {
+        // IMPORTANT: The getter always returns fanoutHandler, not the assigned handler.
+        // This is intentional: ensures all calls via webservices.onConnectionStateChange()
+        // go through the multi-listener fanout mechanism instead of bypassing it.
+        // The assigned handler is captured into the listeners Set by the setter.
         return fanoutHandler;
       },
       set(fn) {

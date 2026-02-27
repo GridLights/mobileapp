@@ -8,7 +8,7 @@
 //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 <template>
-  <q-layout view="lHh Lpr lFf" v-if="allPagesLoaded">
+  <q-layout view="lHh Lpr lFf">
     <q-page-container class="q-pb-md transition-container">
       <div class="transition-wrapper">
         <router-view v-slot="{ Component, route }">
@@ -27,22 +27,6 @@
       <BottomTabBar :items="NavLinks" class="stable-bottom-nav" />
     </q-footer>
   </q-layout>
-  <div v-else class="loading-container">
-    <div class="loading-content">
-      <q-spinner size="50px" color="primary" />
-      <div class="loading-text">Loading...</div>
-    </div>
-  </div>
-
-  <!-- Preload all pages (hidden) -->
-  <div v-show="false" class="preload-container">
-    <component
-      v-for="route in preloadRoutes"
-      :key="route.path"
-      :is="route.component"
-      @vue:mounted="onComponentLoaded"
-    />
-  </div>
 </template>
 
 <script>
@@ -51,11 +35,6 @@ import { useQuasar } from "quasar";
 import { useRoute } from "vue-router";
 import BottomTabBar from "components/BottomTabBar.vue";
 
-// Import all of the page components for preload
-import IndexPage from "pages/IndexPage.vue";
-import JourneysPage from "pages/JourneysPage.vue";
-import SequencerPage from "pages/SequencerPage.vue";
-import RandomizerPage from "pages/RandomizerPage.vue";
 
 const linksList = [
   {
@@ -95,10 +74,6 @@ export default defineComponent({
 
   components: {
     BottomTabBar,
-    IndexPage,
-    JourneysPage,
-    SequencerPage,
-    RandomizerPage,
   },
 
   data() {
@@ -112,17 +87,6 @@ export default defineComponent({
     const leftDrawerOpen = ref(false);
     const route = useRoute();
     const lastPath = ref(route.path);
-    const allPagesLoaded = ref(false);
-    const loadedComponents = ref(new Set());
-
-    // Define routes to preload
-    const preloadRoutes = [
-      { path: "/", component: IndexPage },
-      { path: "/journeys", component: JourneysPage },
-      { path: "/sequencer", component: SequencerPage },
-      { path: "/randomizer", component: RandomizerPage },
-    ];
-
     //transition classes based on navigation direction
     const transitionClasses = ref({
       enter: "animated slideInRight",
@@ -148,18 +112,6 @@ export default defineComponent({
 
       // Use existing logic for main navigation pages
       return transitionClasses.value;
-    };
-
-    // Handle component loading
-    const onComponentLoaded = () => {
-      loadedComponents.value.add(Date.now()); // Use timestamp to ensure uniqueness
-
-      // Check if all components are loaded
-      if (loadedComponents.value.size >= preloadRoutes.length) {
-        setTimeout(() => {
-          allPagesLoaded.value = true;
-        }, 100); // Small delay to ensure everything is settled
-      }
     };
 
     // watch route changes to control slide direction
@@ -199,22 +151,12 @@ export default defineComponent({
 
     onMounted(() => {
       $q.dark.set(true);
-
-      // Fallback: if components don't trigger mounted events, show after timeout
-      setTimeout(() => {
-        if (!allPagesLoaded.value) {
-          allPagesLoaded.value = true;
-        }
-      }, 2000);
     });
 
     return {
       NavLinks: linksList,
       leftDrawerOpen,
       transitionClasses,
-      allPagesLoaded,
-      preloadRoutes,
-      onComponentLoaded,
       toggleLeftDrawer() {
         leftDrawerOpen.value = !leftDrawerOpen.value;
       },
@@ -223,36 +165,24 @@ export default defineComponent({
 
   watch: {
     $route(newRoute, oldRoute) {
-      console.log("WATCH - New route:", newRoute.path);
-      console.log("WATCH - Old route:", oldRoute ? oldRoute.path : "null");
       this.previousRoutePath = oldRoute ? oldRoute.path : null;
-      console.log("WATCH - Stored previousRoutePath:", this.previousRoutePath);
     },
   },
 
   methods: {
     getTransitionName(route) {
-      const currentPath = this.previousRoutePath; // Use the stored previous route
+      const currentPath = this.previousRoutePath;
       const newPath = route.path;
-
-      console.log("switching");
-      console.log("currentPath (previousRoutePath):", currentPath);
-      console.log("newPath (route.path):", newPath);
-      console.log("currentPath === '/settings':", currentPath === "/settings");
-      console.log("newPath === '/settings':", newPath === "/settings");
 
       // Going TO settings from any page
       if (newPath === "/settings" && currentPath !== "/settings") {
-        console.log("left");
         return "slide-left";
       }
       // Going FROM settings to any page
       if (currentPath === "/settings" && newPath !== "/settings") {
-        console.log("right");
         return "slide-right";
       }
 
-      console.log("no match - returning empty");
       return "";
     },
   },

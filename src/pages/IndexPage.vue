@@ -139,7 +139,7 @@
 <script>
 import { defineComponent } from "vue";
 import LedGrid from "src/components/LedGrid.vue";
-import webservices from "../webservices";
+import webservices, { ConnectionState, resolveStartupIp } from "../webservices";
 import gconsole from "../utils/gconsole";
 
 export default defineComponent({
@@ -236,23 +236,24 @@ export default defineComponent({
     // Store somewhere?
     //this.freqValue = 0;
 
-    // Initialize WebSocket when the component is mounted
-    //const wsUrl = "ws://192.168.84.43:80/ws"; // TODO: set this in the UI?
-    var wsUrl = "ws://4.3.2.1:80/ws"; // Tavis
+    // Resolve the best available IP: user-configured → last valid → null
+    const ip = resolveStartupIp();
 
-    // Load IP Address from local storage on page reload
-    const savedIp = localStorage.getItem("ipAddress");
-    if (savedIp) {
-      wsUrl = `ws://${savedIp}:80/ws`;
-      this.wledUrl = savedIp;
+    if (!ip) {
+      // No usable IP — show failed state and prompt user to configure in Settings
+      webservices.setConnectionState(ConnectionState.FAILED);
+      this.loadCustomEffects();
+      return;
     }
+
+    this.wledUrl = ip;
 
     // Load custom effects for the current device
     this.loadCustomEffects();
 
     // Do not auto-subscribe on connect; we'll manage subscription based on power state
     webservices.initWebSocket(
-      wsUrl,
+      `ws://${ip}:80/ws`,
       this.handleWebSocketMessage,
       this.handleLiveStreamData,
       this.onWebSocketConnected
@@ -403,9 +404,8 @@ export default defineComponent({
 
     // called when websocket receives an inbound message
     handleWebSocketMessage(data) {
-      gconsole.log("web state socket data: " + JSON.stringify(data.state), 'index-page');
-      gconsole.log("web info socket data: " + JSON.stringify(data.info), 'index2-page');
       if (data?.state !== undefined) {
+        gconsole.log("web state socket data: " + JSON.stringify(data.state), 'index-page');
         this.wledState = data.state;
         if (typeof data.state.bri === "number") {
           this.sliderValue = Math.round((data.state.bri / 255) * 100);
@@ -447,7 +447,7 @@ export default defineComponent({
 
     // Explicitly set power state and manage live updates subscription
     setPower(turnOn) {
-      const command = { on: !!turnOn };
+      const command = { on: !!turnOn, udpn: { send: false } };
       webservices.sendCommandToWebSocket(command);
 
       // Update local state immediately for responsiveness

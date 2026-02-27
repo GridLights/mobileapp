@@ -9,9 +9,16 @@
 }
 
 .randomizer-page .content-area-randomizer {
-  margin-top: 80px;
+  /*
+   * Mirrors .content-area in app.scss exactly.
+   * margin-top = --safe-top + header(40px) + gap(20px)
+   * height     = 100vh - --safe-top - header(40px) - bottom-margin(30px)
+   * browser:  margin-top = 8+40+20 = 68px,  height = 100vh - 8 - 40 - 30 = 100vh - 78px
+   * device:   margin-top = 44+40+20 = 104px, height = 100vh - 44 - 40 - 30 = 100vh - 114px
+   */
+  margin-top: calc(var(--safe-top) + var(--header-height) + 20px);
   margin-bottom: 10px;
-  height: calc(100vh - 90px);
+  height: calc(100vh - var(--safe-top) - var(--header-height) - 30px);
   overflow-y: auto;
 }
 
